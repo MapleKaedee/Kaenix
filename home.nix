@@ -12,6 +12,7 @@
     ./modules/home/niri-home.nix
     ./modules/home/dms-home.nix
     ./modules/home/tablet-home.nix
+    ./modules/home/automount-home.nix
   ];
 
   home.username = globals.username;
