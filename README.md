@@ -1,48 +1,120 @@
-# kaenix — syrup
+# Kaenix
 
-Konfigurasi NixOS + Home Manager untuk `kaede`, berdasarkan desktop CachyOS pada 16 Oktober 2026. Desktop: Niri, DankMaterialShell, DankGreeter, Fish, Kitty, Fastfetch, Brave, ASUS utilities, OpenTabletDriver, dan osu!lazer.
+My personal [NixOS](https://nixos.org/) configuration, built with Flakes and Home Manager for **syrup**. It brings my CachyOS desktop setup to NixOS: Niri, DankMaterialShell, Fish, and a Catppuccin desktop with video wallpapers.
 
-**Belum untuk langsung di-switch:** `hardware-configuration.nix` masih berasal dari instalasi lama. `installation.nix` sengaja menolak deployment sampai hardware, bootloader, dan state version instalasi baru sudah dimasukkan.
+[Repository](https://github.com/MapleKaedee/Kaenix) · [Getting started](#getting-started) · [Validation](#validation)
 
-## Dokumentasi
+> **Migration in progress.** The checked-in hardware configuration belongs to an older installation. Deployment is blocked until the hardware configuration, bootloader, and state versions are updated in [installation.nix](installation.nix) after a clean NixOS install.
 
-- [Catatan perubahan](CHANGELOG.md)
-- [Panduan clean install dan migrasi](docs/MIGRATION.md)
-- [Daftar backup pilihan pengguna](docs/BACKUP.md)
-- [Konteks untuk melanjutkan chat di NixOS](docs/CONTINUE-IN-NIXOS.md)
-- [Kepemilikan konfigurasi dan perubahan GUI](docs/CONFIGURATION.md)
-- [Hasil dan cara mengulang validasi](docs/VALIDATION.md)
-- [Inventaris dan diff rewrite](docs/changes/2026-10-16-rewrite.md)
+## Host
 
-## Struktur
+| Setting | Target |
+| --- | --- |
+| Hostname / flake output | `syrup` / `nixosConfigurations.syrup` |
+| User | `kaede` |
+| Platform | `x86_64-linux` |
+| Package source | `nixos-unstable`, pinned in `flake.lock` |
+| Kernel | CachyOS kernel through Chaotic-Nyx |
+| Graphics | Radeon 680M for the desktop; RTX 3060 Mobile through NVIDIA PRIME offload |
+| Time zone | `Asia/Jakarta` |
 
-- `flake.nix`, `flake.lock`: sumber paket terkunci; output tetap `nixosConfigurations.syrup`.
-- `installation.nix`: pengaturan khusus instalasi, bootloader, dan state version.
-- `configuration.nix`, `modules/env/`: sistem, hardware, layanan, GPU, pengguna.
-- `home.nix`, `modules/home/`: aplikasi dan konfigurasi pengguna.
-- `config/`: konfigurasi dasar dan seed writable; tidak merujuk home CachyOS.
-- `collection/`: wallpaper, termasuk video yang digunakan mpvpaper.
-- `scripts/`, `tests/`: seed idempoten dan pemeriksaan konfigurasi.
+The GPU PCI addresses and desktop preferences are specific to this machine. Adapt them along with the user and host settings when using this repository as a reference.
 
-## Pemeriksaan
+## Desktop components
 
-Jalankan dari root repo pada mesin yang memiliki Nix dengan flakes aktif:
+| Component | Choice |
+| --- | --- |
+| Wayland compositor | Niri + Xwayland Satellite |
+| Desktop shell | DankMaterialShell (DMS) |
+| Login screen | DankGreeter |
+| Terminal | Kitty |
+| Shell / prompt | Fish + Starship |
+| Command-line tools | eza, Fastfetch, Fish autopair |
+| Browser | Brave |
+| Editor / file manager | Zed / Nautilus |
+| Theme / fonts | Catppuccin Mocha with Mauve; JetBrains Mono and its Nerd Font variant |
+| Audio / networking | PipeWire / NetworkManager |
+| ASUS controls | asusd, asusctl, and ROG Control Center |
+| Tablet / game | OpenTabletDriver / osu!lazer |
+| DMS plugins | catWidget and mpvpaper, pinned to specific commits |
+
+## Configuration approach
+
+Home Manager is integrated into NixOS, so one system rebuild applies both system and user configuration. The repository includes its configuration assets and wallpaper video; it can be cloned into any directory.
+
+Kitty, Fish, Starship, Fastfetch, and Brave use Home Manager options. Niri's base KDL is installed through `xdg.configFile`.
+
+DMS settings, generated Niri fragments, Kitty theme files, and the tablet profile start from **writable defaults copied only when absent**. Later GUI edits survive rebuilds. Changing a default in the repository does not overwrite an existing runtime file, and rolling back a generation does not roll back GUI state.
+
+To reapply a writable default, stop the relevant application, move the individual runtime file to a backup, and rebuild. Keep a separate backup of GUI state if you want to restore earlier settings.
+
+## Repository layout
+
+```text
+.
+├── flake.nix                    # Inputs and the syrup NixOS configuration
+├── flake.lock                   # Pinned dependency revisions
+├── installation.nix             # Installation guard, bootloader, state versions
+├── hardware-configuration.nix    # Replace with the clean install's generated file
+├── configuration.nix            # System entry point
+├── home.nix                     # Home Manager entry point
+├── modules/
+│   ├── env/                     # System services, hardware, packages, and users
+│   └── home/                    # Applications, desktop settings, writable defaults
+├── config/                      # Configuration assets and initial GUI settings
+├── collection/                  # Wallpapers, including the mpvpaper video
+├── scripts/                     # Writable-default initialization helper
+└── tests/                       # Seed tests, Niri validation, evaluation fixture
+```
+
+## Getting started
+
+Start from a working NixOS installation with Git and Nix flakes enabled:
+
+```bash
+git clone https://github.com/MapleKaedee/Kaenix.git
+cd Kaenix
+```
+
+Before building the real host configuration:
+
+1. Back up important data.
+2. Replace `hardware-configuration.nix` with the file generated by the new installation.
+3. Copy the installer's bootloader settings and initial `system.stateVersion` into `installation.nix`. Choose the Home Manager state version for the new home and keep both state versions fixed after adoption.
+4. Review the hardware-specific settings, then set `hardwareReady = true`.
+
+Once the installation settings are ready, build and prepare the next boot:
+
+```bash
+nix flake check --no-build
+sudo nixos-rebuild build --flake .#syrup
+sudo nixos-rebuild boot --flake .#syrup
+sudo reboot
+```
+
+After rebooting, check login and screen locking, audio, networking, Brave screen sharing, ASUS controls, tablet input, GPU offload, external displays, and suspend/resume. When adding configuration files or assets, stage them in Git before evaluating the local Git flake so they are included in its source.
+
+## Validation
+
+The targeted checks can run before the installation guard is cleared:
 
 ```bash
 python3 -m unittest discover -s tests -v
-nix build --no-link .#checks.x86_64-linux.seed-files .#checks.x86_64-linux.seed-integration .#checks.x86_64-linux.niri-config
-nix eval --impure --json --expr 'import ./tests/evaluate.nix { flake = builtins.getFlake ("path:" + toString ./.); }'
+nix build --no-link \
+  .#checks.x86_64-linux.seed-files \
+  .#checks.x86_64-linux.seed-integration \
+  .#checks.x86_64-linux.niri-config
+nix eval --impure --json --expr \
+  'import ./tests/evaluate.nix { flake = builtins.getFlake ("path:" + toString ./.); }'
 ```
 
-Fixture evaluasi memakai disk fiktif untuk memeriksa seluruh derivasi sistem sebelum clean install. Fixture bukan konfigurasi untuk di-boot atau di-deploy. `nix flake check` terhadap output sistem asli akan tetap tertahan pengaman instalasi sampai langkah migrasi selesai.
+The evaluation fixture uses synthetic disk and boot settings to evaluate the system derivation. It is for validation only. The real host output remains blocked until the installation settings are complete.
 
-Jika repo ini dimasukkan ke Git, pastikan seluruh file baru termasuk video wallpaper ditambahkan ke index sebelum menggunakan flake Git; file untracked tidak ikut sumber flake tersebut. Checkout saat rewrite tidak memiliki metadata Git yang dapat dipakai, sehingga perubahan dicatat dalam Markdown dan diff, tanpa commit otomatis.
+Targeted builds and fixture evaluation have passed; a complete system build and hardware testing after installation are still pending.
 
-## Referensi
+## References and inspiration
 
-- [NixOS & Flakes Book — Home Manager](https://nixos-and-flakes.thiscute.world/nixos-with-flakes/start-using-home-manager)
-- [DMS — integrasi NixOS/Home Manager](https://danklinux.com/docs/dankmaterialshell/nixos-flake)
-- [DankGreeter — NixOS](https://danklinux.com/docs/dankgreeter/nixos)
-- [DMS — autentikasi lock screen](https://danklinux.com/docs/dankmaterialshell/lock-screen-authentication)
+- [Ryan4Yin's nix-config](https://github.com/ryan4yin/nix-config) — inspiration for the README structure.
+- [NixOS & Flakes Book](https://nixos-and-flakes.thiscute.world/) — learning and configuration reference.
 
-Detail opsi mengikuti sumber yang dikunci dalam `flake.lock`; dokumentasi upstream dapat berubah.
+The revisions in `flake.lock` determine the configuration interfaces used here; upstream documentation may describe newer versions.
