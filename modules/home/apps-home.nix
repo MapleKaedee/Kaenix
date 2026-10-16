@@ -2,9 +2,16 @@
 {
   programs.git = {
     enable = true;
-    settings.user = {
-      name = globals.username;
-      email = "maplemepuruu@gmail.com";
+    settings = {
+      user = {
+        name = globals.username;
+        email = "maplemepuruu@gmail.com";
+      };
+      # gh cannot write helpers into Home Manager's read-only Git config.
+      credential = {
+        "https://github.com".helper = [ "" "${pkgs.gh}/bin/gh auth git-credential" ];
+        "https://gist.github.com".helper = [ "" "${pkgs.gh}/bin/gh auth git-credential" ];
+      };
     };
   };
   programs.brave.enable = true;
@@ -17,5 +24,5 @@
       "x-scheme-handler/https" = [ "brave-browser.desktop" ];
     };
   };
-  home.packages = [ pkgs.osu-lazer-bin ];
+  home.packages = [ pkgs.osu-lazer-bin pkgs.wl-clipboard ];
 }
