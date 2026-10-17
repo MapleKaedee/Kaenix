@@ -27,7 +27,7 @@ The GPU PCI addresses and desktop preferences are specific to this machine. Adap
 | Desktop shell | DankMaterialShell (DMS) |
 | Login screen | DankGreeter |
 | Terminal | Kitty |
-| Shell / prompt | Fish + Starship |
+| Shell / prompt | Nushell (default) + Fish, with shared Starship |
 | Command-line tools | eza, Fastfetch, Fish autopair |
 | Browser | Brave |
 | Editor / file manager | Zed / Nautilus |
@@ -36,16 +36,6 @@ The GPU PCI addresses and desktop preferences are specific to this machine. Adap
 | ASUS controls | asusd, asusctl, and ROG Control Center |
 | Tablet / game | OpenTabletDriver / osu!lazer |
 | DMS plugins | catWidget and mpvpaper, pinned to specific commits |
-
-## Configuration approach
-
-Home Manager is integrated into NixOS, so one system rebuild applies both system and user configuration. The repository includes its configuration assets and wallpaper video; it can be cloned into any directory.
-
-Kitty, Fish, Starship, Fastfetch, and Brave use Home Manager options. Niri's base KDL is installed through `xdg.configFile`.
-
-DMS settings, generated Niri fragments, Kitty theme files, and the tablet profile start from **writable defaults copied only when absent**. Later GUI edits survive rebuilds. Changing a default in the repository does not overwrite an existing runtime file, and rolling back a generation does not roll back GUI state.
-
-To reapply a writable default, stop the relevant application, move the individual runtime file to a backup, and rebuild. Keep a separate backup of GUI state if you want to restore earlier settings.
 
 ## Repository layout
 

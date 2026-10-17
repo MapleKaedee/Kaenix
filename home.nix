@@ -5,6 +5,8 @@
   imports = [
     ./modules/home/apps-home.nix
     ./modules/home/fish-home.nix
+    ./modules/home/nushell-home.nix
+    ./modules/home/shell-common-home.nix
     ./modules/home/kitty-home.nix
     ./modules/home/fastfetch-home.nix
     ./modules/home/seed-files.nix

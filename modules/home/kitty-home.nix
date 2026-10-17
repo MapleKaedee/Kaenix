@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, globals, ... }:
 {
   programs.kitty = {
     enable = true;
@@ -19,7 +19,10 @@
       strip_trailing_spaces = "smart";
       tab_bar_style = "powerline";
       tab_bar_align = "left";
-      shell = "${pkgs.fish}/bin/fish";
+      shell = lib.getExe (import ../../lib/shell-package.nix {
+        inherit lib pkgs;
+        name = globals.defaultShell;
+      });
     };
     keybindings = {
       "ctrl+shift+n" = "new_window";

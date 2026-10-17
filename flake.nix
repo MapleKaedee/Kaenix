@@ -33,6 +33,8 @@
       globals = {
         username = "kaede";
         hostname = "syrup";
+        # Choose "nushell" or "fish" for both login and Kitty.
+        defaultShell = "nushell";
         installation = import ./installation.nix;
       };
     in
@@ -48,7 +50,7 @@
           ./configuration.nix
           chaotic.nixosModules.default
           home-manager.nixosModules.home-manager
-          {
+          ({ globals, ... }: {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = { inherit globals inputs; };
@@ -56,7 +58,7 @@
             home-manager.overwriteBackup = false;
             home-manager.sharedModules = [ dms.homeModules.dank-material-shell ];
             home-manager.users.${globals.username} = import ./home.nix;
-          }
+          })
         ];
       };
     };

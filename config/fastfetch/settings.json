@@ -35,6 +35,14 @@
             "key": "  │ {$2}{$1}  wm      │"
         },
         {
+            "type": "terminal",
+            "key": "  │ {$2}{$1}  term    │"
+        },
+        {
+            "type": "shell",
+            "key": "  │ {$2}{$1}  shell   │"
+        },
+        {
             "type": "disk",
             "key": "  │ {$2}{$1}  disk    │",
             "folder": "/"

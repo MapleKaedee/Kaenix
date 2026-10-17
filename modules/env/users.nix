@@ -1,12 +1,14 @@
 # System user account and default shell
-{ pkgs, globals, ... }:
+{ lib, pkgs, globals, ... }:
 {
   users.users.${globals.username} = {
     isNormalUser = true;
     description = globals.username;
     extraGroups = [ "networkmanager" "wheel" ];
-    shell = pkgs.fish;
+    shell = import ../../lib/shell-package.nix { inherit lib pkgs; name = globals.defaultShell; };
   };
 
   programs.fish.enable = true;
+  programs.nushell.enable = true;
+  environment.shells = [ pkgs.fish pkgs.nushell ];
 }
