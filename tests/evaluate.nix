@@ -1,6 +1,9 @@
 # Evaluation fixture only. NEVER deploy this synthetic disk/boot configuration.
 # nix eval --impure --json --expr 'import ./tests/evaluate.nix { flake = builtins.getFlake ("path:" + toString ./.); }'
-{ flake, defaultShell ? "nushell" }:
+{
+  flake,
+  defaultShell ? "nushell",
+}:
 let
   original = flake.nixosConfigurations.syrup;
   fixture = original.extendModules {
@@ -16,13 +19,21 @@ let
         };
       };
     };
-    modules = [({ lib, ... }: {
-      fileSystems = lib.mkForce {
-        "/" = { device = "/dev/disk/by-label/kaenix-test-root"; fsType = "ext4"; };
-        "/boot" = { device = "/dev/disk/by-label/kaenix-test-efi"; fsType = "vfat"; };
-      };
-      swapDevices = lib.mkForce [ ];
-    })];
+    modules = [
+      ({ lib, ... }: {
+        fileSystems = lib.mkForce {
+          "/" = {
+            device = "/dev/disk/by-label/kaenix-test-root";
+            fsType = "ext4";
+          };
+          "/boot" = {
+            device = "/dev/disk/by-label/kaenix-test-efi";
+            fsType = "vfat";
+          };
+        };
+        swapDevices = lib.mkForce [ ];
+      })
+    ];
   };
   cfg = fixture.config;
   hm = cfg.home-manager.users.kaede;

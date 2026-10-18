@@ -1,0 +1,8 @@
+{ ... }:
+{
+  imports = [
+    ./niri
+    ./dms
+    ./theme
+  ];
+}

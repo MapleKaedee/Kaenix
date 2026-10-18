@@ -227,7 +227,8 @@
     };
   };
   "configVersion" = 18;
-} // {
+}
+// {
   lockPamExternallyManaged = true;
   customThemeFile = "${configHome}/DankMaterialShell/themes/catppuccin/theme.json";
 }

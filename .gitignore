@@ -7,3 +7,4 @@ __pycache__/
 # Personal documentation is kept locally and in the offline backup.
 /docs/
 /CHANGELOG.md
+AGENTS.md

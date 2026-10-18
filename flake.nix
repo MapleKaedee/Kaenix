@@ -28,7 +28,15 @@
     extra-trusted-public-keys = [ "nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk=" ];
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, dms, chaotic, ... }:
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      home-manager,
+      dms,
+      chaotic,
+      ...
+    }:
     let
       globals = {
         username = "kaede";
@@ -39,9 +47,11 @@
       };
     in
     {
+      formatter.x86_64-linux = self.nixosConfigurations.${globals.hostname}.pkgs.nixfmt-tree;
       checks.x86_64-linux = import ./tests/checks.nix {
         pkgs = self.nixosConfigurations.${globals.hostname}.pkgs;
-        homeConfig = self.nixosConfigurations.${globals.hostname}.config.home-manager.users.${globals.username};
+        homeConfig =
+          self.nixosConfigurations.${globals.hostname}.config.home-manager.users.${globals.username};
       };
       nixosConfigurations.${globals.hostname} = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
