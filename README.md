@@ -46,6 +46,10 @@ This configuration targets my installed `syrup` machine. [installation.nix](inst
 ├── scripts/                     # Writable-default initialization helper
 └── tests/                       # Seed tests, Niri validation, evaluation fixture
 ```
+
+## Screenshots
+![desktop](collection/desktop.png)
+
 ## Getting started
 
 ### Installation
