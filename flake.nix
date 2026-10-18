@@ -1,5 +1,5 @@
 {
-  description = "syrup NixOS system + home-manager";
+  description = "Nyaaaaannnnnnnn";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

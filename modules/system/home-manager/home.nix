@@ -1,4 +1,0 @@
-{ ... }:
-{
-  imports = [ ./seed-files.nix ];
-}

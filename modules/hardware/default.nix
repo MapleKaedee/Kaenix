@@ -1,10 +1,10 @@
 { ... }:
 {
   imports = [
-    ./nvidia
-    ./asus
-    ./power
-    ./tablet
-    ./bluetooth
+    ./nvidia.nix
+    ./asus.nix
+    ./power.nix
+    ./tablet.nix
+    ./bluetooth.nix
   ];
 }

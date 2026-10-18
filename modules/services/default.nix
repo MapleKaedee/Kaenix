@@ -1,9 +1,9 @@
 { ... }:
 {
   imports = [
-    ./audio
-    ./printing
-    ./automount
-    ./session
+    ./audio.nix
+    ./printing.nix
+    ./automount.nix
+    ./session.nix
   ];
 }

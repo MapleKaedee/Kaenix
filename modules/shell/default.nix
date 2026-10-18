@@ -6,13 +6,11 @@
 }:
 {
   imports = [
-    ./fish
-    ./nushell
-    ./common
-    ./fastfetch
-    ./git
-    ./nix
-    ./tools
+    ./fish.nix
+    ./nushell.nix
+    ./common.nix
+    ./fastfetch.nix
+    ./git.nix
   ];
 
   users.users.${globals.username}.shell = import ../../lib/shell-package.nix {
