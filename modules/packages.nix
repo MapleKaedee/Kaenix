@@ -41,7 +41,7 @@
   ];
 
   # Packages installed through feature modules (not a transitive dependency list):
-  # - modules/apps/{brave,kitty}.nix: Brave and Kitty.
+  # - modules/apps/{brave,kitty,mpv}.nix: Brave, Kitty, and mpv.
   # - modules/shell/{fish,nushell,common,fastfetch,git}.nix:
   #   Fish/autopair, Nushell, Starship/eza, Fastfetch, and Home Manager's Git.
   # - modules/desktop/{niri,dms,theme}.nix: Niri, DMS/DankGreeter,
