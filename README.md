@@ -1,13 +1,13 @@
 # Kaenix
 
-My personal [NixOS](https://nixos.org/) configuration, built with Flakes and Home Manager for **syrup**.
-[Repository](https://github.com/MapleKaedee/Kaenix) · [Getting started](#getting-started)
+My personal [NixOS](https://nixos.org/) configuration.
 
-> [!IMPORTANT] [!WARNING]
+> [!IMPORTANT]
 > **Disclaimer:** _This is not a "community framework" or "NixOS distribution"._
 > Please do not use it like one. It is an ongoing and experiment to
 > feel out NixOS and the Nix language for my own purposes.
 > It's better to use it as a reference, not as a drop-in replacement.
+
 ## Desktop components
 
 | Component | Choice |
