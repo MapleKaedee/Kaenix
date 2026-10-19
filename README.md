@@ -3,7 +3,11 @@
 My personal [NixOS](https://nixos.org/) configuration, built with Flakes and Home Manager for **syrup**.
 [Repository](https://github.com/MapleKaedee/Kaenix) · [Getting started](#getting-started)
 
-This configuration targets my installed `syrup` machine. [installation.nix](installation.nix) has `hardwareReady = true` and configures systemd-boot; both state versions remain `26.05`. Review the hardware and installation settings before using it on another installation. Repository changes still need a rebuild to become active.
+> [!IMPORTANT] [!WARNING]
+> **Disclaimer:** _This is not a "community framework" or "NixOS distribution"._
+> Please do not use it like one. It is an ongoing and experiment to
+> feel out NixOS and the Nix language for my own purposes.
+> It's better to use it as a reference, not as a drop-in replacement.
 ## Desktop components
 
 | Component | Choice |
