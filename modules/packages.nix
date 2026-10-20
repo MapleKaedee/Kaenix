@@ -41,11 +41,11 @@
   ];
 
   # Packages installed through feature modules (not a transitive dependency list):
-  # - modules/apps/{brave,kitty,mpv}.nix: Brave, Kitty, and mpv.
+  # - modules/apps/{alacritty,brave,kitty,mpv}.nix: Alacritty, Brave, Kitty, and mpv.
   # - modules/shell/{fish,nushell,common,fastfetch,git}.nix:
   #   Fish/autopair, Nushell, Starship/eza, Fastfetch, and Home Manager's Git.
   # - modules/desktop/{niri,dms,theme}.nix: Niri, DMS/DankGreeter,
-  #   DMS integrations, and the Adwaita cursor package.
+  #   DMS integrations, xdg-terminal-exec, and the Adwaita cursor package.
   # - modules/hardware/: NVIDIA, ASUS utilities, OpenTabletDriver,
   #   Bluetooth, and power management through their modules.
   # - modules/services/: audio, printing, automount, and session integrations.

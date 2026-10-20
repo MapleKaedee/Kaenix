@@ -3,6 +3,7 @@
 {
   flake,
   defaultShell ? "nushell",
+  defaultTerminal ? "alacritty",
 }:
 let
   original = flake.nixosConfigurations.syrup;
@@ -10,7 +11,7 @@ let
     specialArgs.globals = {
       username = "kaede";
       hostname = "syrup";
-      inherit defaultShell;
+      inherit defaultShell defaultTerminal;
       installation = (import ../installation.nix) // {
         hardwareReady = true;
         bootLoader = {
@@ -47,7 +48,22 @@ assert cfg.programs.fish.enable && cfg.programs.nushell.enable;
 assert hm.programs.fish.enable && hm.programs.nushell.enable;
 assert hm.programs.starship.enableFishIntegration && hm.programs.starship.enableNushellIntegration;
 assert hm.programs.kitty.settings.shell == fixture.pkgs.lib.getExe cfg.users.users.kaede.shell;
+assert hm.programs.alacritty.settings.terminal.shell.program == hm.programs.kitty.settings.shell;
+assert hm.programs.alacritty.settings.terminal.shell.args == [ "--login" ];
 assert cfg.users.users.kaede.shell.outPath == fixture.pkgs.${defaultShell}.outPath;
+assert hm.programs.kitty.enable && hm.programs.alacritty.enable;
+assert builtins.all
+  (pkg: builtins.any (installed: installed.outPath == pkg.outPath) hm.home.packages)
+  [
+    hm.programs.alacritty.package
+    hm.programs.kitty.package
+  ];
+assert cfg.environment.sessionVariables.TERMINAL == defaultTerminal;
+assert hm.xdg.terminal-exec.enable;
+assert
+  hm.xdg.terminal-exec.settings.default == [
+    (if defaultTerminal == "alacritty" then "Alacritty.desktop" else "kitty.desktop")
+  ];
 {
   systemDrv = cfg.system.build.toplevel.drvPath;
   homeDrv = hm.home.activationPackage.drvPath;
@@ -59,5 +75,6 @@ assert cfg.users.users.kaede.shell.outPath == fixture.pkgs.${defaultShell}.outPa
   };
   seedCount = builtins.length hm.kaenix.seedFiles;
   shell = cfg.users.users.kaede.shell.name;
+  terminal = cfg.environment.sessionVariables.TERMINAL;
   services = builtins.attrNames hm.systemd.user.services;
 }

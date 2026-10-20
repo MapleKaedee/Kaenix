@@ -41,8 +41,10 @@
       globals = {
         username = "kaede";
         hostname = "syrup";
-        # Choose "nushell" or "fish" for both login and Kitty.
+        # Choose "nushell" or "fish" for login and both terminals.
         defaultShell = "nushell";
+        # Choose "alacritty" or "kitty" for desktop terminal launchers.
+        defaultTerminal = "alacritty";
         installation = import ./installation.nix;
       };
     in

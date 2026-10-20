@@ -1,5 +1,38 @@
 { pkgs, homeConfig }:
 {
+  terminals =
+    pkgs.runCommand "kaenix-terminals-test"
+      {
+        nativeBuildInputs = [
+          pkgs.python3
+          homeConfig.xdg.terminal-exec.package
+          homeConfig.programs.alacritty.package
+          homeConfig.programs.kitty.package
+        ];
+        alacrittyConfig = homeConfig.xdg.configFile."alacritty/alacritty.toml".source;
+        terminalList = homeConfig.xdg.configFile."xdg-terminals.list".source;
+        shellProgram = homeConfig.programs.kitty.settings.shell;
+        themePath = "${homeConfig.xdg.configHome}/alacritty/dank-theme.toml";
+        themeSeed = ../config/alacritty/dank-theme.toml;
+        terminalDataDirs = "${homeConfig.programs.alacritty.package}/share:${homeConfig.programs.kitty.package}/share";
+        terminalPackages = builtins.toJSON {
+          "Alacritty.desktop" = "${homeConfig.programs.alacritty.package}/bin/alacritty";
+          "kitty.desktop" = "${homeConfig.programs.kitty.package}/bin/kitty";
+        };
+      }
+      ''
+        export HOME="$TMPDIR/test-home"
+        export XDG_CONFIG_HOME="$HOME/.config"
+        export XDG_CACHE_HOME="$HOME/.cache"
+        export XDG_DATA_HOME="$HOME/.local/share"
+        export XDG_DATA_DIRS="$terminalDataDirs"
+        export XDG_CONFIG_DIRS="$TMPDIR/empty-config"
+        export XDG_CURRENT_DESKTOP=niri
+        export XTE_CACHE_ENABLED=0
+        python3 ${./test_terminals.py}
+        touch "$out"
+      '';
+
   mpv-config =
     pkgs.runCommand "kaenix-mpv-config-test"
       {
@@ -139,7 +172,7 @@
         from pathlib import Path
         root = Path("test-home")
         entries = json.loads(Path(os.environ["manifest"]).read_text())
-        assert len(entries) == 16
+        assert len(entries) == 17
         for entry in entries:
             path = root / entry["target"]
             assert path.is_file() and not path.is_symlink(), path
@@ -148,12 +181,14 @@
                 json.loads(path.read_text())
         settings = root / ".config/DankMaterialShell/settings.json"
         settings.write_text('{"fromGUI": true}')
+        (root / ".config/alacritty/dank-theme.toml").write_text('[colors.primary]\nbackground = "#123456"\n')
         PY
         python3 ${../scripts/seed-files.py} --home "$PWD/test-home" --manifest "$manifest"
         python3 - <<'PY'
         import json
         from pathlib import Path
         assert json.loads(Path("test-home/.config/DankMaterialShell/settings.json").read_text()) == {"fromGUI": True}
+        assert Path("test-home/.config/alacritty/dank-theme.toml").read_text() == '[colors.primary]\nbackground = "#123456"\n'
         PY
         touch "$out"
       '';
