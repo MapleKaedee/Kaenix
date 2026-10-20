@@ -1,5 +1,14 @@
 { globals, ... }:
 {
+  nixpkgs.overlays = [
+    (_final: prev: {
+      # The pinned Sphinx hook reads only the first item of a structured array.
+      khal = prev.khal.overrideAttrs (_: {
+        sphinxBuilders = "html man";
+      });
+    })
+  ];
+
   services.displayManager.dms-greeter = {
     enable = true;
     compositor.name = "niri";
