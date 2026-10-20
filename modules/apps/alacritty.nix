@@ -31,7 +31,7 @@
               x = 12;
               y = 12;
             };
-            opacity = 0.5;
+            opacity = 0.9;
             decorations = "None";
           };
           scrolling.history = 3000;
