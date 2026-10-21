@@ -35,7 +35,7 @@ generalize or restructure it without a clear request. Prioritize declarative con
 
 - modules/desktop/: Niri, DMS, font defaults, and cursor theme.
 - modules/shell/: shells, prompt, Fastfetch, and Git configuration.
-- modules/apps/: application configuration for Alacritty, Brave, Kitty, and mpv.
+- modules/apps/: application configuration for Alacritty, Brave, Kitty, mpv, and Steam.
 - modules/hardware/: graphics, ASUS, power, tablet, and Bluetooth.
 - modules/services/: audio, printing, automount, session services, and SCX scheduling.
 - modules/system/: base system settings, users, Nix, and Home Manager infrastructure.
@@ -48,7 +48,7 @@ Follow existing module patterns. Introduce abstractions only when they
 reduce duplication or make the configuration easier to understand.
 
 Each category has an explicit imports list in default.nix. Each of the
-26 features is a single named .nix file, such as modules/apps/kitty.nix.
+27 features is a single named .nix file, such as modules/apps/kitty.nix.
 Keep NixOS settings at the top level and, when needed, an inline Home
 Manager module under home-manager.users.${globals.username}. Give that
 module its own config/lib/pkgs arguments when it needs Home Manager context.

@@ -44,6 +44,8 @@ For formatting changes, use the formatter output on relevant files; `nix fmt` wr
 
 ## Local validation skill
 
+Steam gaming has no dedicated headless game check. For changes to its feature or package list, evaluate the flake and inspect Steam/Protontricks/Gamescope/GameMode enablement, the GameMode user service, 32-bit graphics/audio, controller permissions, PRIME offload, and the unchanged firewall defaults. Build the configured Steam, Protontricks, and GameMode packages plus the pinned ProtonPlus, MangoHud, Gamescope, and GOverlay packages without activation. Inspect Steam's FHS environment for the gaming commands and GameMode's 32/64-bit preload libraries. Follow the [gaming runtime checklist](steam.md#runtime-verification) after activation; package availability does not prove that a game or overlay works in Niri.
+
 Use [Kaenix Validate](../.agents/skills/kaenix-validate/SKILL.md), for example `$kaenix-validate validate Kaenix changes`, to select checks for the requested scope. The skill contains its procedure and action boundaries; dated results are in the [changelog](../CHANGELOG.md).
 
 ## Reviewing changes

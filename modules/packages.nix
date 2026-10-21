@@ -26,6 +26,11 @@
     pkgs.osu-lazer-bin
     pkgs.spotify
 
+    # Gaming tools; Steam, Protontricks, Gamescope, and GameMode use the Steam feature.
+    pkgs.protonplus
+    pkgs.mangohud
+    pkgs.goverlay
+
     # Nix and Wayland tools.
     pkgs.nix-output-monitor
     pkgs.nixfmt
@@ -42,7 +47,8 @@
   ];
 
   # Packages installed through feature modules (not a transitive dependency list):
-  # - modules/apps/{alacritty,brave,kitty,mpv}.nix: Alacritty, Brave, Kitty, and mpv.
+  # - modules/apps/{alacritty,brave,kitty,mpv,steam}.nix: Alacritty, Brave, Kitty,
+  #   mpv, Steam/steam-run, Protontricks, Gamescope, and GameMode.
   # - modules/shell/{fish,nushell,common,fastfetch,git}.nix:
   #   Fish/autopair, Nushell, Starship/eza, Fastfetch, and Home Manager's Git.
   # - modules/desktop/{niri,dms,theme}.nix: Niri, DMS/DankGreeter,

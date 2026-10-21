@@ -17,15 +17,18 @@ English is the default language for project content and communication with the u
 | [Kaenix context](kaenix.md) | Starting point and local documentation index |
 | [Configuration](CONFIGURATION.md) | Module categories, file ownership, applications, writable GUI settings, and flake input updates |
 | [mpv and PlayKit main](MPV.md) | English UI, shortcuts, optional shaders, video defaults, and writable state |
+| [Steam gaming](steam.md) | Steam, ProtonPlus, GameMode, overlays, Gamescope, and per-game launch options |
 | [Validation](VALIDATION.md) | Commands, check coverage, review/validation/debugging skills, and evidence limits |
 | [Reinstallation and adaptation](MIGRATION.md) | Moving the configuration to another installation or device |
 | [Backup](BACKUP.md) | Selected data, the backup skill, copy verification, and recovery guidance |
 
 ## Configuration context
 
-The configuration uses six categories and 26 features, each in one `.nix` file containing NixOS and Home Manager settings where needed. Imports are explicit; system, user, and font package lists are centralized in `modules/packages.nix`. The desktop uses Niri, DankMaterialShell, and DankGreeter, with AMD rendering and NVIDIA available through PRIME offload.
+The configuration uses six categories and 27 features, each in one `.nix` file containing NixOS and Home Manager settings where needed. Imports are explicit; system, user, and font package lists are centralized in `modules/packages.nix`. The desktop uses Niri, DankMaterialShell, and DankGreeter, with AMD rendering and NVIDIA available through PRIME offload.
 
 [LAVD scheduling](CONFIGURATION.md#lavd-cpu-scheduling) uses the existing CachyOS kernel's sched_ext support. The system service runs `scx_lavd --autopower` and follows power-profiles-daemon's active profile.
+
+[Steam gaming](steam.md) includes ProtonPlus, Protontricks, GameMode, MangoHud, GOverlay, and optional per-game Gamescope. NVIDIA offload, GameMode requests, and overlays are selected per game; GUI preferences and downloaded compatibility tools remain writable.
 
 Alacritty and Nushell are selected through `globals.defaultTerminal` and `globals.defaultShell`; Kitty and Fish remain available. The 17 seed files are copied only when their targets are absent, keeping GUI settings writable. Existing `Mod+T` bindings require a [one-time migration](CONFIGURATION.md#choosing-alacritty-or-kitty).
 

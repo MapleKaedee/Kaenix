@@ -10,14 +10,14 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | --- | --- |
 | `modules/desktop/` | Niri, DMS/greeter, font defaults, and cursor |
 | `modules/shell/` | Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
-| `modules/apps/` | Alacritty, Brave, Kitty, and mpv configuration |
+| `modules/apps/` | Alacritty, Brave, Kitty, mpv, and Steam configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
 | `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
 | `modules/system/` | Base system settings, users, Nix, and Home Manager infrastructure |
 
 `configuration.nix` imports hardware settings and `modules/default.nix`, then sets the host identity, installation guard, bootloader, and system state version. Each category imports its features explicitly through `default.nix`.
 
-Each feature is one named file, such as `modules/apps/kitty.nix`. There are 26 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
+Each feature is one named file, such as `modules/apps/kitty.nix`. There are 27 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
 
 Add configured features to the relevant category's imports. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
@@ -27,7 +27,7 @@ The `kaenix.seedFiles` infrastructure, including its option definition and activ
 
 ## Centralized package lists
 
-`modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, Nix tools, and CLI utilities no longer have separate modules because they only install packages.
+`modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation.
 
 The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, Kitty, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
 
@@ -222,6 +222,10 @@ Official Discord is installed through `home.packages` in `modules/packages.nix`,
 Pavucontrol and EasyEffects are installed through `home.packages` in `modules/packages.nix`. PipeWire and PulseAudio compatibility are configured in `modules/services/audio.nix`. EasyEffects presets remain GUI-selected and writable; the repository enables no additional EasyEffects autostart or service.
 
 Keep physical speakers/headsets/microphones as the default devices; do not select EasyEffects virtual devices as the defaults. This follows [upstream guidance](https://github.com/wwmm/easyeffects).
+
+## Steam gaming
+
+`modules/apps/steam.nix` configures Steam, Protontricks, Gamescope, and GameMode. See the [Steam gaming guide](steam.md) for first launch, ProtonPlus, overlays, per-game launch options, and runtime verification.
 
 ## GPU and applications
 
