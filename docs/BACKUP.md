@@ -4,9 +4,7 @@ Updated: 21 October 2026. The data selection follows the user's choices on 16 Oc
 
 ## Local backup skill
 
-Use [Kaenix Backup](../.agents/skills/kaenix-backup/SKILL.md), for example `$kaenix-backup prepare a backup plan for my selected Kaenix data`, to prepare backups, create explicitly requested copies, or verify existing backups. Planning and verification alone do not authorize copying. The skill preserves the selections and exclusions below, verifies the actual destination mount and filesystem, uses unique destinations, and reports copy consistency and verification separately.
-
-Closing applications or stopping services requires instructions covering those actions. The skill provides restoration guidance without executing restores, deleting source data, pruning backups, mounting/formatting drives, uploading data, or activating configurations. Private backups stay outside the repository; unsupported metadata and Nix-store symlinks are reported as recovery limits.
+Use [Kaenix Backup](../.agents/skills/kaenix-backup/SKILL.md), for example `$kaenix-backup prepare a backup plan for my selected Kaenix data`, for its copy/verification procedure and action boundaries. Planning or verification does not authorize copying; restoration is guidance-only. Closing applications or stopping services needs authorization. Keep private backups outside the repository and preserve the selections below.
 
 ## Selected data
 

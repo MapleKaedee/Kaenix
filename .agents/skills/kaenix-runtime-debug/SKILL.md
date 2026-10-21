@@ -7,11 +7,8 @@ description: "Diagnose problems in the running Kaenix desktop, services, and har
 
 ## Establish the symptom and authorized scope
 
-Work in the Kaenix repository containing this skill, three levels above its
-directory. Read [project context](../../../docs/kaenix.md), `AGENTS.md`, the latest
-`CHANGELOG.md` entries, relevant guides, and the actual implementation. Inspect
-staged, unstaged, and relevant untracked changes; preserve existing work. If local
-guides are unavailable, proceed from the code and report that limitation.
+Follow [shared context loading](../../../AGENTS.md#understand-the-context-first)
+and inspect the affected implementation and session.
 
 Establish the failing behavior, expected result, affected application/device,
 session, timing, reproduction steps, and whether diagnosis or a fix was requested.
@@ -27,6 +24,10 @@ do not ask again for the same action. Diagnosis or a repository fix alone does
 not authorize those actions, commit, push, or deployment.
 
 ## Distinguish intended configuration from the running session
+
+When documentation or version compatibility needs investigation, consult
+[Kaenix Docs](../kaenix-docs/SKILL.md), identifying the installed/running target
+separately from checkout pins. Keep live diagnosis in this workflow.
 
 Compare the checkout, the active system generation (`/run/current-system`), the
 relevant user configuration, and the affected application's actual inputs.
@@ -112,5 +113,4 @@ activation/migration/runtime verification still needed. Separate repository,
 evaluation/build, active-generation, and observed runtime evidence. A service
 being active does not prove that audio, capture, tablet input, or rendering works;
 a repository correction without activation and retesting remains runtime-unverified.
-Follow the project's language rules and do not claim inaccessible behavior was
-reproduced or fixed.
+Do not claim inaccessible behavior was reproduced or fixed.

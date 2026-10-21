@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Docs"
+  short_description: "Research documentation for Kaenix's pinned versions"
+  default_prompt: "Use $kaenix-docs to research the requested Kaenix option or behavior against its actual sources and report version support with evidence and limitations."

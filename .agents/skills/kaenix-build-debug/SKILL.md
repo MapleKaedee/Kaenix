@@ -7,10 +7,8 @@ description: "Diagnose Kaenix Nix evaluation, fetch, dependency build, and confi
 
 ## Establish the failure and authorized scope
 
-Work in the Kaenix repository containing this skill, three levels above its
-directory. Read [project context](../../../docs/kaenix.md), `AGENTS.md`, the latest
-`CHANGELOG.md` entries, the relevant guides, and the actual implementation.
-Inspect staged, unstaged, and relevant untracked changes; preserve existing work.
+Follow [shared context loading](../../../AGENTS.md#understand-the-context-first)
+and inspect the failing implementation.
 
 Identify the original failing command, target, relevant log or error, and whether
 the user requested diagnosis or a fix. Diagnosis-only requests do not authorize
@@ -25,6 +23,9 @@ the failing command or necessary evidence is missing, inspect available evidence
 first, then ask only for the missing information needed to proceed.
 
 ## Trace the first actionable cause
+
+When diagnosis needs documentation lookup or pinned-version support evidence,
+consult [Kaenix Docs](../kaenix-docs/SKILL.md) for research within this workflow.
 
 Separate the phase that failed from the final top-level error. A message that a
 dependency failed usually points to an earlier error rather than its cause.
@@ -107,11 +108,10 @@ specific blocker and next action.
 
 Report the command/target, failure phase, evidence-supported cause or remaining
 hypothesis, changes if authorized, verification results, and unresolved limits.
-Follow the project's language rules. Distinguish cached or substituted results
-from builds/tests actually executed, evaluation from successful builds, and
+Distinguish cached or substituted results from builds/tests actually executed,
+evaluation from successful builds, and
 builds from activation/runtime. Do not claim an unavailable original failure has
 been reproduced or fixed solely from static reasoning.
 
-Diagnosis and fixes do not authorize system/Home Manager activation, service or
-machine restarts, reboot, commit, push, or deployment. Follow the explicit action
-boundaries in `AGENTS.md`.
+Diagnosis and fixes do not authorize activation or service/machine restarts;
+the shared action boundaries also apply.

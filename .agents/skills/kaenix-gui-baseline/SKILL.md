@@ -7,11 +7,9 @@ description: "Save selected GUI preferences as Kaenix repository baselines for D
 
 ## Establish the requested change
 
-Work in the Kaenix repository containing this skill, three levels above its
-directory. Read [project context](../../../docs/kaenix.md), `AGENTS.md`, the latest
-`CHANGELOG.md` entries, and the relevant parts of
+Follow [shared context loading](../../../AGENTS.md#understand-the-context-first)
+and the relevant parts of
 [configuration ownership](../../../docs/CONFIGURATION.md#bringing-gui-changes-back-into-the-repository).
-Inspect the working tree and preserve existing user changes.
 
 Identify the application, selected preferences, and source: a supplied export,
 relevant live settings, or values described by the user. Ask only if missing scope
@@ -91,8 +89,7 @@ where relevant; follow [the validation guide](../../../docs/VALIDATION.md) if th
 validation skill is unavailable. Do not duplicate its check inventory here.
 
 Report the selected preferences, source, repository owners changed, checks
-actually run, and any remaining runtime verification. Follow the language rules
-in `AGENTS.md` and the user's explicit language requests.
+actually run, and any remaining runtime verification.
 
 Explain whether a change affects declarative configuration or only a seed for
 absent targets. A rebuild does not replace an existing seed target, including an

@@ -7,12 +7,9 @@ description: "Add or modify Kaenix applications, services, and configuration fea
 
 ## Establish scope and inspect the existing implementation
 
-Work in the Kaenix repository containing this skill, three levels above its
-directory. Read [project context](../../../docs/kaenix.md), `AGENTS.md`, the latest
-`CHANGELOG.md` entries, and the relevant parts of
+Follow [shared context loading](../../../AGENTS.md#understand-the-context-first)
+and the relevant parts of
 [configuration ownership](../../../docs/CONFIGURATION.md#modules-by-category).
-Inspect staged, unstaged, and relevant untracked changes before editing; preserve
-existing user work.
 
 Identify the requested capability and check whether it is already implemented.
 Read neighboring features, the category imports, package lists, and associated
@@ -42,6 +39,9 @@ such behavior only when requested or necessary for the specified capability,
 and explain any required integration rather than silently broadening the task.
 
 ## Implement within the pinned configuration
+
+When documentation lookup or version support needs investigation, consult
+[Kaenix Docs](../kaenix-docs/SKILL.md) for source research within this workflow.
 
 Inspect package attributes and option definitions from the inputs actually pinned
 by the repository. Distinguish NixOS options from Home Manager options; do not
@@ -84,11 +84,8 @@ existing checks do not provide; state remaining runtime gaps.
 Update relevant local guides and the changelog for the implemented behavior.
 When the module structure changes, update affected feature counts and references
 from the actual inventory, not a fixed count in this skill. Keep package-module
-references useful without turning them into a transitive dependency list. Follow
-documentation ownership and tracking rules from `AGENTS.md`.
+references useful without turning them into a transitive dependency list.
 
 Report what changed, why it satisfies the request, checks actually performed,
-and any activation or runtime steps still needed. Distinguish evaluation, builds,
-activation, and runtime evidence. Follow the project's language rules. A request
-to implement a feature does not authorize system/Home Manager activation, reboot,
-commit, push, or deployment; follow the explicit action boundaries in `AGENTS.md`.
+and any activation or runtime steps still needed, following the shared reporting
+and action boundaries in `AGENTS.md`.

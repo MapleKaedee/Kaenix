@@ -8,7 +8,7 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 
 | Category | Contents |
 | --- | --- |
-| `modules/desktop/` | Niri, DMS/greeter, font defaults, and cursor |
+| `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
 | `modules/apps/` | Alacritty, Brave, Kitty, mpv, and Steam configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
@@ -21,9 +21,13 @@ Each feature is one named file, such as `modules/apps/kitty.nix`. There are 27 f
 
 Add configured features to the relevant category's imports. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
-Use [Kaenix Feature](../.agents/skills/kaenix-feature/SKILL.md), for example `$kaenix-feature add or update a configured application`, to choose between package-list edits and feature modules, preserve configuration ownership, and select relevant validation.
+For implementation, use [Kaenix Feature](../.agents/skills/kaenix-feature/SKILL.md), for example `$kaenix-feature add or update a configured application`.
 
 The `kaenix.seedFiles` infrastructure, including its option definition and activation, is in `modules/system/home-manager.nix`.
+
+## Documentation lookup and version support
+
+Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-docs verify whether this option is supported by Kaenix's pinned Home Manager`, for source-based documentation and compatibility research. It accounts for locked input mappings, package overrides, and vendored adaptations; research remains report-only. Feature changes, dependency updates, documentation edits, and live diagnosis stay with their existing workflows.
 
 ## Centralized package lists
 
@@ -147,7 +151,7 @@ NixOS generation rollback restores declarative configuration and plugin sources 
 
 ## Bringing GUI changes back into the repository
 
-Use [Kaenix GUI Baseline](../.agents/skills/kaenix-gui-baseline/SKILL.md), for example `$kaenix-gui-baseline save my selected DMS preferences as repository defaults`, to map selected GUI preferences to their repository owners. Saving a baseline preserves existing writable files; it does not apply those defaults to the current home automatically.
+For selected preference imports, use [Kaenix GUI Baseline](../.agents/skills/kaenix-gui-baseline/SKILL.md), for example `$kaenix-gui-baseline save my selected DMS preferences as repository defaults`.
 
 Export DMS settings with `dms ipc call settings dump`, then translate the desired baseline values into `config/dms/settings.nix`. Do not copy other users' absolute paths, search history, or credentials.
 
@@ -157,7 +161,7 @@ Plugins are pinned in flake inputs. The GUI can change settings, but plugin code
 
 ## Updating flake inputs
 
-Use [Kaenix Update](../.agents/skills/kaenix-update/SKILL.md), for example `$kaenix-update update dms and review compatibility`, for selected input updates or an explicitly requested full update. Review-only requests preserve files. Update requests allow scoped declaration/lockfile changes and narrow compatibility fixes, with upstream review and checks for affected consumers; they do not authorize activation or service restarts.
+Use [Kaenix Update](../.agents/skills/kaenix-update/SKILL.md), for example `$kaenix-update update dms and review compatibility`, for selected inputs or an explicitly requested full update. The skill owns the review/update procedure and compatibility-fix boundaries; activation remains separate.
 
 Preserve input release lines and shared nixpkgs relationships. The `cat-widget` and `mpvpaper-plugin` declarations pin exact commits: verify and change the intended commit before refreshing the selected lock entries. A lockfile refresh alone does not advance those declared pins. Reassess affected workarounds, including the [khal override](#dms-calendar-and-the-khal-build-workaround), and distinguish passing configuration checks from real-session plugin compatibility. Vendored mpv/PlayKit assets follow their separate [update guidance](../config/mpv/UPSTREAM.md#attribution-and-updates).
 

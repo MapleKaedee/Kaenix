@@ -7,14 +7,8 @@ description: "Select and run validation for Kaenix configuration changes or a re
 
 ## Establish context and scope
 
-This skill applies to the Kaenix repository containing it. The repository root
-is three levels above the skill directory. Run commands from that root, not from
-the skill directory or another project's checkout.
-
-Read the [project context](../../../docs/kaenix.md), `AGENTS.md`, the latest
-`CHANGELOG.md` entries, the [validation guide](../../../docs/VALIDATION.md), and
-relevant feature guides. If local documents are unavailable, proceed from the
-code and state that limitation. The repository remains the source of project rules.
+Follow [shared context loading](../../../AGENTS.md#understand-the-context-first)
+and use the relevant sections of the [validation guide](../../../docs/VALIDATION.md).
 
 Inspect `git status --short`, unstaged and staged diffs, and relevant untracked
 files. Use `git diff`, `git diff --cached`, and
@@ -41,13 +35,19 @@ for mixed changes without running duplicates.
 | Change | Selected checks |
 | --- | --- |
 | Documentation only | Whitespace and changed links/paths; no Nix evaluation or build |
-| Skill instructions or metadata only | Structure/frontmatter, YAML, references, and whitespace; no Nix build |
+| Skill instructions or metadata only | Structure/frontmatter, YAML, references, and whitespace; affected behavioral scenarios for decision changes; no Nix build |
 | Nix configuration or package lists | Flake evaluation, non-writing format checks on changed Nix files, and checks for affected features |
 | Shell, prompt, greeting, or login environment | `shells`; add `terminals` if terminal shells or shared wiring are affected |
 | Terminal or XDG selection | `terminals`; add `niri-config` if launchers or bindings change |
 | Writable seed helper, manifest, declarations, or baselines | `seed-files` and `seed-integration`, plus checks for affected consumers |
 | Niri KDL, including DMS fragments | `niri-config`; add seed checks if a fragment is a seed baseline |
 | mpv configuration, scripts, or Home Manager/MIME mapping | `mpv-config` |
+
+For instruction changes, use the [agent scenario guide](../../../tests/agents/README.md)
+to select cases that exercise changed decisions within the authorized scope.
+Static checks always apply; wording-only edits that preserve decisions need no
+model run. Report selected cases and untested boundaries separately from static
+validation; a paper exercise does not establish runtime enforcement or discovery.
 
 For shell/terminal selection or wiring changes, also evaluate all four
 combinations supported by the terminal/shell fixture. Obtain the current command
@@ -99,7 +99,7 @@ updates.
 
 ## Report evidence
 
-Report in English unless the user explicitly requests another language:
+Follow the shared reporting rules, including:
 
 - Briefly state the scope and reasons for the selected checks.
 - List actual commands and their status: passed, failed, blocked by the

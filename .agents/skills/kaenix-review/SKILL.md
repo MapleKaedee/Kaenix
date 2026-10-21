@@ -7,10 +7,8 @@ description: "Review Kaenix changes for actionable defects, regressions, configu
 
 ## Establish the review scope
 
-Work in the Kaenix repository containing this skill, three levels above its
-directory. Read [project context](../../../docs/kaenix.md), `AGENTS.md`, the latest
-`CHANGELOG.md` entries, relevant guides, and the affected implementation. If local
-guides are unavailable, proceed from code and state that limitation.
+Follow [shared context loading](../../../AGENTS.md#understand-the-context-first)
+and inspect the affected implementation.
 
 Establish the intended behavior and requested scope before judging changes. Read
 `git status --short`, staged and unstaged diffs, and relevant untracked files.
@@ -30,6 +28,9 @@ no explicit scope, report that fact and ask what to review rather than starting
 an unsolicited repository audit or default evaluation.
 
 ## Trace behavior and ownership
+
+When a finding depends on documentation or version compatibility, consult
+[Kaenix Docs](../kaenix-docs/SKILL.md) for research within this read-only review.
 
 Use [configuration ownership](../../../docs/CONFIGURATION.md), actual module
 wiring, pinned option definitions, and generated configuration where needed.
@@ -59,6 +60,26 @@ with evidence. Avoid speculative risks presented as bugs, stylistic preferences,
 unrelated refactoring, and mechanical complaints without a meaningful consequence.
 Do not require another test merely because code changed: identify the behavior
 or regression that existing coverage fails to establish.
+
+## Documentation and comment checklist
+
+Apply this checklist only to documentation and comments within the review scope:
+
+- Check claims against the relevant implementation, contracts, and dated evidence.
+  Distinguish configured values, available build outputs, active configuration,
+  and observed runtime behavior; do not assume code settles an unclear contract.
+- Preserve dates and outcomes together, uncertainty, safety constraints,
+  attribution, compatibility limits, upstream references, and workaround reasons.
+  Missing records do not prove an event failed or never happened.
+- Read from the top without conversation context or explanations supplied later.
+  Check links and paths for usability, stating access limits when necessary.
+  Identify conflicting copies of current facts without rewriting dated history
+  as if it described the present.
+- Report a concrete factual, contractual, or usability defect and its evidence.
+  Accurate content needs no rewrite, reflow, or invented finding. Shortening must
+  retain procedure prerequisites, purpose, ordering, and completion conditions.
+- Keep review-only work report-only. Suggested corrections do not authorize file
+  edits, implementation changes, or executing documented commands.
 
 ## Resolve uncertainty without implementing changes
 
@@ -104,5 +125,5 @@ After findings, briefly state inspected scope/base, checks actually run, unresol
 questions, and coverage limits. If no actionable findings are found, say so
 explicitly without claiming that the change is proven correct. Separate static
 reasoning, evaluation, builds/cached outputs, and observed runtime evidence.
-Follow project language rules. Do not write a review report, edit documentation,
+Do not write a review report, edit documentation,
 or add a changelog entry during review unless the user requests recording it.

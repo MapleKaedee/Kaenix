@@ -7,11 +7,9 @@ description: "Prepare, create, and verify explicitly requested backups of select
 
 ## Establish the requested operation and data
 
-Work in the Kaenix repository containing this skill, three levels above its
-directory. Read [project context](../../../docs/kaenix.md), `AGENTS.md`, the latest
-`CHANGELOG.md` entries, [the backup guide](../../../docs/BACKUP.md), and relevant
-implementation. If local guides are unavailable, proceed from code and report
-the missing selection guidance; do not invent the user's personal data choices.
+Follow [shared context loading](../../../AGENTS.md#understand-the-context-first)
+and [the backup guide](../../../docs/BACKUP.md). If selection guidance is missing,
+do not invent the user's personal data choices.
 
 Identify whether the request is planning, creating a copy, or verifying an existing
 backup. Planning and verification alone do not authorize copying data or editing
@@ -128,7 +126,7 @@ generation rollback does not restore writable GUI state and refer to
 Do not execute restoration, activation, or application/service restarts through
 this skill. Keep existing copies until recovery is independently verified.
 
-Follow project language and documentation ownership rules. Planning or verifying
-a backup does not write reports, change selections, or update documentation unless
-the user requests it; when a requested report is saved, keep private details out
-of repository content and respect the documentation tracking rules.
+Planning or verifying a backup does not write reports, change selections, or
+update documentation unless the user requests it; when a requested report is
+saved, keep private details out of repository content and respect documentation
+tracking rules.

@@ -7,10 +7,8 @@ description: "Review or update Kaenix flake inputs, inspect upstream changes, an
 
 ## Establish the requested update
 
-Work in the Kaenix repository containing this skill, three levels above its
-directory. Read [project context](../../../docs/kaenix.md), `AGENTS.md`, the latest
-`CHANGELOG.md` entries, relevant guides, and the actual implementation. If local
-guides are unavailable, proceed from code and report that limitation.
+Follow [shared context loading](../../../AGENTS.md#understand-the-context-first)
+and the relevant [input update guidance](../../../docs/CONFIGURATION.md#updating-flake-inputs).
 
 Identify the named inputs, requested revisions/release lines, and whether the
 request is review-only or authorizes updates. Infer scope from the request and
@@ -32,6 +30,9 @@ system/Home Manager activation, live settings changes, service restarts, logout,
 reboot, commit, push, or deployment. Honor explicit authorization already supplied.
 
 ## Resolve targets and review upstream changes
+
+When documentation or compatibility evidence needs investigation, consult
+[Kaenix Docs](../kaenix-docs/SKILL.md) for the actual old and proposed revisions.
 
 Read the input declarations, root input mapping, relevant locked nodes and
 `follows` relationships, and the modules/assets consuming the inputs. Preserve
@@ -118,4 +119,4 @@ sources, checks actually performed, and unresolved risks. Distinguish cached
 outputs, evaluation, builds, activation, and observed runtime behavior. Passing
 checks do not prove that plugins or the desktop work in a real session; use
 [Kaenix Runtime Debug](../kaenix-runtime-debug/SKILL.md) when runtime diagnosis is
-requested. Follow project language and documentation ownership rules.
+requested.

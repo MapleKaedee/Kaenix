@@ -50,17 +50,21 @@ Use [Kaenix Validate](../.agents/skills/kaenix-validate/SKILL.md), for example `
 
 ## Reviewing changes
 
-Use [Kaenix Review](../.agents/skills/kaenix-review/SKILL.md), for example `$kaenix-review review current Kaenix changes`, for a read-only review of actionable defects, regressions, ownership conflicts, and migration gaps. The default scope combines staged, unstaged, and relevant untracked changes against `HEAD`; explicit files or comparison revisions take precedence. With no changes or specified scope, the skill asks what to review rather than starting an unsolicited audit.
+Use [Kaenix Review](../.agents/skills/kaenix-review/SKILL.md), for example `$kaenix-review review current Kaenix changes`, for read-only correctness and migration review. The skill defines scope selection, findings, and routing for requested fixes. Neither a review with no findings nor passing checks proves runtime correctness.
 
-Review complements validation by tracing behavior and affected consumers. Findings include concrete consequences, evidence, and file locations; targeted checks may help resolve uncertainty. The skill preserves repository files, the lockfile, Git index, and live settings, and directs explicitly requested fixes to the appropriate existing workflow. It does not write reports or documentation unless asked. No findings or passing checks do not prove runtime correctness.
+For documentation and comment reviews, use the [documentation checklist](../.agents/skills/kaenix-review/SKILL.md#documentation-and-comment-checklist) in the review skill.
+
+## Agent behavioral scenarios
+
+The [agent scenario guide](../tests/agents/README.md) and its synthetic fixtures cover agent decisions about Kaenix ownership, review boundaries, writable seeds, package placement, validation, and documentation evidence. They complement skill structure and link checks; they are not Nix configuration checks. Select cases affected by a decision change, and keep wording-only checks static. Model trials require isolated sessions and follow the guide's protocol; dated results are in the changelog.
 
 ## Build failure diagnosis
 
-Use [Kaenix Build Debug](../.agents/skills/kaenix-build-debug/SKILL.md), for example `$kaenix-build-debug diagnose this Kaenix build failure`, to trace evaluation or build failures to actionable evidence. Diagnosis-only requests preserve repository files; requested fixes use narrow changes and targeted verification. Full system builds require a request covering that build, and neither diagnosis nor fixes authorize activation.
+Use [Kaenix Build Debug](../.agents/skills/kaenix-build-debug/SKILL.md), for example `$kaenix-build-debug diagnose this Kaenix build failure`, for evaluation/build faults. The skill defines reproduction and requested-fix procedures; diagnosis alone stays read-only and does not authorize activation.
 
 ## Runtime problem diagnosis
 
-Use [Kaenix Runtime Debug](../.agents/skills/kaenix-runtime-debug/SKILL.md), for example `$kaenix-runtime-debug diagnose why screen sharing fails in my Niri session`, for problems in the running desktop, services, or hardware integrations. The skill compares repository intent, the active generation, and writable state using targeted logs and session/device evidence. Diagnosis-only requests preserve files; requested fixes permit narrow repository changes. Live settings changes, service restarts, activation, logout, and reboot require explicit instructions covering those actions. Unavailable session/device access and runtime behavior still needing verification are reported separately from successful configuration checks.
+Use [Kaenix Runtime Debug](../.agents/skills/kaenix-runtime-debug/SKILL.md), for example `$kaenix-runtime-debug diagnose why screen sharing fails in my Niri session`, for live desktop, service, or device faults. The skill owns the diagnostic procedure and requested-fix boundaries. Live changes require separate authorization; conclusions depend on actual session/device access.
 
 ## Repository configuration and the active system
 
