@@ -49,7 +49,8 @@
   #   DMS integrations, xdg-terminal-exec, and the Adwaita cursor package.
   # - modules/hardware/: NVIDIA, ASUS utilities, OpenTabletDriver,
   #   Bluetooth, and power management through their modules.
-  # - modules/services/: audio, printing, automount, and session integrations.
+  # - modules/services/: audio, printing, automount, session integrations,
+  #   and SCX schedulers.
   # - modules/system/: kernel, networking, Nix, and Home Manager infrastructure.
   # Keep enable flags and package selections alongside those configurations.
 }

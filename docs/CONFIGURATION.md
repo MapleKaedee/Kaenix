@@ -12,12 +12,12 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | `modules/shell/` | Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
 | `modules/apps/` | Alacritty, Brave, Kitty, and mpv configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
-| `modules/services/` | Audio, printing, automount, and session services |
+| `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
 | `modules/system/` | Base system settings, users, Nix, and Home Manager infrastructure |
 
 `configuration.nix` imports hardware settings and `modules/default.nix`, then sets the host identity, installation guard, bootloader, and system state version. Each category imports its features explicitly through `default.nix`.
 
-Each feature is one named file, such as `modules/apps/kitty.nix`. There are 25 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
+Each feature is one named file, such as `modules/apps/kitty.nix`. There are 26 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
 
 Add configured features to the relevant category's imports. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
@@ -30,6 +30,26 @@ The `kaenix.seedFiles` infrastructure, including its option definition and activ
 `modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, Nix tools, and CLI utilities no longer have separate modules because they only install packages.
 
 The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, Kitty, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
+
+## LAVD CPU scheduling
+
+`modules/services/scx.nix` enables the standard NixOS `services.scx` service with `pkgs.scx.rustscheds` and `scx_lavd --autopower`. It starts at boot and follows the active power-profiles-daemon profile (performance, balanced, or power saver). All other LAVD settings use upstream defaults. Change the scheduler or its arguments in this module, then rebuild; `scx-loader` is not enabled.
+
+The existing CachyOS kernel provides sched_ext and BPF support; no kernel replacement or extra kernel parameters are needed. The NixOS service checks for `/sys/kernel/sched_ext`, restarts on failure with a start-rate limit, and installs the scheduler package itself. Do not duplicate it in the explicit package lists.
+
+Activate when ready with `sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix#syrup`. The service starts during activation; a reboot is not required when the running kernel already supports sched_ext. After activation, inspect:
+
+```bash
+systemctl status scx.service
+journalctl -b -u scx.service --no-pager
+cat /sys/kernel/sched_ext/state
+cat /sys/kernel/sched_ext/root/ops
+powerprofilesctl get
+```
+
+Expect sched_ext to be enabled with LAVD attached. Confirm the selected power profile in the service logs while changing profiles through the existing desktop controls. Evaluate responsiveness and gaming behavior on the target laptop; successful evaluation and package builds do not prove runtime compatibility or performance.
+
+For a temporary return to the kernel's built-in fair scheduler, run `sudo systemctl stop scx.service`; use `sudo systemctl start scx.service` to resume LAVD. Stopping the service does not change the declarative boot default. To disable it persistently, remove the SCX feature import and rebuild. The kernel also falls back to fair scheduling when the BPF scheduler exits or is aborted after an error; inspect logs if this occurs.
 
 ## Declarative configuration through Home Manager
 

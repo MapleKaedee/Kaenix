@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-21 — LAVD scheduling with automatic power profiles
+
+- Add the imported SCX service feature using the pinned `pkgs.scx.rustscheds` package and `scx_lavd --autopower`. Start at boot and follow the existing power-profiles-daemon profile, keeping other LAVD defaults and the current CachyOS kernel. Use the standard NixOS service without enabling scx-loader or duplicating its package in explicit lists.
+- Document activation, service/kernel status, power-profile verification, and temporary/permanent disable steps. Update the service-category references and feature count from 25 to 26. Preserve the public README, flake inputs/lockfile, hardware configuration, and state versions.
+- Validation passes: flake evaluation with `--no-build --no-update-lock-file path:.`; evaluated service/package assertions and generated unit inspection; non-writing Nix formatting, 19 local documentation links/anchors, seven-file whitespace, feature inventory, and staged/unstaged `git diff --check`. The SCX 1.1.2 package is realized from the configured cache; `scx_lavd --autopower --version` exits successfully without attaching a scheduler. Help output confirms `--autopower` but exits 255 because the pinned `clap_main` wrapper exits with -1 when help is requested. The README, lockfile, kernel feature, and power feature retain their original checksums. No full system build, activation, reboot, commit, push, scheduler attachment, or runtime power-profile/performance test is performed.
+
 ## 2026-10-21 — Documentation eligible for version control
 
 - Remove the `docs/`, `CHANGELOG.md`, and both `AGENTS.md` ignore rules and the obsolete personal-documentation comment. Preserve build-output, `.claude`, and Python-cache ignore rules.

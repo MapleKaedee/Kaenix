@@ -23,7 +23,9 @@ English is the default language for project content and communication with the u
 
 ## Configuration context
 
-The configuration uses six categories and 25 features, each in one `.nix` file containing NixOS and Home Manager settings where needed. Imports are explicit; system, user, and font package lists are centralized in `modules/packages.nix`. The desktop uses Niri, DankMaterialShell, and DankGreeter, with AMD rendering and NVIDIA available through PRIME offload.
+The configuration uses six categories and 26 features, each in one `.nix` file containing NixOS and Home Manager settings where needed. Imports are explicit; system, user, and font package lists are centralized in `modules/packages.nix`. The desktop uses Niri, DankMaterialShell, and DankGreeter, with AMD rendering and NVIDIA available through PRIME offload.
+
+[LAVD scheduling](CONFIGURATION.md#lavd-cpu-scheduling) uses the existing CachyOS kernel's sched_ext support. The system service runs `scx_lavd --autopower` and follows power-profiles-daemon's active profile.
 
 Alacritty and Nushell are selected through `globals.defaultTerminal` and `globals.defaultShell`; Kitty and Fish remain available. The 17 seed files are copied only when their targets are absent, keeping GUI settings writable. Existing `Mod+T` bindings require a [one-time migration](CONFIGURATION.md#choosing-alacritty-or-kitty).
 
