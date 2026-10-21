@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Review"
+  short_description: "Review Kaenix changes for defects and regressions"
+  default_prompt: "Use $kaenix-review to review current Kaenix changes for actionable defects and regressions, with evidence and file locations."

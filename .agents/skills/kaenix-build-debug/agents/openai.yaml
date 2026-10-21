@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Build Debug"
+  short_description: "Diagnose Kaenix evaluation and build failures"
+  default_prompt: "Use $kaenix-build-debug to diagnose this Kaenix build failure and report the evidence, cause, and next steps."

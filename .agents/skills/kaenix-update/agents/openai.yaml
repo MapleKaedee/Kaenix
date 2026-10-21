@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Update"
+  short_description: "Update Kaenix flake inputs and review compatibility"
+  default_prompt: "Use $kaenix-update to update the requested Kaenix flake inputs and report compatibility, validation results, and remaining risks."

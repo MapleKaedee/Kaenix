@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Runtime Debug"
+  short_description: "Diagnose Kaenix desktop and service runtime problems"
+  default_prompt: "Use $kaenix-runtime-debug to diagnose this Kaenix runtime problem and report the evidence, cause, and next steps."

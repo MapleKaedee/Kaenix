@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Backup"
+  short_description: "Prepare, create, and verify selected Kaenix backups"
+  default_prompt: "Use $kaenix-backup to prepare a backup plan for the selected Kaenix and user data, including destination checks and verification."

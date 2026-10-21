@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Validate"
+  short_description: "Validate Kaenix changes with relevant checks"
+  default_prompt: "Use $kaenix-validate to validate Kaenix changes and report results and evidence limits."

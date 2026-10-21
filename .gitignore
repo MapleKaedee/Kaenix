@@ -3,9 +3,3 @@ result
 result-*
 __pycache__/
 *.pyc
-
-# Personal documentation is kept locally and in the offline backup.
-/docs/
-/CHANGELOG.md
-AGENTS.md
-/AGENTS.md

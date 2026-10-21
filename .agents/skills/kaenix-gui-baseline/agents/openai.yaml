@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix GUI Baseline"
+  short_description: "Save selected GUI preferences as Kaenix baselines"
+  default_prompt: "Use $kaenix-gui-baseline to save my selected GUI preferences as repository baselines while preserving existing writable settings."

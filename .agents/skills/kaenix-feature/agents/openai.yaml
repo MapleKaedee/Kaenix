@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Feature"
+  short_description: "Add or update features using Kaenix module patterns"
+  default_prompt: "Use $kaenix-feature to add or update the requested Kaenix feature, preserve its configuration ownership, and validate the changes."
