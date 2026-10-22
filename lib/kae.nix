@@ -13,6 +13,7 @@ let
     system = pkgs.stdenv.hostPlatform.system;
     commands = {
       nix = "${pkgs.nix}/bin/nix";
+      nom = "${pkgs.nix-output-monitor}/bin/nom";
       rebuild = "${pkgs.nixos-rebuild}/bin/nixos-rebuild";
       collectGarbage = "${pkgs.nix}/bin/nix-collect-garbage";
       formatterCheck = "${checkFormatter}/bin/treefmt";

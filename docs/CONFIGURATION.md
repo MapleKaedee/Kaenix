@@ -35,6 +35,12 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, btop, Helix, Kitty, Yazi, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
 
+## Removable-media automount and the udiskie test workaround
+
+`modules/services/automount.nix` enables UDisks2 and GVfs, plus Home Manager's udiskie service with automounting, notifications, and an automatic tray icon. Its `services.udiskie.package` overrides only the pinned udiskie package's test assertion: after invalidating a synthetic key, lookup must raise either `KeyNotAvailable` (`ENOKEY`) or `KeyRevoked` (`EKEYREVOKED`). The original assertion accepts only `ENOKEY`, but the local build returns `EKEYREVOKED`. Both results deny access to the invalidated key; all 15 package tests remain enabled, and application code is unchanged. See the [kernel key-request documentation](https://www.kernel.org/doc/html/latest/security/keys/request-key.html) for lookup errors.
+
+This workaround is verified for udiskie 2.7.0 from nixpkgs `02c087f3fe673c9e317f206a627cb6b910336dbe`. After updating nixpkgs or udiskie, recheck the assertion and remove the override when upstream handles the result. Build the effective `home-manager.users.kaede.services.udiskie.package` and inspect its test log; evaluation alone does not verify the fix. Package tests do not prove removable-drive mounting in the desktop session.
+
 ## LAVD CPU scheduling
 
 `modules/services/scx.nix` enables the standard NixOS `services.scx` service with `pkgs.scx.rustscheds` and `scx_lavd --autopower`. It starts at boot and follows the active power-profiles-daemon profile (performance, balanced, or power saver). All other LAVD settings use upstream defaults. Change the scheduler or its arguments in this module, then rebuild; `scx-loader` is not enabled.
@@ -184,15 +190,20 @@ Plugins are pinned in flake inputs. The GUI can change settings, but plugin code
 | `kae`, `kae help`, `kae --help` | Show commands; use `kae help gc` or `kae gc --help` for command help |
 | `kae check` | Evaluate the flake without building checks |
 | `kae test [checks...]` | Discover available checks, validate names, and build selected checks or all checks by default |
-| `kae build` | Build `syrup` without activation; leave `result` in the checkout |
+| `kae build` | Build `syrup` through `nom` with monitored progress, without activation; leave `result` in the checkout |
 | `kae switch` | Build and activate `syrup`, elevating activation operations through sudo |
+| `kae update [inputs...]` | Update all flake inputs by default, or only named inputs; intentionally write `flake.lock` |
 | `kae gc` | Collect unreachable store paths while retaining generations |
 | `kae gc --older-than 14d` | Prune profiles and collect garbage as the user, then through sudo for system/root profiles |
 | `kae optimize` | Deduplicate identical store files with `nix store optimise` |
 | `kae fmt [paths...]` | Run the flake's Nix formatter on the whole repository or selected paths |
 | `kae fmt --check [paths...]` | Check formatting without modifying source files |
 
-Commands work from any directory. The default checkout is `/home/kaede/Kaenix`; override it with `KAE_REPO` (for example, `with-env {KAE_REPO: "/path/to/checkout"} { kae check }` in Nu). Relative formatting paths are relative to that checkout. Help, garbage collection, and optimization do not require a checkout. Repository flake operations use `path:` references to include untracked files and prohibit lockfile updates. Each invocation runs only the requested operation and preserves its failure status.
+Commands work from any directory. The default checkout is `/home/kaede/Kaenix`; override it with `KAE_REPO` (for example, `with-env {KAE_REPO: "/path/to/checkout"} { kae check }` in Nu). Relative formatting paths are relative to that checkout. Help, garbage collection, and optimization do not require a checkout. Repository flake operations use `path:` references to include untracked files. Only `kae update` intentionally writes the lockfile; other operations preserve it. Each invocation runs only the requested operation and preserves its failure status.
+
+General help lists command forms, checkout defaults, and the `KAE_REPO` override. Both `kae help COMMAND` and `kae COMMAND --help` explain arguments, flags, defaults, effects, and examples in Nu's generated layout. Examples are documentation only: help never executes them and works without a checkout. For example, use `kae help test` to see all-check and selected-check forms, `kae help gc` for generation retention/pruning, and `kae help fmt` for whole-repository, selected-path, and read-only modes.
+
+`kae update` wraps `nix flake update --flake path:REPOSITORY`. Use `kae update nixpkgs` for one input or `kae update nixpkgs dms` for multiple inputs; Nix validates names and resolves required dependency updates. Run it without sudo. It does not automatically check, build, or activate the result. Input declarations, release lines, and exact commit pins remain unchanged; see [updating flake inputs](#updating-flake-inputs) for pin handling and review guidance.
 
 `kae fmt` uses the existing flake formatter, currently pinned `nixfmt-tree`. Its `--ci` flag alone rewrites files before reporting differences, so `kae fmt --check` directly uses a pinned variant of the same package with `nixfmt --check` configured. If the flake formatter is replaced or customized, update this variant alongside it. Formatting covers Nix files, not the Nu script.
 
@@ -207,6 +218,8 @@ nix run --no-update-lock-file path:/home/kaede/Kaenix#kae -- help
 Install the command into the active user environment with the usual explicit rebuild: `sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix#syrup`. Thereafter, run `kae` normally; only activation and explicit system/root pruning request sudo. The [validation guide](VALIDATION.md#repeatable-checks) describes the isolated command check and its evidence limits.
 
 ## Updating flake inputs
+
+For command-line lockfile updates, use `kae update` for all inputs or `kae update nixpkgs dms` for selected inputs. Review the resulting diff and run relevant validation before choosing to activate it.
 
 Use [Kaenix Update](../.agents/skills/kaenix-update/SKILL.md), for example `$kaenix-update update dms and review compatibility`, for selected inputs or an explicitly requested full update. The skill owns the review/update procedure and compatibility-fix boundaries; activation remains separate.
 
@@ -266,6 +279,14 @@ The `wl-clipboard` package provides `wl-copy`/`wl-paste` for copying login codes
 ## Monitoring Nix builds
 
 `pkgs.nix-output-monitor` is installed through `home.packages` in `modules/packages.nix`, from pinned nixpkgs. There is no new flake input or replacement alias for Nix commands.
+
+The flake's `packages.x86_64-linux.default` points to the existing `syrup` system derivation. From the repository root, plain `nom build` or `nix build` builds that full system and creates the `result` symlink without activation or sudo. To explicitly include untracked sources and preserve the lockfile, use:
+
+```bash
+nom build --no-update-lock-file path:.
+```
+
+The running system stays unchanged until a separate activation through `kae switch` or `nixos-rebuild switch`. The management CLI remains available as `.#kae`. `kae build` uses the pinned `nom` executable with an explicit system target for its configured host, preserves the lockfile, and places `result` in the selected checkout even when invoked elsewhere. `kae switch` continues to use `nixos-rebuild switch` with sudo elevation for activation.
 
 After rebuilding, user `kaede` can use `nom`, `nom-build`, and `nom-shell` from Nushell or Fish. Check installation with `nom --version`. From the repository root, view build progress, downloads, and dependency trees with:
 

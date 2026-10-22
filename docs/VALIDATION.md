@@ -31,7 +31,7 @@ git diff --check
 
 | Check | Coverage |
 | --- | --- |
-| `kae` | Packaged Nu entry point, isolated user configuration, command dispatch/arguments/cwd, check discovery, errors and exit codes, generation retention and privilege boundaries with stubs; pinned formatter checks and writes only in disposable fixtures |
+| `kae` | Packaged Nu entry point, isolated user configuration, command dispatch/arguments/cwd, all/selected input update dispatch, informative help through both help forms, check discovery, errors and exit codes, generation retention and privilege boundaries with stubs; pinned formatter checks and writes only in disposable fixtures |
 | `terminals` | Home Manager's generated Alacritty TOML and Kitty config, direct login-shell startup, writable theme import, XDG selection of both desktop entries, and argument forwarding |
 | `terminal-apps` | Generated btop, Helix, and Yazi configuration values plus `--version` smoke tests for all three pinned packages |
 | `mpv-config` | English UI locale, video MIME defaults, parsing/script startup on pinned mpv, shaders/presets, writable volume/resume state, deployed FFmpeg `libplacebo` availability, and SDR thumbnails from two instances in a temporary home without a display |
@@ -42,7 +42,7 @@ git diff --check
 
 Seed checks provide Python through Nix; a global Python installation is unnecessary. Home Manager's seed activation also uses the Nix-provided interpreter. Running unit tests directly with `python3` is only an alternative when an interpreter is available.
 
-After activation, `kae check` runs lock-preserving flake evaluation and `kae test [checks...]` builds all or selected checks; see the [command guide](CONFIGURATION.md#kaenix-management-with-kae). The `kae` check uses stubbed Nix, rebuild, and sudo commands. It does not activate a generation, collect garbage, optimize the store, or build the full system.
+After activation, `kae check` runs lock-preserving flake evaluation and `kae test [checks...]` builds all or selected checks; see the [command guide](CONFIGURATION.md#kaenix-management-with-kae). The `kae` check uses stubbed Nix, nom, rebuild, and sudo commands, including for `kae update`. It verifies that `kae build` invokes nom for the explicit configured system target with lockfile protection and no sudo, while `kae switch` retains rebuild and elevation. It also verifies that update requests allow lockfile writes without sudo or follow-up operations, and that help explains command variants without invoking external commands. It does not update real dependencies, activate a generation, collect garbage, optimize the store, or build the full system.
 
 For formatting changes, use the formatter output on relevant files; `nix fmt` writes changes. The `path:.` reference includes new unstaged files, while a regular Git flake reference requires them to be tracked.
 

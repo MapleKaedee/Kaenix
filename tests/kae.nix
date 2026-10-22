@@ -7,6 +7,7 @@ let
     '';
   commands = {
     nix = stub "nix";
+    nom = stub "nom";
     rebuild = stub "rebuild";
     collectGarbage = stub "collectGarbage";
     sudo = stub "sudo";

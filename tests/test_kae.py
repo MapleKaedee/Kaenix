@@ -77,12 +77,61 @@ class KaeTests(unittest.TestCase):
 
     def test_help_does_not_need_repository_or_load_user_config(self):
         self.env["KAE_REPO"] = str(self.root / "missing")
-        commands = ("check", "test", "build", "switch", "gc", "optimize", "fmt")
+        commands = ("help", "check", "test", "build", "switch", "update", "gc", "optimize", "fmt")
         for args in [(), ("help",), ("--help",), *[("help", c) for c in commands], *[(c, "--help") for c in commands]]:
             with self.subTest(args=args):
                 result = self.run_kae(*args)
                 self.assertTrue(result.stdout.strip() or result.stderr.strip())
                 self.assert_calls([])
+
+    def test_help_explains_variants_and_effects(self):
+        self.env["KAE_REPO"] = str(self.root / "missing")
+        expected = {
+            "help": ["kae help", "kae help gc", "kae gc --help", "kae --help", "without an existing checkout"],
+            "check": ["kae check", "without building", "preserves flake.lock", "does not request sudo"],
+            "test": ["kae test shells", "kae test shells terminals", "every check", "does not activate"],
+            "build": ["kae build", "nom build", "progress monitor", "result", "selected checkout", "no sudo", "without activation"],
+            "switch": ["kae switch", "activates", "sudo elevation", "password", "no automatic tests"],
+            "update": ["kae update nixpkgs", "kae update nixpkgs dms", "With no names", "writes flake.lock", "exact commit pins", "No automatic checks"],
+            "gc": ["kae gc --older-than 14d", "positive day", "user profiles first", "system/root", "rollback", "By default"],
+            "optimize": ["kae optimize", "hard links", "automatically", "no checkout", "garbage collection"],
+            "fmt": ["kae fmt flake.nix modules/shell", "kae fmt --check", "kae fmt --check flake.nix", "whole repository", "read-only", "relative to the checkout"],
+        }
+        for command, fragments in expected.items():
+            for args in [("help", command), (command, "--help")]:
+                with self.subTest(args=args):
+                    result = self.run_kae(*args)
+                    text = " ".join(result.stdout.split())
+                    for fragment in ["Examples:", *fragments]:
+                        self.assertIn(fragment, text)
+                    self.assert_calls([])
+        for args in [(), ("help",), ("--help",)]:
+            with self.subTest(general_help=args):
+                text = " ".join(self.run_kae(*args).stdout.split())
+                for fragment in [
+                    "kae help [command]", "kae test [checks...]", "kae update [inputs...]",
+                    "kae gc [--older-than DAYS]", "kae fmt [--check] [paths...]",
+                    "/home/kaede/Kaenix", "KAE_REPO", "relative formatting paths",
+                ]:
+                    self.assertIn(fragment, text)
+                self.assert_calls([])
+
+    def test_update_all_inputs(self):
+        result = self.run_kae("update")
+        self.assert_calls([("nix", ["flake", "update", "--flake", self.ref, "--"])])
+        self.assertIn("stub stdout", result.stdout)
+        self.assertIn("stub stderr", result.stderr)
+        self.assertIn("kae:", result.stderr)
+
+    def test_update_selected_inputs(self):
+        for names in [("nixpkgs",), ("nixpkgs", "dms")]:
+            with self.subTest(inputs=names):
+                self.run_kae("update", *names)
+                self.assert_calls([("nix", ["flake", "update", "--flake", self.ref, "--", *names])])
+
+    def test_update_names_are_not_interpreted_as_options(self):
+        self.run_kae("update", "--", "--commit-lock-file")
+        self.assert_calls([("nix", ["flake", "update", "--flake", self.ref, "--", "--commit-lock-file"])])
 
     def test_check(self):
         result = self.run_kae("check")
@@ -121,14 +170,16 @@ class KaeTests(unittest.TestCase):
                      self.ref + "#checks.x86_64-linux.alpha"]),
         ])
 
-    def test_build_and_switch(self):
-        for command in ("build", "switch"):
-            with self.subTest(command=command):
-                self.run_kae(command)
-                args = [command, "--flake", self.ref + "#syrup", "--no-update-lock-file"]
-                if command == "switch":
-                    args += ["--elevate", "sudo"]
-                self.assert_calls([("rebuild", args)])
+    def test_build_uses_monitor_without_activation(self):
+        result = self.run_kae("build")
+        self.assert_calls([("nom", ["build", "--no-update-lock-file", self.ref + "#nixosConfigurations.syrup.config.system.build.toplevel"])])
+        self.assertIn("stub stdout", result.stdout)
+        self.assertIn("stub stderr", result.stderr)
+        self.assertIn("kae:", result.stderr)
+
+    def test_switch_uses_rebuild_with_elevation(self):
+        self.run_kae("switch")
+        self.assert_calls([("rebuild", ["switch", "--flake", self.ref + "#syrup", "--no-update-lock-file", "--elevate", "sudo"])])
 
     def test_fmt_arguments(self):
         for args, forwarded in [((), []), (("nested file.nix", "other.nix"), ["nested file.nix", "other.nix"]), (("--check",), ["--ci"]), (("--check", "nested file.nix"), ["--ci", "nested file.nix"])]:
@@ -157,6 +208,10 @@ class KaeTests(unittest.TestCase):
         self.assertEqual([c["mode"] for c in self.calls], ["collectGarbage", "sudo", "collectGarbage"])
 
     def test_rejects_invalid_arguments_without_commands(self):
+        for args in [("update", "--bad"), ("update", "--all"), ("update", "--flake", "elsewhere")]:
+            with self.subTest(args=args):
+                self.run_kae(*args, code=None)
+                self.assert_calls([])
         for args in [("unknown",), ("help", "unknown"), ("check", "--bad"), ("build", "--bad"), ("switch", "--bad"), ("gc", "--bad"), ("optimize", "--bad"), ("fmt", "--bad"), ("test", "--bad"), ("check", "extra"), ("build", "extra"), ("switch", "extra"), ("optimize", "extra"), ("gc", "extra"), ("gc", "--older-than")]:
             with self.subTest(args=args):
                 self.run_kae(*args, code=None)
@@ -168,7 +223,7 @@ class KaeTests(unittest.TestCase):
 
     def test_missing_repository_stops_repository_commands(self):
         self.env["KAE_REPO"] = str(self.root / "missing")
-        for command in ("check", "test", "build", "switch", "fmt"):
+        for command in ("check", "test", "build", "switch", "update", "fmt"):
             with self.subTest(command=command):
                 self.run_kae(command, code=None)
                 self.assert_calls([])
@@ -179,7 +234,12 @@ class KaeTests(unittest.TestCase):
         self.assert_calls([])
 
     def test_failure_codes_preserved(self):
-        for args, failure in [(('check',), 'nix:flake'), (('test',), 'nix:eval'), (('test', 'alpha'), 'nix:build'), (('build',), 'rebuild'), (('switch',), 'rebuild'), (('fmt',), 'nix:fmt'), (('fmt', '--check'), 'formatterCheck'), (('gc',), 'nix:store'), (('optimize',), 'nix:store'), (('gc', '--older-than', '14d'), 'collectGarbage'), (('gc', '--older-than', '14d'), 'sudo')]:
+        for names in [(), ("nixpkgs",), ("missing-input",)]:
+            with self.subTest(update_inputs=names):
+                self.env["KAE_TEST_FAIL"] = "nix:flake"
+                self.run_kae("update", *names, code=37)
+                self.assert_calls([("nix", ["flake", "update", "--flake", self.ref, "--", *names])])
+        for args, failure in [(('check',), 'nix:flake'), (('test',), 'nix:eval'), (('test', 'alpha'), 'nix:build'), (('build',), 'nom'), (('switch',), 'rebuild'), (('fmt',), 'nix:fmt'), (('fmt', '--check'), 'formatterCheck'), (('gc',), 'nix:store'), (('optimize',), 'nix:store'), (('gc', '--older-than', '14d'), 'collectGarbage'), (('gc', '--older-than', '14d'), 'sudo')]:
             with self.subTest(args=args, failure=failure):
                 self.env['KAE_TEST_FAIL'] = failure
                 self.run_kae(*args, code=37)

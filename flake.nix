@@ -49,6 +49,8 @@
       };
     in
     {
+      packages.x86_64-linux.default =
+        self.nixosConfigurations.${globals.hostname}.config.system.build.toplevel;
       packages.x86_64-linux.kae = import ./lib/kae.nix {
         pkgs = self.nixosConfigurations.${globals.hostname}.pkgs;
         hostname = globals.hostname;
