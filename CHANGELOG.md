@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-22 — DMS 2.0 configuration-path compatibility
+
+- Follow pinned DMS revision `9b413296b16721f7679fb62e624cb1ed2433fa58`: seed settings, plugin settings, and the Catppuccin theme under `.config/dms`, and session state under `.local/state/dms`. Update the new-home theme baseline, writable-setting fixture assertions, configuration/backup guidance, validation coverage, and context index. DMS migrates the former `DankMaterialShell` directories and leaves compatibility symlinks; preserve those links and existing GUI files rather than weakening the helper's parent-symlink guard or resetting settings.
+- Add a disposable migrated-home regression fixture with both compatibility symlinks and existing settings/plugins/session/theme. Verify the previous seed manifest fails with the same parent-symlink error as the reported activation, then freshly build the corrected integration check: migrated contents and links survive, all 17 fresh-home seeds match their sources, the theme baseline uses the canonical path, and GUI edits survive another run. The unchanged seed-files unit check is reused from the store. Lock-preserving flake evaluation, synthetic-fixture evaluation, Nix formatting, whitespace, and local documentation target checks pass. Preserve the lockfile, flake outputs, public README, Git index, and seed helper. No live files are changed, services restarted, system built/activated, commit created, or push performed; retry `kae switch` and inspect `home-manager-kaede.service` to verify live recovery.
+
 ## 2026-10-22 — Monitored system builds through kae
 
 - Change `kae build` to execute pinned nix-output-monitor's `nom build` for the explicit `nixosConfigurations.HOST.config.system.build.toplevel` target. Preserve `KAE_REPO`, paths with spaces, `path:` source visibility, lockfile protection, streamed output, exit status, and the checkout's `result` symlink. Keep `kae switch` on `nixos-rebuild switch` with its existing elevation behavior. Add nom to the package's injected command configuration and refresh command help, configuration/validation guidance, and the context index.

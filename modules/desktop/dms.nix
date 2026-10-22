@@ -57,19 +57,19 @@
       home.file."Pictures/Wallpapers/${videoName}".source = ../../collection + "/${videoName}";
       kaenix.seedFiles = [
         {
-          target = ".config/DankMaterialShell/settings.json";
+          target = ".config/dms/settings.json";
           source = json "dms-settings.json" settings;
         }
         {
-          target = ".config/DankMaterialShell/plugin_settings.json";
+          target = ".config/dms/plugin_settings.json";
           source = json "dms-plugins.json" pluginSettings;
         }
         {
-          target = ".local/state/DankMaterialShell/session.json";
+          target = ".local/state/dms/session.json";
           source = json "dms-session.json" { showThirdPartyPlugins = true; };
         }
         {
-          target = ".config/DankMaterialShell/themes/catppuccin/theme.json";
+          target = ".config/dms/themes/catppuccin/theme.json";
           source = ../../config/dms/catppuccin.json;
         }
       ];

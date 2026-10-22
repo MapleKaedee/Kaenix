@@ -188,9 +188,41 @@
       {
         nativeBuildInputs = [ pkgs.python3 ];
         manifest = pkgs.writeText "kaenix-seeds.json" (builtins.toJSON homeConfig.kaenix.seedFiles);
+        dmsThemePath = "${homeConfig.xdg.configHome}/dms/themes/catppuccin/theme.json";
       }
       ''
-        mkdir -p test-home
+        mkdir -p test-home migrated-home
+        python3 - <<'PY'
+        import json
+        from pathlib import Path
+        root = Path("migrated-home")
+        preserved = {
+            ".config/dms/settings.json": '{"fromGUI": true}',
+            ".config/dms/plugin_settings.json": '{"customPlugin": true}',
+            ".local/state/dms/session.json": '{"customSession": true}',
+            ".config/dms/themes/catppuccin/theme.json": '{"customTheme": true}',
+        }
+        for relative, contents in preserved.items():
+            target = root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(contents)
+        for base in (".config", ".local/state"):
+            (root / base / "DankMaterialShell").symlink_to("dms", target_is_directory=True)
+        Path("migrated-expected.json").write_text(json.dumps(preserved))
+        PY
+        python3 ${../scripts/seed-files.py} --home "$PWD/migrated-home" --manifest "$manifest"
+        python3 - <<'PY'
+        import json
+        from pathlib import Path
+        root = Path("migrated-home")
+        for relative, contents in json.loads(Path("migrated-expected.json").read_text()).items():
+            target = root / relative
+            assert not target.is_symlink(), relative
+            assert target.read_text() == contents, relative
+        for base in (".config", ".local/state"):
+            assert (root / base / "DankMaterialShell").readlink() == Path("dms")
+            assert not (root / base / "dms").is_symlink()
+        PY
         python3 ${../scripts/seed-files.py} --home "$PWD/test-home" --manifest "$manifest"
         python3 - <<'PY'
         import json, os
@@ -198,13 +230,21 @@
         root = Path("test-home")
         entries = json.loads(Path(os.environ["manifest"]).read_text())
         assert len(entries) == 17
+        assert {entry["target"] for entry in entries if entry["target"].startswith((".config/dms/", ".local/state/dms/"))} == {
+            ".config/dms/settings.json",
+            ".config/dms/plugin_settings.json",
+            ".local/state/dms/session.json",
+            ".config/dms/themes/catppuccin/theme.json",
+        }
+        assert all("/DankMaterialShell/" not in entry["target"] for entry in entries)
         for entry in entries:
             path = root / entry["target"]
             assert path.is_file() and not path.is_symlink(), path
             assert path.read_bytes() == Path(entry["source"]).read_bytes(), path
             if path.suffix == ".json":
                 json.loads(path.read_text())
-        settings = root / ".config/DankMaterialShell/settings.json"
+        settings = root / ".config/dms/settings.json"
+        assert json.loads(settings.read_text())["customThemeFile"] == os.environ["dmsThemePath"]
         settings.write_text('{"fromGUI": true}')
         (root / ".config/alacritty/dank-theme.toml").write_text('[colors.primary]\nbackground = "#123456"\n')
         PY
@@ -212,7 +252,7 @@
         python3 - <<'PY'
         import json
         from pathlib import Path
-        assert json.loads(Path("test-home/.config/DankMaterialShell/settings.json").read_text()) == {"fromGUI": True}
+        assert json.loads(Path("test-home/.config/dms/settings.json").read_text()) == {"fromGUI": True}
         assert Path("test-home/.config/alacritty/dank-theme.toml").read_text() == '[colors.primary]\nbackground = "#123456"\n'
         PY
         touch "$out"

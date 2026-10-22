@@ -230,5 +230,5 @@
 }
 // {
   lockPamExternallyManaged = true;
-  customThemeFile = "${configHome}/DankMaterialShell/themes/catppuccin/theme.json";
+  customThemeFile = "${configHome}/dms/themes/catppuccin/theme.json";
 }

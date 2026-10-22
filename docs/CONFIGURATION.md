@@ -156,10 +156,10 @@ This workaround applies to pinned nixpkgs `09063bd1f2b36fd9fd793c36dfade7bd40a93
 
 | Target | Initial source | Owner after activation |
 | --- | --- | --- |
-| `~/.config/DankMaterialShell/settings.json` | `config/dms/settings.nix` | DMS GUI |
-| `~/.config/DankMaterialShell/plugin_settings.json` | `modules/desktop/dms.nix` | DMS plugin GUI |
-| `~/.local/state/DankMaterialShell/session.json` | Minimal state without launcher history | DMS |
-| `~/.config/DankMaterialShell/themes/catppuccin/theme.json` | `config/dms/catppuccin.json` | DMS |
+| `~/.config/dms/settings.json` | `config/dms/settings.nix` | DMS GUI |
+| `~/.config/dms/plugin_settings.json` | `modules/desktop/dms.nix` | DMS plugin GUI |
+| `~/.local/state/dms/session.json` | Minimal state without launcher history | DMS |
+| `~/.config/dms/themes/catppuccin/theme.json` | `config/dms/catppuccin.json` | DMS |
 | `~/.config/niri/dms/*.kdl` | `config/niri/dms/` | DMS/user |
 | `~/.config/kitty/dank-*.conf` | `config/kitty/` | DMS theme generator |
 | `~/.config/alacritty/dank-theme.toml` | `config/alacritty/dank-theme.toml` | DMS theme generator/user |
@@ -167,7 +167,9 @@ This workaround applies to pinned nixpkgs `09063bd1f2b36fd9fd793c36dfade7bd40a93
 
 Changing a baseline does not replace existing active files, including empty files or symlinks. To reapply one baseline, stop the relevant application, move its active file to a unique backup, then rebuild. Do not move the entire DMS directory because Home Manager manages plugin sources.
 
-If `.config/niri` or a target's parent directory is still an out-of-store symlink from an older configuration, back it up and replace it with a regular directory. The helper refuses to write through directory symlinks rather than following them into an old repository.
+The pinned DMS revision `9b413296b16721f7679fb62e624cb1ed2433fa58` [migrates its config, state, cache, and data directories](https://github.com/AvengeMedia/DankMaterialShell/blob/9b413296b16721f7679fb62e624cb1ed2433fa58/core/internal/utils/dirs.go) from `DankMaterialShell` to `dms`, leaving compatibility symlinks at the old names. Kaenix seeds the canonical `dms` paths and preserves existing GUI files and compatibility links. Existing theme preferences using the old path still resolve through those links; the baseline for new homes uses `dms/themes/catppuccin/theme.json`. Do not remove or replace these DMS-created links to resolve a seed failure. After correcting older Kaenix seed paths, retry `kae switch`; successful evaluation or a package build alone does not confirm Home Manager activation.
+
+For other legacy out-of-store directory symlinks, such as `.config/niri` pointing into an old repository, back up the directory and replace the link with a regular directory before seeding. The helper continues to refuse writes through symlinked parent directories. If the canonical `dms` directory is itself a symlink, inspect its ownership and target before choosing a migration; the compatibility-link case above assumes `dms` is a regular directory.
 
 NixOS generation rollback restores declarative configuration and plugin sources but not GUI state. Back up writable state separately to roll back appearance or tablet area.
 

@@ -1,6 +1,6 @@
 # Backing up Kaenix and user data
 
-Updated: 21 October 2026. The data selection follows the user's choices on 16 October, with an optional note about the Alacritty theme. The backup destination is an external hard drive. Its mount point and the success of any current copy have not been verified.
+Updated: 22 October 2026. The data selection follows the user's choices on 16 October, with an optional note about the Alacritty theme. The backup destination is an external hard drive. Its mount point and the success of any current copy have not been verified.
 
 ## Local backup skill
 
@@ -12,14 +12,14 @@ Use [Kaenix Backup](../.agents/skills/kaenix-backup/SKILL.md), for example `$kae
 | --- | --- |
 | Personal data | User-selected folders/files |
 | All osu!lazer data, including the database | `/home/kaede/.local/share/osu/` |
-| DMS settings, plugins, and themes | `/home/kaede/.config/DankMaterialShell/` |
-| DMS state | `/home/kaede/.local/state/DankMaterialShell/` |
+| DMS settings, plugins, and themes | `/home/kaede/.config/dms/` |
+| DMS state | `/home/kaede/.local/state/dms/` |
 | Niri fragments written by DMS | `/home/kaede/.config/niri/dms/` |
 | Kitty themes written by DMS | `/home/kaede/.config/kitty/dank-theme.conf` and `/home/kaede/.config/kitty/dank-tabs.conf` |
 | Alacritty theme written by DMS (optional) | `/home/kaede/.config/alacritty/dank-theme.toml` |
 | Entire repository, assets, wallpapers, lockfile, documentation, and Git metadata | `/home/kaede/Kaenix/` |
 
-These sources are guidance, not evidence that all data has been copied. Adjust them before copying if the checkout or data locations change.
+These sources are guidance, not evidence that all data has been copied. Adjust them before copying if the checkout or data locations change. Updated DMS moves the former `DankMaterialShell` directories to `dms` and leaves compatibility symlinks; back up the canonical directories containing the data, not just the old symlinks. See [DMS path migration](CONFIGURATION.md#writable-files-and-one-time-seeding).
 
 Active terminal themes are outside the DMS directory; copy those files too if you want to preserve their colors after recovery.
 
