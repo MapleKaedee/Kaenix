@@ -1,6 +1,6 @@
 # Kaenix — project context and local documentation
 
-Updated: 21 October 2026. Kaenix is a personal NixOS configuration for host `syrup`, user `kaede`, platform `x86_64-linux`, and time zone `Asia/Jakarta`, located at `/home/kaede/Kaenix`.
+Updated: 22 October 2026. Kaenix is a personal NixOS configuration for host `syrup`, user `kaede`, platform `x86_64-linux`, and time zone `Asia/Jakarta`, located at `/home/kaede/Kaenix`.
 
 ## Purpose and documentation ownership
 
@@ -12,6 +12,7 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 | --- | --- |
 | Modules and packages | [Configuration ownership](CONFIGURATION.md#modules-by-category); `modules/`, `modules/packages.nix` |
 | Documentation lookup and version support | [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md); relevant pinned sources, overrides, and vendored provenance |
+| Git workflow, conventions, and authentication | [Kaenix Git](../.agents/skills/kaenix-git/SKILL.md), [commit-message standard](CONFIGURATION.md#commit-message-standard), and [GitHub authentication](CONFIGURATION.md#github-cli-authentication) |
 | Terminal and shell selection | [Terminal](CONFIGURATION.md#choosing-alacritty-or-kitty), [shell](CONFIGURATION.md#choosing-nushell-or-fish), and [binding migration](CONFIGURATION.md#one-time-migration-after-first-activation); shared globals and `modules/shell/` / `modules/apps/` |
 | Niri, DMS, and GUI baselines | [Writable settings](CONFIGURATION.md#writable-files-and-one-time-seeding); `modules/desktop/`, `config/`, `modules/system/home-manager.nix`, `scripts/seed-files.py` |
 | Scheduling and input updates | [LAVD](CONFIGURATION.md#lavd-cpu-scheduling) and [flake updates](CONFIGURATION.md#updating-flake-inputs); `modules/services/scx.nix`, `flake.nix` |

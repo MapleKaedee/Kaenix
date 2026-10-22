@@ -82,6 +82,8 @@ files with read-only store symlinks without considering application save behavio
   ask only about significant decisions unresolved by repository evidence.
 - Activation of system/Home Manager configurations, reboot, commit, push, and
   deployment require explicit instructions.
+- For authorized commits, follow the [commit-message standard](docs/CONFIGURATION.md#commit-message-standard),
+  including its default scope and explicit-message overrides.
 - Do not delete unrelated files or discard user changes. When blocked, finish
   unaffected work and explain what remains unresolved.
 

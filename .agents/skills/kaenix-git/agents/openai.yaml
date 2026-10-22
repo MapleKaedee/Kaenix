@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kaenix Git"
+  short_description: "Perform requested Kaenix Git and branch operations"
+  default_prompt: "Use $kaenix-git to perform the requested Kaenix Git operation, inspect its scope, preserve other work, and verify the result."

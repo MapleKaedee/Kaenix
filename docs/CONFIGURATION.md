@@ -1,6 +1,6 @@
 # Configuration ownership
 
-Updated: 21 October 2026, based on repository modules and evaluation. Use [Kaenix context and the documentation index](kaenix.md) for other guides and [validation](VALIDATION.md) to distinguish repository configuration, check results, and runtime status.
+Updated: 22 October 2026; configuration claims are based on repository modules and prior evaluation. Use [Kaenix context and the documentation index](kaenix.md) for other guides and [validation](VALIDATION.md) to distinguish repository configuration, check results, and runtime status.
 
 ## Modules by category
 
@@ -164,6 +164,40 @@ Plugins are pinned in flake inputs. The GUI can change settings, but plugin code
 Use [Kaenix Update](../.agents/skills/kaenix-update/SKILL.md), for example `$kaenix-update update dms and review compatibility`, for selected inputs or an explicitly requested full update. The skill owns the review/update procedure and compatibility-fix boundaries; activation remains separate.
 
 Preserve input release lines and shared nixpkgs relationships. The `cat-widget` and `mpvpaper-plugin` declarations pin exact commits: verify and change the intended commit before refreshing the selected lock entries. A lockfile refresh alone does not advance those declared pins. Reassess affected workarounds, including the [khal override](#dms-calendar-and-the-khal-build-workaround), and distinguish passing configuration checks from real-session plugin compatibility. Vendored mpv/PlayKit assets follow their separate [update guidance](../config/mpv/UPSTREAM.md#attribution-and-updates).
+
+## Commit-message standard
+
+Use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) for future commits:
+
+```text
+type(scope): short description
+
+Optional explanation of why the change was needed.
+
+Optional footers.
+```
+
+The scope is optional; use a relevant area such as `git`, `skills`, `dms`, `niri`, `mpv`, or `deps`. Write descriptions in English, using an imperative verb and no final period. Aim for a subject of 72 characters or fewer, prioritizing clarity. Add a body when context, migration steps, or validation limits need explanation.
+
+| Type | Purpose | Example |
+| --- | --- | --- |
+| `feat` | New capability | `feat(git): add repository workflow skill` |
+| `fix` | Correct a defect | `fix(dms): preserve existing writable settings` |
+| `docs` | Documentation changes | `docs(git): define commit-message conventions` |
+| `refactor` | Restructure without changing behavior | `refactor(skills): centralize shared guidance` |
+| `test` | Add or improve tests | `test(seed): cover existing symlink preservation` |
+| `build` | Dependencies or build configuration | `build(deps): update Home Manager input` |
+| `chore` | Other repository maintenance | `chore: remove obsolete development artifacts` |
+
+Use `ci`, `style`, or `perf` when those accurately describe the change. These type choices and writing guidelines are Kaenix conventions within the upstream format. For an actual incompatible change, append `!` immediately before the colon, as in `feat(niri)!: rename legacy bindings`, and include a `BREAKING CHANGE:` footer explaining the impact and any required migration.
+
+For an authorized commit request without a narrower file selection, review and include all pending staged, unstaged, and untracked changes. Honor explicit file selections or staged-only requests. Keep ignored files ignored and exclude credentials/private data. Do not automatically split commits; describe their main purpose in the subject and explain additional changes in the body. Preserve an exact message supplied by the user, even when it overrides this default format.
+
+Use descriptive subjects for ordinary commits instead of version-only titles. Keep release/version changes explicit: this convention does not authorize automatic version bumps, tags, releases, commits, or pushes. Apply it to future commits without rewriting existing history. This is guidance only; no hooks, commitlint dependency, or Git configuration enforcement are installed. [Kaenix Git](../.agents/skills/kaenix-git/SKILL.md) uses this section as the canonical standard.
+
+## Git repository workflow
+
+Use [Kaenix Git](../.agents/skills/kaenix-git/SKILL.md), for example `$kaenix-git commit and push the pending changes`, for requested inspection, staging, commits, pushes, fetches, branch creation/switching, and fast-forward synchronization. The skill owns the operation and verification procedure; the [commit-message standard](#commit-message-standard) owns message conventions and default commit scope. Inspection does not authorize publication. Diverged histories, destructive operations, pull requests, and releases require a separate workflow; existing authentication stays configured as described below.
 
 ## GitHub CLI authentication
 
