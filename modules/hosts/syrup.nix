@@ -28,50 +28,14 @@ in
         networking.hostName = globals.hostname;
         system.stateVersion = globals.installation.systemStateVersion;
       })
-      features.boot
+      features.core
       features.packages
-      # Desktop.
-      features.niri
-      features.dms
-      features.theme
-      # Shell.
-      features.default-shell
-      features.fish
-      features.nushell
-      features.common
-      features.fastfetch
-      features.git
-      # Apps.
-      features.alacritty
-      features.brave
-      features.btop
-      features.helix
-      features.mpv
-      features.steam
-      features.yazi
-      # Hardware.
-      features.nvidia
-      features.asus
-      features.power
-      features.tablet
-      features.bluetooth
-      # Services.
-      features.audio
-      features.printing
-      features.automount
-      features.session
-      features.scx
-      # System.
-      features.networking
-      features.base
-      features.users
-      features.nix
-      features.seed-files
+      features.workstation
+      features.terminal
+      features.applications
+      features.gaming
+      features.hardware-syrup
       inputs.chaotic.nixosModules.default
-      features.home-manager
-      features.home
-      # Preserve Kitty's merge position from the pilot, including seed order.
-      features.kitty
     ];
   };
 }

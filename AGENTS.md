@@ -30,8 +30,13 @@ directory map. Follow existing patterns; abstractions must reduce duplication or
 improve clarity. Each configured feature uses one named `.nix` file under
 `modules/<category>/`, registering `flake.modules.nixos.<name>`.
 `import-tree` discovers flake-parts modules only under `modules/`;
-`modules/hosts/syrup.nix` explicitly selects each registered NixOS module.
-Registration alone does not enable a feature. Do not extend discovery beyond
+`modules/hosts/syrup.nix` explicitly selects six shallow composition bundles and
+`packages`. Each bundle in `modules/bundles/` registers an import-only NixOS
+module with explicit leaf feature imports. Each of the 35 bundled features has
+one bundle owner; bundles never import bundles, and features never import bundles.
+Add configured features to one appropriate bundle; keep `packages` directly
+selected by the host. Registration alone does not enable a feature: trace
+host → bundle → feature selection. Do not extend discovery beyond
 `modules/` or introduce feature toggles without a need.
 
 Flake-parts `config` describes flake outputs; it is distinct from NixOS and Home
@@ -112,9 +117,11 @@ Synthetic disk fixtures are for validation only, never installation or deploymen
 
 ## Documentation and reporting
 
-- Never edit, reformat, regenerate, rename, or remove the root README.md.
-  Only the user maintains this public document; report suggestions and leave it
-  unchanged.
+- The root README.md is user-maintained. Agents may edit, reformat, regenerate,
+  rename, or remove it only with user permission or an explicit user request.
+  Stay within the authorized scope; do not ask again for permission already
+  granted for that work. Without authorization, leave it unchanged and report
+  suggestions.
 - Keep `docs/kaenix.md` current as the entry point; update relevant guides under
   `docs/` and record changes in `CHANGELOG.md`.
 - Keep docs/, CHANGELOG.md, and the root AGENTS.md eligible for version

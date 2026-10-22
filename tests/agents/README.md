@@ -15,7 +15,11 @@ cases have no model result. Catalog version 5 refreshes B01–B05 for the `modul
 B01 reads user metadata defaults, B02 retains the inline Home Manager argument
 defect, B03/B05 use the shorter asset path, and B04 retains centralized package
 placement and explicit host selection. Static fixture inspection does not rerun these cases
-or establish fresh-chat instruction loading or runtime model routing.
+or establish fresh-chat instruction loading or runtime model routing. Catalog
+version 6 updates B05's composition evidence: the host selects `workstation`,
+which imports `niri`. B04 continues to select `packages` directly. Case intents
+and historical observations remain unchanged; this fixture refresh has no new
+model-trial result.
 Do not add a model trial to routine configuration
 validation merely because this directory exists.
 

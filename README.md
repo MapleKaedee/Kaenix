@@ -15,13 +15,16 @@ My personal [NixOS](https://nixos.org/) configuration.
 | Wayland compositor | Niri + Xwayland Satellite |
 | Desktop shell | DankMaterialShell (DMS) |
 | Login screen | DankGreeter |
-| Terminal | Kitty |
+| Terminal | Kitty (default) + Alacritty |
 | Shell / prompt | Nushell (default) + Fish, with shared Starship |
-| Command-line tools | eza, Fastfetch, Fish autopair |
+| Command-line tools | eza, Fastfetch, Fish autopair, btop, Yazi |
+| Terminal multiplexer | TUIOS (manual sessions with `tuios new`) |
 | Nix formatting | nixfmt (`nixfmt`, `nix fmt`) |
 | Browser | Brave |
-| Editor | Zed |
-| Theme | Catppuccin Mocha with Mauve|
+| Editor | Zed + Helix (default CLI editor) |
+| Media player | mpv |
+| Gaming | Steam, Protontricks, Gamescope, GameMode |
+| Theme | Catppuccin Mocha with Mauve |
 | Fonts | JetBrains Mono and its Nerd Font variant |
 | Audio / networking | PipeWire / NetworkManager |
 | Audio controls / effects | Pavucontrol / EasyEffects |
@@ -31,26 +34,42 @@ My personal [NixOS](https://nixos.org/) configuration.
 
 ```text
 .
-├── flake.nix                    # Inputs and the syrup NixOS configuration
-├── flake.lock                   # Pinned dependency revisions
-├── installation.nix             # Installation guard, bootloader, state versions
-├── hardware-configuration.nix    # Hardware and mounts for syrup
-├── configuration.nix            # System entry point
-├── home.nix                     # Home Manager entry point
+├── flake.nix                       # Inputs, caches, and module discovery
+├── flake.lock                      # Pinned dependency revisions
+├── AGENTS.md                       # Project instructions
+├── CHANGELOG.md                    # Dated changes and validation results
+├── README.md                       # Public overview and getting started
 ├── modules/
-│   ├── default.nix              # Explicit category imports
-│   ├── desktop/                 # Niri, DMS, fonts, and cursor theme
-│   ├── shell/                   # Fish, Nushell, prompt, Git, and CLI tools
-│   ├── apps/                    # Browser, terminal, messaging, media, and other apps
-│   ├── hardware/                # NVIDIA, ASUS, power, tablet, and Bluetooth
-│   ├── services/                # Audio, printing, automount, and session services
-│   └── system/                  # Base settings, users, Nix, and Home Manager support
-├── config/                      # Configuration assets and initial GUI settings
-├── collection/                  # Wallpapers, including the mpvpaper video
-├── scripts/                     # Writable-default initialization helper
-└── tests/                       # Seed tests, Niri validation, evaluation fixture
+│   ├── hosts/syrup.nix             # Host identity, user selection, and composition
+│   ├── users/kaede.nix             # Username, default shell, and default terminal
+│   ├── bundles/                    # Six shallow, explicit feature compositions
+│   ├── system/
+│   │   ├── base.nix                # Locale, timezone, keyboard, and zram
+│   │   ├── boot.nix                # Kernel and installation bootloader
+│   │   ├── networking.nix          # NetworkManager
+│   │   ├── nix.nix                 # Nix configuration
+│   │   ├── users.nix               # User preference schema and account/groups
+│   │   ├── home-manager.nix        # Home Manager integration
+│   │   ├── home.nix                # Home identity, state version, and XDG defaults
+│   │   └── seed-files.nix          # Writable GUI seed options and activation
+│   ├── hardware/                   # NVIDIA, ASUS, power, tablet, and Bluetooth
+│   ├── desktop/                    # Niri, DMS, fonts, and cursor theme
+│   ├── shell/                      # Fish, Nushell, prompt, Git, and CLI tools
+│   ├── apps/                       # Terminals, browser, editors, media, and Steam
+│   ├── services/                   # Audio, printing, automount, session, and SCX
+│   ├── packages.nix                # Explicit system, user, and font package lists
+│   └── outputs.nix                 # System package, kae, formatter, and checks
+├── installation/
+│   ├── hardware-configuration.nix  # Generated hardware and mounts for syrup
+│   └── installation.nix            # Readiness, bootloader, and state versions
+├── lib/                            # Shared package helpers and kae packaging
+├── config/                         # Configuration assets and initial GUI settings
+├── collection/                     # Wallpapers, including the mpvpaper video
+├── scripts/                        # kae, shell helpers, and writable-file seeding
+├── tests/                          # Configuration checks and evaluation fixtures
+├── docs/                           # Local configuration, migration, and validation guides
+└── .agents/                        # Project-local agent skills
 ```
-
 ## Screenshots
 ![desktop](collection/desktop.png)
 
@@ -63,52 +82,30 @@ git clone https://github.com/MapleKaedee/Kaenix.git
 cd Kaenix
 ```
 
-Before deploying this checkout to a new target:
+These steps adapt an already installed NixOS system. Before deploying this checkout to a new target:
 
-1. Back up important data.
-2. In `installation.nix` set the value with your own settings.
-3. Review the user/host settings, GPU PCI addresses, kernel, and monitor outputs. Set `hardwareReady = true` after the target settings are ready in `installation.nix`.
+1. Back up important data and keep a copy of the working installer configuration. Ensure the target account has a password.
+2. Set `hardwareReady = false` in `installation/installation.nix` while adapting the configuration.
+3. Replace `installation/hardware-configuration.nix` with the target's generated hardware configuration. Set the target's bootloader in `installation/installation.nix` and preserve its system and Home Manager state versions.
+4. Review username, default shell, and default terminal in `modules/users/kaede.nix`. Review the selected user record and hostname in `modules/hosts/syrup.nix`, hardware selection in `modules/bundles/hardware-syrup.nix`, GPU PCI addresses, kernel choice, and Niri/DMS monitor outputs.
+5. Set `hardwareReady = true` only after the target settings have been checked.
 
-Once the installation settings are ready, build and prepare the next boot:
+Once the installation settings and checks are ready, build and prepare the next boot:
 
 ```bash
-nix flake check --no-build path:.
+nix flake check --no-build --no-update-lock-file path:.
 sudo nixos-rebuild build --flake path:.#syrup
 sudo nixos-rebuild boot --flake path:.#syrup
 sudo reboot
 ```
+
 Or if you want to rebuild and switch at the same time:
 
 ```bash
 sudo nixos-rebuild switch --flake path:.#syrup
 ```
 
-## Monitoring builds
-
-Home Manager installs `nix-output-monitor` from the pinned nixpkgs input. After rebuilding, use `nom build` explicitly to display build progress, downloads, and the dependency tree. For example, from this repository:
-
-```bash
-nom build --no-link path:.#checks.x86_64-linux.shells
-```
-
-The package also provides `nom-build` and `nom-shell` for the legacy Nix commands. These commands are available from Nushell and Fish. Monitoring `nixos-rebuild` requires piping its logs to `nom` separately; see the [upstream usage guide](https://github.com/maralorn/nix-output-monitor#running). The regular Nix commands are not aliased or replaced.
-
-## Formatting Nix code
-
-Home Manager installs `nixfmt` from the pinned nixpkgs input. After rebuilding, the `nixfmt` command is available from Nushell and Fish. The flake also provides `nixfmt-tree` as its formatter, so `nix fmt` works before system activation. Run these commands from the repository root:
-
-```bash
-# Format one file
-nixfmt modules/shell/nix/home.nix
-
-# Format all Nix files in the project
-nix fmt
-
-# Format only selected files
-nix fmt -- flake.nix modules/shell/nix/home.nix
-```
-
-These commands write formatting changes to files. Formatting is explicit; no Git hooks or editor format-on-save settings are installed. See the [upstream documentation](https://github.com/NixOS/nixfmt#installation).
+Use the selected host output name in place of `syrup` if you rename it.
 
 ## References and inspiration
 

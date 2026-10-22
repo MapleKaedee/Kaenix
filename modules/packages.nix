@@ -22,6 +22,7 @@
         pkgs.curl
         pkgs.wget
         pkgs.codex
+        pkgs.nil
       ];
 
       home-manager.users.${globals.username}.home.packages = [

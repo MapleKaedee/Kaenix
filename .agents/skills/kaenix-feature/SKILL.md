@@ -12,8 +12,8 @@ and the relevant parts of
 [configuration ownership](../../../docs/CONFIGURATION.md#modules-by-category).
 
 Identify the requested capability and check whether it is already implemented.
-Read neighboring features, explicit host selections, package lists, and associated
-assets. Extend the existing owner instead of creating a competing module. Ask
+Read neighboring features, their bundle memberships, explicit host selections,
+package lists, and associated assets. Extend the existing owner instead of creating a competing module. Ask
 only about significant behavior or scope choices that cannot be resolved from
 the request and repository.
 
@@ -23,7 +23,7 @@ the request and repository.
 | --- | --- |
 | Install an application/tool without configuration | Add the package to the appropriate explicit list in `modules/packages.nix`; do not create a package-only feature |
 | Change an existing configured application or service | Edit its existing feature file and relevant assets |
-| Add a configured feature | Add one named `.nix` file in `modules/<category>/`, register `flake.modules.nixos.<name>`, and explicitly select it in `modules/hosts/syrup.nix` |
+| Add a configured feature | Add one named `.nix` file in `modules/<category>/`, register `flake.modules.nixos.<name>`, and explicitly import it in one appropriate `modules/bundles/<bundle>.nix` selected by the host |
 | Save current GUI preferences as defaults | Use [Kaenix GUI Baseline](../kaenix-gui-baseline/SKILL.md) for the selected baseline import; add feature wiring only if the request needs it |
 
 For explicit package lists, distinguish shared system tools, per-user applications,
@@ -66,11 +66,16 @@ the typed schema and the registered account/groups module.
 Use existing globals for shared choices; preserve alignment among consumers when
 changing shell or terminal selection. Only `modules/` uses import-tree discovery of
 flake-parts modules; assets, helpers, tests, scripts, installation fixtures, and
-generated hardware and installation data in `installation/` stay outside it. Register configured features under
-`modules/<category>/<name>.nix` and select them explicitly in
-`modules/hosts/syrup.nix`. Package-only additions remain in the existing `packages`
-registration. Keep flake-parts `config` separate from registered NixOS and inline
-Home Manager `config`. Registered modules must take their own lower-level
+generated hardware and installation data in `installation/` stay outside it.
+Register configured features under
+`modules/<category>/<name>.nix` and import them explicitly in one appropriate
+`modules/bundles/<bundle>.nix`. Trace host → bundle → feature selection. Bundles
+are shallow, import-only registered modules: do not add settings, options, globals
+capture, bundle-to-bundle imports, or feature-to-bundle imports. Check declared
+edges before import deduplication for duplicate ownership and complete host
+reachability. Package-only additions remain in the existing `packages`
+registration, directly selected by the host. Keep flake-parts `config` separate
+from registered NixOS and inline Home Manager `config`. Registered modules must take their own lower-level
 `globals` arguments so fixture overrides remain effective. See the
 [feature ownership guide](../../../docs/CONFIGURATION.md#dendritic-features-and-flake-outputs).
 Do not introduce feature-toggle frameworks or unrelated restructuring.

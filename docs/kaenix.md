@@ -10,10 +10,10 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 
 | Task | Guide and implementation |
 | --- | --- |
-| Modules and packages | [Configuration ownership](CONFIGURATION.md#modules-by-category); `modules/`, `modules/hosts/syrup.nix` |
+| Modules, bundles, and packages | [Configuration ownership](CONFIGURATION.md#modules-by-category); `modules/bundles/`, leaf categories, `modules/packages.nix`, and `modules/hosts/syrup.nix` |
 | Kaenix management, monitored builds, updates, and help | [kae](CONFIGURATION.md#kaenix-management-with-kae); `scripts/kae.nu`, `lib/kae.nix` |
 | User defaults and host identity | [Ownership and metadata](CONFIGURATION.md#dendritic-features-and-flake-outputs); `modules/users/kaede.nix`, `modules/hosts/syrup.nix`, `installation/` |
-| Flake structure and dendritic features | [Feature registration and host selection](CONFIGURATION.md#dendritic-features-and-flake-outputs); `flake.nix`, `modules/` |
+| Flake structure and dendritic features | [Feature registration and host selection](CONFIGURATION.md#dendritic-features-and-flake-outputs); `flake.nix`, host → bundle → feature wiring under `modules/` |
 | Default system builds and build monitoring | [Default build target and nom](CONFIGURATION.md#monitoring-nix-builds); `modules/outputs.nix` |
 | Documentation lookup and version support | [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md); relevant pinned sources, overrides, and vendored provenance |
 | Git workflow, conventions, and authentication | [Kaenix Git](../.agents/skills/kaenix-git/SKILL.md), [commit-message standard](CONFIGURATION.md#commit-message-standard), and [GitHub authentication](CONFIGURATION.md#github-cli-authentication) |

@@ -89,11 +89,134 @@ let
       };
     };
   };
+  expectedBundles = {
+    core = [
+      "boot"
+      "networking"
+      "base"
+      "users"
+      "nix"
+      "seed-files"
+      "home-manager"
+      "home"
+    ];
+    workstation = [
+      "niri"
+      "dms"
+      "theme"
+      "audio"
+      "session"
+      "printing"
+      "automount"
+    ];
+    terminal = [
+      "default-shell"
+      "fish"
+      "nushell"
+      "common"
+      "fastfetch"
+      "git"
+      "alacritty"
+      "kitty"
+      "btop"
+      "helix"
+      "yazi"
+    ];
+    applications = [
+      "brave"
+      "mpv"
+    ];
+    gaming = [ "steam" ];
+    hardware-syrup = [
+      "nvidia"
+      "asus"
+      "power"
+      "tablet"
+      "bluetooth"
+      "scx"
+    ];
+  };
+  expectedSelections = [
+    "core"
+    "packages"
+    "workstation"
+    "terminal"
+    "applications"
+    "gaming"
+    "hardware-syrup"
+  ];
+  expectedLeaves = lib.sort builtins.lessThan (
+    [ "packages" ] ++ lib.concatLists (builtins.attrValues expectedBundles)
+  );
+  expectedRegistrations = lib.sort builtins.lessThan (
+    expectedLeaves ++ builtins.attrNames expectedBundles
+  );
+  projectPrefix = "${flake.outPath}/flake.nix#modules.nixos.";
+  # Stop at the next project registration. Skip only its same-name wrappers;
+  # graph retains declared imports before the module system deduplicates them.
+  frontier =
+    owner: nodes:
+    lib.concatMap (
+      node:
+      let
+        name =
+          if lib.hasPrefix projectPrefix node.file then
+            builtins.unsafeDiscardStringContext (lib.removePrefix projectPrefix node.file)
+          else
+            null;
+      in
+      if name != null && name != owner then [ { inherit name node; } ] else frontier owner node.imports
+    ) nodes;
+  inspectComposition =
+    host:
+    let
+      selected = frontier null host.graph;
+      bundles = builtins.filter (edge: builtins.hasAttr edge.name expectedBundles) selected;
+      children = edge: frontier edge.name edge.node.imports;
+      membership = builtins.listToAttrs (
+        map (edge: {
+          name = edge.name;
+          value = map (child: child.name) (children edge);
+        }) bundles
+      );
+      leaves =
+        builtins.filter (edge: !(builtins.hasAttr edge.name expectedBundles)) selected
+        ++ lib.concatMap children bundles;
+      names = map (edge: edge.name) leaves;
+    in
+    {
+      selections = map (edge: edge.name) selected;
+      inherit membership;
+      valid =
+        map (edge: edge.name) selected == expectedSelections
+        && membership == expectedBundles
+        && lib.sort builtins.lessThan names == expectedLeaves
+        && builtins.length (lib.unique names) == builtins.length names
+        && builtins.all (edge: children edge == [ ]) leaves;
+    };
+  composition = inspectComposition flake.nixosConfigurations.syrup;
+  duplicate = flake.nixosConfigurations.syrup.extendModules {
+    modules = [ flake.modules.nixos.workstation ];
+  };
+  directLeaf = flake.nixosConfigurations.syrup.extendModules {
+    modules = [ flake.modules.nixos.niri ];
+  };
+  repeatedLeaf = make (
+    { config, ... }: { flake.modules.nixos.workstation.imports = [ config.flake.modules.nixos.niri ]; }
+  );
+  nestedBundle = make (
+    { config, ... }: { flake.modules.nixos.workstation.imports = [ config.flake.modules.nixos.core ]; }
+  );
   guards = builtins.filter (
     item: !item.assertion && lib.hasPrefix "kaenix: replace installation/" item.message
   ) notReady.config.assertions;
 in
-assert builtins.length (builtins.attrNames flake.modules.nixos) == 36;
+assert builtins.attrNames flake.modules.nixos == expectedRegistrations;
+assert composition.valid;
+assert !(inspectComposition duplicate).valid;
+assert !(inspectComposition directLeaf).valid;
+assert !(inspectComposition repeatedLeaf.nixosConfigurations.syrup).valid;
+assert !(inspectComposition nestedBundle.nixosConfigurations.syrup).valid;
 assert (discovery.nixosConfigurations or { }) == { };
 assert builtins.attrNames discovery.modules.nixos == builtins.attrNames flake.modules.nixos;
 assert renamedCfg.users.users.kaenix-fixture.isNormalUser;
@@ -106,6 +229,8 @@ assert rejected "nushell" "xterm";
 {
   inherit supported;
   registered = builtins.attrNames flake.modules.nixos;
+  composition = { inherit (composition) selections membership; };
+  invalidCompositionsRejected = true;
   discoveryWithoutHost = true;
   renamedUserAndOutputs = true;
   unsupportedPreferencesRejected = true;

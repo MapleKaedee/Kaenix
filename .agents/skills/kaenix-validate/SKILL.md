@@ -36,8 +36,8 @@ for mixed changes without running duplicates.
 | --- | --- |
 | Documentation only | Whitespace and changed links/paths; no Nix evaluation or build |
 | Skill instructions or metadata only | Structure/frontmatter, YAML, references, and whitespace; affected behavioral scenarios for decision changes; no Nix build |
-| Flake-parts/import-tree foundation, shared host wiring, or full feature migration | Flake evaluation, baseline/post-change derivation comparison, non-writing Nix formatting, all existing checks, and all four shell/terminal fixture combinations |
-| Nix configuration, individual feature registration, or package lists | Flake evaluation, non-writing format checks on changed Nix files, and checks for affected features; inspect registration and host selection for a new feature |
+| Flake-parts/import-tree foundation, bundle composition, shared host wiring, or full feature migration | Flake evaluation, baseline/post-change derivation comparison, non-writing Nix formatting, all existing checks, and all four shell/terminal fixture combinations |
+| Nix configuration, individual feature registration, or package lists | Flake evaluation, non-writing format checks on changed Nix files, and checks for affected features; inspect registration, single bundle ownership, and host reachability for a new feature |
 | Shell, prompt, greeting, or login environment | `shells`; add `terminals` if terminal shells or shared wiring are affected |
 | Terminal or XDG selection | `terminals`; add `niri-config` if launchers or bindings change |
 | Writable seed helper, manifest, declarations, or baselines | `seed-files` and `seed-integration`, plus checks for affected consumers |
@@ -60,18 +60,26 @@ are for evaluation only.
 For dendritic infrastructure changes, record baseline and post-change derivation
 paths for the system toplevel, Home Manager activation package, default package,
 `kae`, formatter, and each check. Compare existing public output names and verify
-every registered `modules.nixos` feature is explicitly selected exactly once by
-the host. Confirm schema and user metadata definitions load without a host
+the exact registration inventory, ordered host project selections, and ordered
+bundle memberships. Inspect declared edges before import deduplication: every
+leaf feature must have one selection path through its single bundle owner or
+the direct host `packages` selection, with complete host reachability. Require
+shallow import-only bundles, no duplicate paths, no bundle-to-bundle or
+feature-to-bundle imports, and no settings, options, or globals capture in bundles.
+Confirm schema and user metadata definitions load without a host
 when host/output modules are excluded. Validate supported and invalid named user
 preferences through the typed `kaenix.users` options, separately preserve
 lower-level globals overrides, and exercise the installation readiness guard in
-a disposable fixture. Compare the four shell/terminal fixture results, system/user/font
-package selections, and seed manifests by target and content. Require unique
-seed targets and test preservation in disposable homes. Trace changed derivations
-to incidental order differences or actual declaration changes; do not assume
+a disposable fixture. Compare all four named user-preference combinations and
+all four lower-level
+shell/terminal fixture results, system/user/font package selections, generated
+file contents and priorities/precedence, and seed manifests by target and content.
+Require unique seed targets and test preservation of all 17 edited seeds in
+disposable homes. Trace changed derivations to incidental order differences or actual declaration changes; do not assume
 every path difference is harmless.
 Use a disposable baseline checkout without changing the current index or working
-tree; preserve the baseline lockfile and document any unavailable baseline.
+tree; verify baseline/current lockfile identity, preserve the baseline lockfile,
+and document any unavailable baseline.
 Run all eight checks for a full infrastructure migration: `kae`, `terminal-apps`,
 `terminals`, `mpv-config`, `shells`, `seed-files`, `niri-config`, and
 `seed-integration`; confirm this inventory against `modules/outputs.nix` and

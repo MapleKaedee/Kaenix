@@ -1,6 +1,6 @@
 {
   "suite": "kaenix-agent-behavior",
-  "version": 5,
+  "version": 6,
   "scenarios": [
     {
       "id": "B01",
@@ -98,7 +98,9 @@
       "files": {
         "evidence/status.txt": "?? config/niri/dms/binds.kdl\n?? modules/desktop/niri.nix\nflake.lock and the index are unchanged.\n",
         "config/niri/dms/binds.kdl": "binds { Mod+T { spawn \"xdg-terminal-exec\"; } }\n",
-        "evidence/check-inventory.md": "The fixture's flake exposes x86_64-linux checks: niri-config validates the Niri base and DMS fragments; seed-files tests the copy-once helper; seed-integration checks Home Manager seed declarations and preservation. Other checks cover shells, terminals, and mpv. The flake discovers the registered niri feature under modules/; modules/hosts/syrup.nix explicitly selects it.\n",
+        "evidence/check-inventory.md": "The fixture's flake exposes x86_64-linux checks: niri-config validates the Niri base and DMS fragments; seed-files tests the copy-once helper; seed-integration checks Home Manager seed declarations and preservation. Other checks cover shells, terminals, and mpv. The flake discovers the registered niri and workstation modules under modules/; modules/hosts/syrup.nix explicitly selects workstation, whose imports include niri. Discovery alone does not select either module.\n",
+        "modules/hosts/syrup.nix": "{ config, inputs, ... }: { flake.nixosConfigurations.syrup = inputs.nixpkgs.lib.nixosSystem { modules = [ config.flake.modules.nixos.workstation ]; }; }\n",
+        "modules/bundles/workstation.nix": "{ config, ... }: { flake.modules.nixos.workstation = { imports = [ config.flake.modules.nixos.niri ]; }; }\n",
         "modules/desktop/niri.nix": "{ ... }:\n{\n  flake.modules.nixos.niri =\n    { globals, ... }:\n    {\n      home-manager.users.${globals.username}.kaenix.seedFiles = [ {\n        target = \".config/niri/dms/binds.kdl\";\n        source = ../../config/niri/dms/binds.kdl;\n      } ];\n    };\n}\n"
       },
       "required": [

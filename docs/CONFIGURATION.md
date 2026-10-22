@@ -8,6 +8,7 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 
 | Category | Contents |
 | --- | --- |
+| `modules/bundles/` | Six shallow, import-only composition modules selected by the host |
 | `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Default login shell, Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
 | `modules/apps/` | Alacritty, Kitty, btop, Brave, Helix, mpv, Steam, and Yazi configuration |
@@ -16,13 +17,24 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | `modules/system/` | Base, boot, networking, account/groups, Nix, Home Manager, home identity/XDG, and seed infrastructure |
 | `modules/users/` | Typed user metadata definitions selected by the host |
 
-`modules/hosts/syrup.nix` selects the user metadata, installation data, and all 36 registered NixOS modules explicitly. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, and zram stay in `modules/system/base.nix`.
+`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 35 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, and zram stay in `modules/system/base.nix`.
+
+| Bundle | Ordered leaf imports |
+| --- | --- |
+| `core` | `boot`, `networking`, `base`, `users`, `nix`, `seed-files`, `home-manager`, `home` |
+| `workstation` | `niri`, `dms`, `theme`, `audio`, `session`, `printing`, `automount` |
+| `terminal` | `default-shell`, `fish`, `nushell`, `common`, `fastfetch`, `git`, `alacritty`, `kitty`, `btop`, `helix`, `yazi` |
+| `applications` | `brave`, `mpv` |
+| `gaming` | `steam` (including its existing Gamescope and GameMode configuration) |
+| `hardware-syrup` | `nvidia`, `asus`, `power`, `tablet`, `bluetooth`, `scx` |
+
+The host keeps generated hardware and its inline host settings first, then selects `core`, `packages`, `workstation`, `terminal`, `applications`, `gaming`, and `hardware-syrup` in that order, with the upstream Chaotic module last. Bundles contain explicit leaf imports only; they introduce no options, globals capture, nested bundles, or settings. Features do not import bundles. This keeps the selection path host → bundle → feature, with `packages` directly selected by the host.
 
 Configured features register one NixOS module from a named file under `modules/<category>/`, such as `modules/apps/alacritty.nix`. `modules/shell/default-shell.nix` owns the selected login shell; `modules/packages.nix` centralizes explicit package lists. NixOS settings belong inside the registered module. Home Manager settings belong in an inline `home-manager.users.${globals.username}` module with its own required `config`, `lib`, and `pkgs` arguments.
 
 `modules/system/home-manager.nix` owns the upstream Home Manager import, `useGlobalPkgs`, `useUserPackages`, `extraSpecialArgs`, shared DMS module, and backup policy. `modules/system/home.nix` registers the `home` NixOS module, whose inline Home Manager module handles home identity, state version, XDG, and Home Manager enablement. `modules/system/seed-files.nix` registers the `seed-files` NixOS module, containing the inline Home Manager `kaenix.seedFiles` option and activation. The former root `configuration.nix` and `home.nix` entrypoints are removed.
 
-Add configured features under the relevant category, register them, and explicitly select them in the host. For package-only applications, use `modules/packages.nix` without an empty feature module. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
+Add configured features under the relevant category, register them, and explicitly import them in one appropriate bundle. For package-only applications, use `modules/packages.nix` without an empty feature module or a bundle change. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
 For implementation, use [Kaenix Feature](../.agents/skills/kaenix-feature/SKILL.md), for example `$kaenix-feature add or update a configured application`.
 
@@ -33,18 +45,19 @@ The root `flake.nix` retains inputs, `nixConfig`, and the platform declaration, 
 | Owner | Responsibility |
 | --- | --- |
 | `modules/outputs.nix` | Existing default system package, `kae`, formatter, and check outputs for `x86_64-linux` |
-| `modules/hosts/syrup.nix` | Select `config.kaenix.users.kaede`, hostname and installation data; assemble globals; construct `nixosConfigurations.syrup`; explicitly select all 36 registered NixOS modules |
+| `modules/hosts/syrup.nix` | Select `config.kaenix.users.kaede`, hostname and installation data; assemble globals; construct `nixosConfigurations.syrup`; explicitly select six bundles and `packages` |
+| `modules/bundles/<name>.nix` | Register an import-only `flake.modules.nixos.<name>` with an explicit ordered list of leaf feature imports |
 | `modules/users/kaede.nix` | Define the internal `kaenix.users.kaede` metadata record: username `kaede`, shell `nushell`, terminal `kitty` |
 | `modules/system/users.nix` | Declare the typed `kaenix.users` schema at flake-parts level and register the separate NixOS account/groups module |
 | `modules/<category>/<name>.nix` | Register `flake.modules.nixos.<name>`, including any inline Home Manager module |
 | `modules/packages.nix` | Register `flake.modules.nixos.packages` with centralized explicit package lists |
 | `installation/installation.nix` and `installation/hardware-configuration.nix` | Installation readiness, bootloader/state data, and generated machine hardware configuration |
 
-Existing public output names remain available. The `modules.nixos` output exposes 36 registered modules. User metadata is typed flake-parts data, not an applied account or a NixOS module registration. Discovery registers definitions; explicit host selection enables them. Loading definitions, including the user schema and metadata, while excluding `modules/hosts/syrup.nix` and `modules/outputs.nix` must create no host. This layout adds no user/host framework, feature enable switches, or extra platforms.
+Existing public output names remain available. The `modules.nixos` output retains all 36 existing registrations and adds six bundle registrations, for 42 total. User metadata is typed flake-parts data, not an applied account or a NixOS module registration. Discovery registers definitions; explicit host selection and bundle imports enable them. Loading definitions, including bundles, the user schema, and metadata, while excluding `modules/hosts/syrup.nix` and `modules/outputs.nix` must create no host. This layout adds no user/host framework, feature enable switches, or extra platforms.
 
 Flake-parts `config` contains flake configuration and outputs. The registered NixOS module has its own arguments and `config`, and its inline Home Manager module has another `config`; application options belong in those lower-level contexts. The host exposes its assembled globals through flake-parts `_module.args` for outputs and NixOS `specialArgs`; Home Manager receives them through `extraSpecialArgs`. Registered modules must take their own lower-level `globals` arguments so `tests/evaluate.nix` can override shell and terminal choices. Do not close over flake-parts globals inside a registered feature.
 
-For a configured feature, add `modules/<category>/<name>.nix` registering `flake.modules.nixos.<name>`, then explicitly select `config.flake.modules.nixos.<name>` in the host. Choose a unique name and verify relative asset/helper paths. Registration alone does not enable a feature. Do not expand discovery or introduce profiles, feature toggles, or extra platforms without a separate need.
+For a configured feature, add `modules/<category>/<name>.nix` registering `flake.modules.nixos.<name>`, then import `config.flake.modules.nixos.<name>` in one appropriate bundle. Choose a unique name and verify relative asset/helper paths. Check declared host and bundle edges before Nix deduplicates imports: every original leaf registration must be reachable exactly once through a bundle or the direct `packages` selection. Registration alone does not enable a feature. Do not expand discovery or introduce profiles, feature toggles, nested bundles, or extra platforms without a separate need.
 
 For changes to this infrastructure, compare baseline and post-change outputs and validate all existing checks through [Kaenix Validate](../.agents/skills/kaenix-validate/SKILL.md). Matching derivations establish equivalence only for those generated outputs; record cached and fresh check execution separately. These checks do not establish activation or desktop runtime behavior.
 
@@ -82,7 +95,7 @@ powerprofilesctl get
 
 Expect sched_ext to be enabled with LAVD attached. Confirm the selected power profile in the service logs while changing profiles through the existing desktop controls. Evaluate responsiveness and gaming behavior on the target laptop; successful evaluation and package builds do not prove runtime compatibility or performance.
 
-For a temporary return to the kernel's built-in fair scheduler, run `sudo systemctl stop scx.service`; use `sudo systemctl start scx.service` to resume LAVD. Stopping the service does not change the declarative boot default. To disable it persistently, remove the SCX selection from `modules/hosts/syrup.nix` and rebuild. The kernel also falls back to fair scheduling when the BPF scheduler exits or is aborted after an error; inspect logs if this occurs.
+For a temporary return to the kernel's built-in fair scheduler, run `sudo systemctl stop scx.service`; use `sudo systemctl start scx.service` to resume LAVD. Stopping the service does not change the declarative boot default. To disable it persistently, remove the `scx` import from `modules/bundles/hardware-syrup.nix`, update the composition assertions, and rebuild. The kernel also falls back to fair scheduling when the BPF scheduler exits or is aborted after an error; inspect logs if this occurs.
 
 ## Declarative configuration through Home Manager
 

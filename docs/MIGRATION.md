@@ -16,7 +16,7 @@ This does not guarantee compatibility with another machine.
 4. Replace `installation/hardware-configuration.nix` with the configuration generated on the target. Preserve the mounts, subvolumes, swap, and initrd settings required by that installation.
 5. Copy the appropriate bootloader settings from the installer's configuration to `installation/installation.nix`. The hardware file does not automatically contain all bootloader settings.
 6. Preserve the installation's state versions. For a new home, choose an appropriate Home Manager baseline. The repository's `26.05` values do not need to increase when the OS or packages are updated.
-7. Review user metadata in `modules/users/kaede.nix`, the selected record and hostname in `modules/hosts/syrup.nix`, AMD/NVIDIA configuration and PCI addresses, kernel in `modules/system/boot.nix`, ASUS/tablet devices, and monitor/wallpaper outputs in the Niri/DMS assets. Preserve installer-specific requirements such as secure boot where applicable.
+7. Review user metadata in `modules/users/kaede.nix`, the selected record and hostname in `modules/hosts/syrup.nix`, the hardware composition in `modules/bundles/hardware-syrup.nix`, AMD/NVIDIA configuration and PCI addresses, kernel in `modules/system/boot.nix`, ASUS/tablet devices, and monitor/wallpaper outputs in the Niri/DMS assets. Preserve installer-specific requirements such as secure boot where applicable.
 8. Once the target configuration is correct, set `hardwareReady = true`. Do not deploy the synthetic disk fixture in `tests/evaluate.nix`.
 
 The current configuration uses systemd-boot. If the target uses GRUB or another bootloader, use the target configuration that already boots successfully; do not automatically copy the repository's bootloader choice.
