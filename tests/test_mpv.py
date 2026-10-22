@@ -124,6 +124,18 @@ with tempfile.TemporaryDirectory() as directory:
     home = root / "home"
     config = home / ".config/mpv"
     shutil.copytree(Path(os.environ["mpvDeployment"]), config)
+    # Exercise the deployed thumbnail executable, not the fixture's FFmpeg on PATH.
+    thumbnail_options = dict(
+        line.split("=", 1)
+        for line in (config / "script-opts/thumb_engine.conf").read_text().splitlines()
+        if line and not line.startswith("#")
+    )
+    for executable in set(thumbnail_options[key] for key in ["binpath", "bat_binpath"]):
+        filters = subprocess.run([executable, "-hide_banner", "-filters"],
+                                 capture_output=True, text=True, check=True)
+        assert re.search(r"^\s*\S+\s+libplacebo\s+", filters.stdout, re.M), (
+            "Dolby Vision thumbnails require libplacebo in " + executable
+        )
     config.chmod(0o755)
     for p in config.rglob("*"):
         p.chmod(0o755 if p.is_dir() else 0o644)

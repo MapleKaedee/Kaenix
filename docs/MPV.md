@@ -1,6 +1,6 @@
 # mpv_PlayKit main in Kaenix
 
-Updated: 19 October 2026. This integration uses native mpv from Kaenix's nixpkgs and selected assets from the **main** branch, commit `4921c6796620a13c2c03266f368d59d354a67b72`, rather than the lite preset or Windows binaries.
+Updated: 22 October 2026. This integration uses native mpv from Kaenix's nixpkgs and selected assets from the **main** branch, commit `4921c6796620a13c2c03266f368d59d354a67b72`, rather than the lite preset or Windows binaries.
 
 ## Configuration and installation
 
@@ -8,7 +8,7 @@ The `modules/apps/mpv.nix` feature enables mpv through Home Manager and installs
 
 The player uses `gpu-next` with native Wayland, Vulkan preferred over EGL, `hwdec=auto-safe`, and PipeWire audio with PulseAudio fallback. It does not force NVIDIA, change driver configuration, or interpolate automatically. Three optional shaders are available: FSR1, Adaptive Sharpen Lite, and hdeband. No shader is active at startup, including after a preset has been saved.
 
-The UI uses the main branch's uosc fork with uosc_addones for shader, subtitle, and property menus. Thumbnails use the FFmpeg backend already available in Kaenix. Statistics use mpv's built-in script. All 122 uosc language keys have English overrides; companion script labels/messages and configuration comments are also in English. Vendor code comments, identifiers, media filenames, fonts, shaders, and license text are preserved.
+The UI uses the main branch's uosc fork with uosc_addones for shader, subtitle, and property menus. Thumbnails use a feature-local variant of pinned FFmpeg with `libplacebo` enabled for Dolby Vision tone mapping; the general-purpose FFmpeg package is unchanged. Statistics use mpv's built-in script. All 122 uosc language keys have English overrides; companion script labels/messages and configuration comments are also in English. Vendor code comments, identifiers, media filenames, fonts, shaders, and license text are preserved.
 
 The Windows installer, AI/VapourSynth pipeline, automatic updater, and subtitle search/download through external helpers are excluded. Local subtitles can still be loaded. Mandarin preferences, placeholder paths, and demonstration image-flipping filters are not enabled.
 
@@ -63,6 +63,6 @@ Run the dedicated check with:
 nix build --no-link path:.#checks.x86_64-linux.mpv-config
 ```
 
-The check uses a temporary home and read-only configuration, without a display or audio device. It covers the English locale, video MIME defaults, script startup, optional shaders, writable presets/volume/resume state, and FFmpeg thumbnails from two instances. Its fixture uses synthetic video, not the user's collection.
+The check uses a temporary home and read-only configuration, without a display or audio device. It covers the English locale, video MIME defaults, script startup, optional shaders, writable presets/volume/resume state, and FFmpeg thumbnails from two instances. It also checks that the deployed thumbnail executables provide the `libplacebo` filter. Its fixture uses synthetic SDR video, not the user's collection; actual Dolby Vision thumbnail rendering still needs a graphics-session test.
 
 Headless checks do not prove uosc/font appearance, GPU shader rendering or performance, hardware decoding, Wayland clipboard behavior, audio, or opening videos from Nautilus. Test these after activation in a Niri session. See the [validation guide](VALIDATION.md) and [changelog](../CHANGELOG.md) for results that were actually obtained.

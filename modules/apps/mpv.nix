@@ -4,6 +4,8 @@
     { lib, pkgs, ... }:
     let
       assets = ../../config/mpv;
+      # Dolby Vision thumbnail tone mapping requires FFmpeg's libplacebo filter.
+      thumbnailFfmpeg = pkgs.ffmpeg.override { withPlacebo = true; };
       files = [
         "mpv.conf"
         "input.conf"
@@ -38,7 +40,7 @@
         })
         // {
           "mpv/script-opts/thumb_engine.conf".text =
-            lib.replaceStrings [ "@FFMPEG@" ] [ (lib.getExe pkgs.ffmpeg) ]
+            lib.replaceStrings [ "@FFMPEG@" ] [ (lib.getExe thumbnailFfmpeg) ]
               (builtins.readFile (assets + "/script-opts/thumb_engine.conf"));
         };
       xdg.mimeApps = {

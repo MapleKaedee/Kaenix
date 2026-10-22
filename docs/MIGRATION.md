@@ -40,7 +40,7 @@ Home Manager is integrated into the NixOS configuration. Do not run its activati
 
 - Check DankGreeter login/logout and lock/unlock with the system password.
 - Check `systemctl --user status dms udiskie opentabletdriver`. DMS and udiskie are declared through Home Manager; the NixOS module provides the OpenTabletDriver user unit. Avoid duplicate instances.
-- Alacritty and Kitty must follow `globals.defaultShell`: currently Nushell, with Fish still available. `Mod+T` and `xdg-terminal-exec --print-id` must follow `globals.defaultTerminal`, currently Alacritty. Existing homes need the [one-time binding migration](CONFIGURATION.md#choosing-alacritty-or-kitty). Check Starship and a single Fastfetch greeting on interactive startup.
+- Alacritty and Kitty must follow `globals.defaultShell`: currently Nushell, with Fish still available. `Mod+T` and `xdg-terminal-exec --print-id` must follow `globals.defaultTerminal`, currently Kitty. Existing homes need the [one-time binding migration](CONFIGURATION.md#choosing-alacritty-or-kitty). Check Starship and a single Fastfetch greeting on interactive startup.
 - Change DMS settings, wallpaper, terminal themes, and tablet area; confirm that GUI changes survive a rebuild. The default terminal application is managed by Nix, while terminal colors remain writable.
 - Check Brave and WhatsApp Web, Discord, notifications, clipboard, file chooser, and screen sharing as needed.
 - Check audio/microphone, Pavucontrol/EasyEffects, brightness, networking, Bluetooth, Niri shortcuts, and screenshots.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-22 — Dolby Vision thumbnail dependency and terminal documentation
+
+- Use a feature-local override of pinned FFmpeg with `withPlacebo = true` for mpv's interactive and batch thumbnail executables. Keep the general-purpose FFmpeg package unchanged. The existing Dolby Vision tone-mapping branch requires `libplacebo`, which the previous executable did not provide.
+- Extend the headless mpv check to inspect the deployed thumbnail executables for the required filter. Confirm the regression check rejects the previous deployment; retain the existing synthetic SDR thumbnail tests and document that actual Dolby Vision rendering still requires a graphics-session test.
+- Correct the configuration and migration guides to identify Kitty as the selected default terminal and Alacritty's configured opacity as `0.9`. Refresh mpv dependency and validation guidance; preserve the public README, lockfile, and existing GUI settings.
+- Validation passes: lock-preserving flake evaluation, the freshly built mpv check, Nix formatting, Python syntax, terminal-documentation consistency, and whitespace checks. The scoped FFmpeg variant builds locally and provides `libplacebo`; pinned FFmpeg source supports the configured tone-mapping options. An initial regression assertion incorrectly required a fixed-input filter signature; correct it to accept the filter's dynamic inputs, then verify the new deployment passes and the old deployment fails. No full system build, activation, graphics-session test, commit, or push is performed.
+
 ## 2026-10-22 — Manual TUIOS startup
 
 - Keep pinned TUIOS installed for `kaede`, but start Kitty and Alacritty directly with the `globals.defaultShell` login shell. Start sessions manually with `tuios new`; retain `tuios ls` and `tuios attach NAME` for discovery and reattachment. Add no alias or desktop shortcut and leave existing sessions and writable data untouched.

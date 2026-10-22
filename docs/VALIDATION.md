@@ -34,7 +34,7 @@ git diff --check
 | `kae` | Packaged Nu entry point, isolated user configuration, command dispatch/arguments/cwd, check discovery, errors and exit codes, generation retention and privilege boundaries with stubs; pinned formatter checks and writes only in disposable fixtures |
 | `terminals` | Home Manager's generated Alacritty TOML and Kitty config, direct login-shell startup, writable theme import, XDG selection of both desktop entries, and argument forwarding |
 | `terminal-apps` | Generated btop, Helix, and Yazi configuration values plus `--version` smoke tests for all three pinned packages |
-| `mpv-config` | English UI locale, video MIME defaults, parsing/script startup on pinned mpv, shaders/presets, writable volume/resume state, and FFmpeg thumbnails from two instances in a temporary home without a display |
+| `mpv-config` | English UI locale, video MIME defaults, parsing/script startup on pinned mpv, shaders/presets, writable volume/resume state, deployed FFmpeg `libplacebo` availability, and SDR thumbnails from two instances in a temporary home without a display |
 | `shells` | Fish/Nushell parsing and startup, login environment, Starship, aliases, Yazi's `y` wrapper in both shells, and interactive/noninteractive greetings |
 | `seed-files` | Copy-once helper, preservation of user changes, and path/symlink protections |
 | `seed-integration` | Contents of all 17 Home Manager seeds, JSON, and preservation of edited DMS settings and Alacritty themes when the helper runs again |

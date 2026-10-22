@@ -63,13 +63,13 @@ Alacritty, btop, Helix, Kitty, Nushell, Fish, Fastfetch, and Yazi use `programs.
 
 ## Choosing Alacritty or Kitty
 
-`globals.defaultTerminal` in `flake.nix` accepts `"alacritty"` or `"kitty"`, with Alacritty as the initial default. `lib/terminal-package.nix` rejects other values. Both applications are always installed through their Home Manager modules; this selection only sets the desktop default and does not remove the other terminal.
+`globals.defaultTerminal` in `flake.nix` accepts `"alacritty"` or `"kitty"` and currently selects Kitty. `lib/terminal-package.nix` rejects other values. Both applications are always installed through their Home Manager modules; this selection only sets the desktop default and does not remove the other terminal.
 
 The Niri module aligns `$TERMINAL` in the NixOS session with `xdg.terminal-exec.settings.default`. The desktop ID is `Alacritty.desktop` or `kitty.desktop`. Home Manager installs `xdg-terminal-exec` and manages `~/.config/xdg-terminals.list` as read-only configuration. Change the default through Nix and rebuild rather than using the DMS GUI's terminal selector; the pinned DMS GUI tries to write the same file. Other DMS state/settings files remain writable.
 
 The baseline `Mod+T` runs `xdg-terminal-exec`. Applications using this launcher follow the default terminal list; applications reading `$TERMINAL` follow the session environment. Explicit `kitty` or `alacritty` commands still open the named application. After changing the default, rebuild and log out/in to refresh the Niri/DMS environment.
 
-Alacritty uses JetBrainsMono Nerd Font Mono at size 12, 12 px padding, 0.5 opacity, hidden decorations, 3000 lines of scrollback, and a block cursor blinking every 1000 ms. `Ctrl+Shift+N` opens a new window; `Ctrl++`, `Ctrl+-`, and `Ctrl+0` control font size. Kitty tabs and its `Ctrl+T` shortcut remain in Kitty; the terminals do not have identical features.
+Alacritty uses JetBrainsMono Nerd Font Mono at size 12, 12 px padding, 0.9 opacity, hidden decorations, 3000 lines of scrollback, and a block cursor blinking every 1000 ms. `Ctrl+Shift+N` opens a new window; `Ctrl++`, `Ctrl+-`, and `Ctrl+0` control font size. Kitty tabs and its `Ctrl+T` shortcut remain in Kitty; the terminals do not have identical features.
 
 Alacritty and Kitty start `globals.defaultShell` directly with `--login`. [TUIOS starts manually](#manual-tuios-sessions) when requested from that shell. Colors are imported from `~/.config/alacritty/dank-theme.toml`, which is copied only if absent and can then be updated by DMS. The pinned DMS Alacritty template is enabled by default; if previously disabled through the GUI, enable it again in DMS theme settings. `runDmsMatugenTemplates` and `matugenTemplateAlacritty` remain GUI preferences. Do not add colors directly to the main configuration because they would override the imported file.
 
