@@ -12,7 +12,7 @@ and the relevant parts of
 [configuration ownership](../../../docs/CONFIGURATION.md#modules-by-category).
 
 Identify the requested capability and check whether it is already implemented.
-Read neighboring features, the category imports, package lists, and associated
+Read neighboring features, explicit host selections, package lists, and associated
 assets. Extend the existing owner instead of creating a competing module. Ask
 only about significant behavior or scope choices that cannot be resolved from
 the request and repository.
@@ -21,9 +21,9 @@ the request and repository.
 
 | Request | Implementation |
 | --- | --- |
-| Install an application/tool without configuration | Add the package to the appropriate explicit list in `modules/packages.nix`; do not create a package-only feature |
+| Install an application/tool without configuration | Add the package to the appropriate explicit list in `parts/features/packages.nix`; do not create a package-only feature |
 | Change an existing configured application or service | Edit its existing feature file and relevant assets |
-| Add a configured feature | Default to one named `.nix` file in the appropriate legacy category and import it explicitly from that category's `default.nix`; expand the pilot only when explicitly requested |
+| Add a configured feature | Add one named `.nix` file in `parts/features/<category>/`, register `flake.modules.nixos.<name>`, and explicitly select it in `parts/hosts/syrup.nix` |
 | Save current GUI preferences as defaults | Use [Kaenix GUI Baseline](../kaenix-gui-baseline/SKILL.md) for the selected baseline import; add feature wiring only if the request needs it |
 
 For explicit package lists, distinguish shared system tools, per-user applications,
@@ -52,23 +52,23 @@ available alternatives. Ask when an alternative changes the requested behavior;
 continue independent work where possible. Do not silently update inputs or the
 lockfile to make an example work.
 
-Keep legacy NixOS settings at the feature's top level; for the Kitty pilot, place
-them inside its registered `flake.modules.nixos.kitty` module. Put Home Manager
-settings inside
+Put NixOS settings inside the feature's registered `flake.modules.nixos.<name>`
+module. Put Home Manager settings inside
 `home-manager.users.${globals.username}` using an inline module with its own
 required `config`, `lib`, and `pkgs` arguments. Obtain other needed arguments
 through the existing module wiring rather than changing the flake unnecessarily.
 Keep shared identity and XDG infrastructure in root `home.nix`.
 
 Use existing globals for shared choices; preserve alignment among consumers when
-changing shell or terminal selection. Legacy categories retain explicit imports.
-Only `parts/` uses import-tree discovery of flake-parts modules; assets, helpers,
-tests, hardware, and legacy modules stay outside it. For an explicitly approved
-pilot expansion, register `flake.modules.nixos.NAME` in `parts/features/NAME.nix`
-and select it in `parts/hosts/syrup.nix`; remove its legacy import when migrating.
-Keep flake-parts `config` separate from registered NixOS and inline Home Manager
-`config`. Registered modules must take their own lower-level `globals` arguments,
-so fixture overrides remain effective. See the [pilot ownership guide](../../../docs/CONFIGURATION.md#dendritic-pilot-and-flake-outputs).
+changing shell or terminal selection. Only `parts/` uses import-tree discovery of
+flake-parts modules; assets, helpers, tests, scripts, installation fixtures, and
+`hardware-configuration.nix` stay outside it. Register configured features under
+`parts/features/<category>/<name>.nix` and select them explicitly in
+`parts/hosts/syrup.nix`. Package-only additions remain in the existing `packages`
+registration. Keep flake-parts `config` separate from registered NixOS and inline
+Home Manager `config`. Registered modules must take their own lower-level
+`globals` arguments so fixture overrides remain effective. See the
+[feature ownership guide](../../../docs/CONFIGURATION.md#dendritic-features-and-flake-outputs).
 Do not introduce feature-toggle frameworks or unrelated restructuring.
 Keep configuration assets in `config/`; use existing helper/script locations
 when the requested feature actually needs them.

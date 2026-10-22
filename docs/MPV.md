@@ -4,7 +4,7 @@ Updated: 22 October 2026. This integration uses native mpv from Kaenix's nixpkgs
 
 ## Configuration and installation
 
-The `modules/apps/mpv.nix` feature enables mpv through Home Manager and installs configuration from `config/mpv/`. `modules/packages.nix` notes installation through the module; there is no duplicate mpv package list, new flake input, or lockfile change. Sources, original hashes, licenses, and local adjustments are recorded in the [asset provenance](../config/mpv/UPSTREAM.md).
+The `parts/features/apps/mpv.nix` feature enables mpv through Home Manager and installs configuration from `config/mpv/`. `parts/features/packages.nix` notes installation through the module; there is no duplicate mpv package list, new flake input, or lockfile change. Sources, original hashes, licenses, and local adjustments are recorded in the [asset provenance](../config/mpv/UPSTREAM.md).
 
 The player uses `gpu-next` with native Wayland, Vulkan preferred over EGL, `hwdec=auto-safe`, and PipeWire audio with PulseAudio fallback. It does not force NVIDIA, change driver configuration, or interpolate automatically. Three optional shaders are available: FSR1, Adaptive Sharpen Lite, and hdeband. No shader is active at startup, including after a preset has been saved.
 

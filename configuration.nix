@@ -1,9 +1,8 @@
-# NixOS host entry point; reusable features are grouped under modules/.
+# NixOS host settings and generated hardware; features are selected in parts/hosts/syrup.nix.
 { globals, ... }:
 {
   imports = [
     ./hardware-configuration.nix
-    ./modules
   ];
 
   boot.loader = globals.installation.bootLoader;

@@ -40,7 +40,7 @@ change rather than applying a universal checklist to unrelated files.
 
 | Area affected | Review questions |
 | --- | --- |
-| Module wiring | Are legacy imports explicit and complete, discovery restricted to `parts/`, registered pilot features selected exactly once by the host, and moved asset/helper paths valid? Are options in the correct flake-parts, registered NixOS, or inline Home Manager context, with lower-level globals preserved for fixture overrides? |
+| Module wiring | Is discovery restricted to `parts/`, is each registered NixOS feature explicitly selected exactly once by the host, and are moved asset/helper paths valid? Are options in the correct flake-parts, registered NixOS, or inline Home Manager context, with lower-level globals preserved for fixture overrides? |
 | Package ownership | Are explicit packages in the centralized lists and in the intended system/user/font scope? Does a new explicit declaration unnecessarily duplicate a module-installed package, or is there a concrete reason for both scopes? |
 | Shared choices | Do login shell and terminal consumers follow the shared globals, retaining supported alternatives and forwarding arguments correctly? |
 | Writable settings | Do seeds preserve existing files and avoid competing writers/store symlinks? Does an intended change for existing homes need a documented targeted migration? |

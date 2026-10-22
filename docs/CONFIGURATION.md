@@ -8,40 +8,41 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 
 | Category | Contents |
 | --- | --- |
-| `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
-| `modules/shell/` | Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
-| `modules/apps/` | Alacritty, btop, Brave, Helix, mpv, Steam, and Yazi configuration |
-| `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
-| `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
-| `modules/system/` | Base system settings, users, Nix, and Home Manager infrastructure |
+| `parts/features/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
+| `parts/features/shell/` | Default login shell, Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
+| `parts/features/apps/` | Alacritty, Kitty, btop, Brave, Helix, mpv, Steam, and Yazi configuration |
+| `parts/features/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
+| `parts/features/services/` | Audio, printing, automount, session services, and SCX scheduling |
+| `parts/features/system/` | Base system settings, users, Nix, and Home Manager infrastructure |
 
-`configuration.nix` imports hardware settings and `modules/default.nix`, then sets the host identity, installation guard, bootloader, and system state version. Each category imports its features explicitly through `default.nix`.
+`configuration.nix` imports hardware settings, then sets the host identity, installation guard, bootloader, and system state version. `parts/hosts/syrup.nix` selects the configured features explicitly; category directories have no `default.nix` import lists.
 
-Each legacy feature is one named file, such as `modules/apps/alacritty.nix`. There are 29 legacy features across six categories, plus Kitty in the dendritic pilot. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. Legacy categories retain explicit imports; the pilot below adds bounded discovery without a new enable option.
+The 30 application, desktop, shell, hardware, service, and system features each register one NixOS module from a named file under `parts/features/<category>/`, such as `parts/features/apps/alacritty.nix`. `parts/features/shell/default-shell.nix` owns the selected user login shell, and `parts/features/packages.nix` owns the centralized package lists, giving 32 registered NixOS modules. NixOS settings belong inside the registered module; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` handles identity, state version, XDG, and Home Manager activation.
 
-By default, add configured features to the relevant legacy category's imports; expand the pilot only when explicitly requested. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
+Add configured features under the relevant category, register them, and explicitly select them in the host. For applications that only need installation, add their packages to `parts/features/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
 For implementation, use [Kaenix Feature](../.agents/skills/kaenix-feature/SKILL.md), for example `$kaenix-feature add or update a configured application`.
 
-The `kaenix.seedFiles` infrastructure, including its option definition and activation, is in `modules/system/home-manager.nix`.
+The `kaenix.seedFiles` infrastructure, including its option definition and activation, is in `parts/features/system/home-manager.nix`.
 
-## Dendritic pilot and flake outputs
+## Dendritic features and flake outputs
 
-The root `flake.nix` retains inputs, `nixConfig`, and shared `globals`, then calls `flake-parts.lib.mkFlake`. `import-tree` discovers flake-parts modules only under `parts/`. Keep assets, helpers, tests, hardware, and the legacy `modules/` tree outside that discovery boundary; files there use their existing explicit imports.
+The root `flake.nix` retains inputs, `nixConfig`, and shared `globals`, then calls `flake-parts.lib.mkFlake`. `import-tree` discovers flake-parts modules only under `parts/`. Keep assets, helpers, tests, scripts, installation fixtures, and `hardware-configuration.nix` outside that discovery boundary. Root `configuration.nix` and `home.nix` remain explicit entrypoints; the former `modules/` import tree has been removed.
 
 | Owner | Responsibility |
 | --- | --- |
 | `parts/outputs.nix` | Existing `packages.x86_64-linux.default`, `packages.x86_64-linux.kae`, `formatter.x86_64-linux`, and `checks.x86_64-linux` outputs |
-| `parts/hosts/syrup.nix` | Construct `nixosConfigurations.syrup`, preserving existing NixOS/Home Manager wiring and explicitly selecting Kitty |
-| `parts/features/kitty.nix` | Register `flake.modules.nixos.kitty`, including Kitty's existing inline Home Manager module |
+| `parts/hosts/syrup.nix` | Construct `nixosConfigurations.syrup`, preserve NixOS/Home Manager wiring, and explicitly select all 32 registered NixOS modules |
+| `parts/features/<category>/<name>.nix` | Register `flake.modules.nixos.<name>`, including any inline Home Manager module |
+| `parts/features/packages.nix` | Register `flake.modules.nixos.packages` with the centralized explicit package lists |
 
-The public output names stay the same, with `modules.nixos.kitty` added for the registered feature. Discovery registers Kitty; `parts/hosts/syrup.nix` selects that module in the host's imports. Kitty is absent from `modules/apps/default.nix` to avoid duplicate imports. All other features remain in the legacy categories. Explicit package lists stay in `modules/packages.nix`.
+Existing public output names remain available. The `modules.nixos` output exposes the 32 registered modules. Discovery registers definitions; host selection enables them. Discovery of feature definitions alone must not construct a host. There are no category import files, profiles, or per-feature enable switches.
 
 Flake-parts `config` contains flake configuration and outputs. The registered NixOS module has its own arguments and `config`, and its inline Home Manager module has another `config`; application options belong in those lower-level contexts. Root globals enter flake-parts through `_module.args`, while NixOS `specialArgs` and Home Manager `extraSpecialArgs` preserve the lower-level `globals` arguments. Do not close over flake-parts globals inside a registered feature: `tests/evaluate.nix` must still be able to override shell and terminal choices.
 
-For an explicitly approved next pilot feature, add `parts/features/NAME.nix` registering `flake.modules.nixos.NAME`, then select `config.flake.modules.nixos.NAME` in the host's module imports. Remove its legacy import if migrating an existing feature, and adjust relative asset/helper paths after moving it. Registration alone does not enable a feature. Do not add profiles, feature toggles, extra platforms, or broad recursive imports as part of this pilot.
+For a configured feature, add `parts/features/<category>/<name>.nix` registering `flake.modules.nixos.<name>`, then select `config.flake.modules.nixos.<name>` in the host's module imports. Choose a unique registration name and verify relative asset/helper paths. Registration alone does not enable a feature. Do not introduce profiles, feature toggles, extra platforms, or discovery outside `parts/` without a separate need.
 
-For changes to this infrastructure, compare baseline and post-change derivation paths and validate all existing checks through [Kaenix Validate](../.agents/skills/kaenix-validate/SKILL.md). Evaluation and matching derivations establish configuration equivalence within that scope; cached check results and headless checks do not establish activation or desktop runtime behavior.
+For changes to this infrastructure, compare baseline and post-change outputs and validate all existing checks through [Kaenix Validate](../.agents/skills/kaenix-validate/SKILL.md). Matching derivations establish equivalence only for those generated outputs; record cached and fresh check execution separately. These checks do not establish activation or desktop runtime behavior.
 
 ## Documentation lookup and version support
 
@@ -49,19 +50,19 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 ## Centralized package lists
 
-`modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list for manual startup.
+`parts/features/packages.nix` registers `flake.modules.nixos.packages`, selected explicitly by the host, and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list for manual startup.
 
-The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, btop, Helix, Kitty, Yazi, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
+The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `parts/features/packages.nix` point to locations such as Brave, btop, Helix, Kitty, Yazi, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
 
 ## Removable-media automount and the udiskie test workaround
 
-`modules/services/automount.nix` enables UDisks2 and GVfs, plus Home Manager's udiskie service with automounting, notifications, and an automatic tray icon. Its `services.udiskie.package` overrides only the pinned udiskie package's test assertion: after invalidating a synthetic key, lookup must raise either `KeyNotAvailable` (`ENOKEY`) or `KeyRevoked` (`EKEYREVOKED`). The original assertion accepts only `ENOKEY`, but the local build returns `EKEYREVOKED`. Both results deny access to the invalidated key; all 15 package tests remain enabled, and application code is unchanged. See the [kernel key-request documentation](https://www.kernel.org/doc/html/latest/security/keys/request-key.html) for lookup errors.
+`parts/features/services/automount.nix` enables UDisks2 and GVfs, plus Home Manager's udiskie service with automounting, notifications, and an automatic tray icon. Its `services.udiskie.package` overrides only the pinned udiskie package's test assertion: after invalidating a synthetic key, lookup must raise either `KeyNotAvailable` (`ENOKEY`) or `KeyRevoked` (`EKEYREVOKED`). The original assertion accepts only `ENOKEY`, but the local build returns `EKEYREVOKED`. Both results deny access to the invalidated key; all 15 package tests remain enabled, and application code is unchanged. See the [kernel key-request documentation](https://www.kernel.org/doc/html/latest/security/keys/request-key.html) for lookup errors.
 
 This workaround is verified for udiskie 2.7.0 from nixpkgs `02c087f3fe673c9e317f206a627cb6b910336dbe`. After updating nixpkgs or udiskie, recheck the assertion and remove the override when upstream handles the result. Build the effective `home-manager.users.kaede.services.udiskie.package` and inspect its test log; evaluation alone does not verify the fix. Package tests do not prove removable-drive mounting in the desktop session.
 
 ## LAVD CPU scheduling
 
-`modules/services/scx.nix` enables the standard NixOS `services.scx` service with `pkgs.scx.rustscheds` and `scx_lavd --autopower`. It starts at boot and follows the active power-profiles-daemon profile (performance, balanced, or power saver). All other LAVD settings use upstream defaults. Change the scheduler or its arguments in this module, then rebuild; `scx-loader` is not enabled.
+`parts/features/services/scx.nix` enables the standard NixOS `services.scx` service with `pkgs.scx.rustscheds` and `scx_lavd --autopower`. It starts at boot and follows the active power-profiles-daemon profile (performance, balanced, or power saver). All other LAVD settings use upstream defaults. Change the scheduler or its arguments in this module, then rebuild; `scx-loader` is not enabled.
 
 The existing CachyOS kernel provides sched_ext and BPF support; no kernel replacement or extra kernel parameters are needed. The NixOS service checks for `/sys/kernel/sched_ext`, restarts on failure with a start-rate limit, and installs the scheduler package itself. Do not duplicate it in the explicit package lists.
 
@@ -77,7 +78,7 @@ powerprofilesctl get
 
 Expect sched_ext to be enabled with LAVD attached. Confirm the selected power profile in the service logs while changing profiles through the existing desktop controls. Evaluate responsiveness and gaming behavior on the target laptop; successful evaluation and package builds do not prove runtime compatibility or performance.
 
-For a temporary return to the kernel's built-in fair scheduler, run `sudo systemctl stop scx.service`; use `sudo systemctl start scx.service` to resume LAVD. Stopping the service does not change the declarative boot default. To disable it persistently, remove the SCX feature import and rebuild. The kernel also falls back to fair scheduling when the BPF scheduler exits or is aborted after an error; inspect logs if this occurs.
+For a temporary return to the kernel's built-in fair scheduler, run `sudo systemctl stop scx.service`; use `sudo systemctl start scx.service` to resume LAVD. Stopping the service does not change the declarative boot default. To disable it persistently, remove the SCX selection from `parts/hosts/syrup.nix` and rebuild. The kernel also falls back to fair scheduling when the BPF scheduler exits or is aborted after an error; inspect logs if this occurs.
 
 ## Declarative configuration through Home Manager
 
@@ -138,7 +139,7 @@ After rebuilding with `sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix
 
 ## btop, Helix, and Yazi
 
-`modules/apps/btop.nix`, `helix.nix`, and `yazi.nix` enable each Home Manager program module, which installs its package and manages its configuration. btop uses its built-in `TTY` colors with a transparent background. Helix uses `base16_transparent`, relative line numbers, and color-coded modes; its `defaultEditor` option sets `EDITOR` and `VISUAL` to `hx`. Yazi sorts names naturally with directories first and leaves other behavior, including hidden-file visibility, at its default. No theme packages, plugins, or language servers are added.
+`parts/features/apps/btop.nix`, `helix.nix`, and `yazi.nix` enable each Home Manager program module, which installs its package and manages its configuration. btop uses its built-in `TTY` colors with a transparent background. Helix uses `base16_transparent`, relative line numbers, and color-coded modes; its `defaultEditor` option sets `EDITOR` and `VISUAL` to `hx`. Yazi sorts names naturally with directories first and leaves other behavior, including hidden-file visibility, at its default. No theme packages, plugins, or language servers are added.
 
 Yazi's `y` wrapper is enabled for Fish and Nushell. It changes the shell's working directory to Yazi's final directory when the file manager exits. Edit the owning feature module and rebuild to change these managed configurations. Validate generated configuration and executable versions with `nix build --no-link path:.#checks.x86_64-linux.terminal-apps`; `shells` checks that both shell integrations load.
 
@@ -154,7 +155,7 @@ sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix#syrup
 
 `fish` or `nu` opens a nested shell; `exit` returns to the previous shell. `exec fish` or `exec nu` replaces the current shell process without changing the Nix default. Avoid using `chsh` for permanent settings because NixOS manages the user's shell.
 
-Starship and eza are managed by the shared `modules/shell/common.nix` module; the prompt theme is in `config/starship.toml`. Starship integration is enabled for both shells. Fastfetch runs once per interactive startup; noninteractive commands print no greeting. Nushell disables its default banner and uses OSC 7/133 for the working directory and Kitty prompt markers.
+Starship and eza are managed by the shared `parts/features/shell/common.nix` module; the prompt theme is in `config/starship.toml`. Starship integration is enabled for both shells. Fastfetch runs once per interactive startup; noninteractive commands print no greeting. Nushell disables its default banner and uses OSC 7/133 for the working directory and Kitty prompt markers.
 
 Fish aliases still use eza for `ls`. Nushell keeps its built-in `ls` so pipelines such as `ls | where type == file` operate on tables; use `ll` for eza output. The two shells' histories are not merged. No additional external completion plugin or framework is installed.
 
@@ -164,7 +165,7 @@ Nushell configuration is Nix-managed and read-only; edit its module and rebuild.
 
 ## DMS calendar and the khal build workaround
 
-The pinned DMS module enables calendar event integration through `khal` by default. `modules/desktop/dms.nix` adds a NixOS overlay specifically for `khal`, with `sphinxBuilders = "html man"`. The pinned Sphinx hook reads the structured-attributes array as a single initial value, so the `[ "html" "man" ]` list only generates HTML and the build fails because the `man` output is missing. The string runs both builders without changing the package version/source or disabling the calendar.
+The pinned DMS module enables calendar event integration through `khal` by default. `parts/features/desktop/dms.nix` adds a NixOS overlay specifically for `khal`, with `sphinxBuilders = "html man"`. The pinned Sphinx hook reads the structured-attributes array as a single initial value, so the `[ "html" "man" ]` list only generates HTML and the build fails because the `man` output is missing. The string runs both builders without changing the package version/source or disabling the calendar.
 
 This workaround applies to pinned nixpkgs `09063bd1f2b36fd9fd793c36dfade7bd40a93dfc`. After updating nixpkgs, recheck Sphinx hook compatibility before keeping or removing the override. Test the `khal` build and its manual output; successful evaluation alone does not prove the issue is resolved.
 
@@ -175,7 +176,7 @@ This workaround applies to pinned nixpkgs `09063bd1f2b36fd9fd793c36dfade7bd40a93
 | Target | Initial source | Owner after activation |
 | --- | --- | --- |
 | `~/.config/dms/settings.json` | `config/dms/settings.nix` | DMS GUI |
-| `~/.config/dms/plugin_settings.json` | `modules/desktop/dms.nix` | DMS plugin GUI |
+| `~/.config/dms/plugin_settings.json` | `parts/features/desktop/dms.nix` | DMS plugin GUI |
 | `~/.local/state/dms/session.json` | Minimal state without launcher history | DMS |
 | `~/.config/dms/themes/catppuccin/theme.json` | `config/dms/catppuccin.json` | DMS |
 | `~/.config/niri/dms/*.kdl` | `config/niri/dms/` | DMS/user |
@@ -283,7 +284,7 @@ Use [Kaenix Git](../.agents/skills/kaenix-git/SKILL.md), for example `$kaenix-gi
 
 Git is managed by Home Manager, so `~/.config/git/config` is a read-only symlink to the Nix store. `gh auth login` can complete browser authentication but fail at the final step when attempting to write the credential helper to that file.
 
-`modules/shell/git.nix` declares the `gh auth git-credential` helper for GitHub and Gist, including resetting the helper list before selecting the GitHub CLI helper. Tokens are not stored in Nix configuration. The `gh` configuration and accounts remain writable and are not managed through `programs.gh`.
+`parts/features/shell/git.nix` declares the `gh auth git-credential` helper for GitHub and Gist, including resetting the helper list before selecting the GitHub CLI helper. Tokens are not stored in Nix configuration. The `gh` configuration and accounts remain writable and are not managed through `programs.gh`.
 
 After rebuilding, check:
 
@@ -298,7 +299,7 @@ The `wl-clipboard` package provides `wl-copy`/`wl-paste` for copying login codes
 
 ## Monitoring Nix builds
 
-`pkgs.nix-output-monitor` is installed through `home.packages` in `modules/packages.nix`, from pinned nixpkgs. There is no new flake input or replacement alias for Nix commands.
+`pkgs.nix-output-monitor` is installed through `home.packages` in `parts/features/packages.nix`, from pinned nixpkgs. There is no new flake input or replacement alias for Nix commands.
 
 The `packages.x86_64-linux.default` output in `parts/outputs.nix` points to the existing `syrup` system derivation. From the repository root, plain `nom build` or `nix build` builds that full system and creates the `result` symlink without activation or sudo. To explicitly include untracked sources and preserve the lockfile, use:
 
@@ -318,40 +319,40 @@ nom build --no-link path:.#checks.x86_64-linux.shells
 
 ## Formatting Nix code
 
-`pkgs.nixfmt` is installed through `home.packages` in `modules/packages.nix`, using pinned nixpkgs without a new flake input or lockfile change. After rebuilding, `nixfmt` is available from Nushell and Fish.
+`pkgs.nixfmt` is installed through `home.packages` in `parts/features/packages.nix`, using pinned nixpkgs without a new flake input or lockfile change. After rebuilding, `nixfmt` is available from Nushell and Fish.
 
 The `formatter.x86_64-linux` output in `parts/outputs.nix` uses `nixfmt-tree` from the host's package set. `nix fmt` is available before system activation. From the repository root:
 
 ```bash
 # Format one file
-nixfmt modules/packages.nix
+nixfmt parts/features/packages.nix
 
 # Format every Nix file in the project
 nix fmt
 
 # Format only selected files
-nix fmt -- modules/packages.nix parts/features/kitty.nix
+nix fmt -- parts/features/packages.nix parts/features/apps/kitty.nix
 ```
 
 These commands write changes to files. No Git hook or editor format-on-save setting is installed. Format only the files being changed to limit the diff; formatting the entire repository remains an explicit action. See the [upstream guide](https://github.com/NixOS/nixfmt#installation).
 
 ## WhatsApp and Discord
 
-Official Discord is installed through `home.packages` in `modules/packages.nix`, without mods or autostart. WhatsApp uses Brave without a separate client. Accounts, login sessions, and preferences remain writable outside the repository.
+Official Discord is installed through `home.packages` in `parts/features/packages.nix`, without mods or autostart. WhatsApp uses Brave without a separate client. Accounts, login sessions, and preferences remain writable outside the repository.
 
 ## mpv and video defaults
 
-`modules/apps/mpv.nix` enables mpv through Home Manager and makes it the video default. Configuration, controls, writable state, asset provenance, and validation are covered in the [mpv_PlayKit main guide](MPV.md).
+`parts/features/apps/mpv.nix` enables mpv through Home Manager and makes it the video default. Configuration, controls, writable state, asset provenance, and validation are covered in the [mpv_PlayKit main guide](MPV.md).
 
 ## Audio settings
 
-Pavucontrol and EasyEffects are installed through `home.packages` in `modules/packages.nix`. PipeWire and PulseAudio compatibility are configured in `modules/services/audio.nix`. EasyEffects presets remain GUI-selected and writable; the repository enables no additional EasyEffects autostart or service.
+Pavucontrol and EasyEffects are installed through `home.packages` in `parts/features/packages.nix`. PipeWire and PulseAudio compatibility are configured in `parts/features/services/audio.nix`. EasyEffects presets remain GUI-selected and writable; the repository enables no additional EasyEffects autostart or service.
 
 Keep physical speakers/headsets/microphones as the default devices; do not select EasyEffects virtual devices as the defaults. This follows [upstream guidance](https://github.com/wwmm/easyeffects).
 
 ## Steam gaming
 
-`modules/apps/steam.nix` configures Steam, Protontricks, Gamescope, and GameMode. See the [Steam gaming guide](steam.md) for first launch, ProtonPlus, overlays, per-game launch options, and runtime verification.
+`parts/features/apps/steam.nix` configures Steam, Protontricks, Gamescope, and GameMode. See the [Steam gaming guide](steam.md) for first launch, ProtonPlus, overlays, per-game launch options, and runtime verification.
 
 ## GPU and applications
 

@@ -4,7 +4,7 @@ Updated: 21 October 2026. This guide covers the Steam feature on Kaenix host `sy
 
 ## Configuration
 
-`modules/apps/steam.nix` enables the NixOS Steam module, Protontricks, Gamescope, and GameMode. Steam supplies `steam-run`, 32-bit graphics/audio integration, and controller udev rules. ProtonPlus, MangoHud, and GOverlay are user packages in `modules/packages.nix`; MangoHud, Gamescope, and GameMode are also included in Steam's FHS environment so game launch options can find them. GameMode's packaged launcher references both its 64-bit and 32-bit preload libraries. The existing NVIDIA PRIME offload, LAVD scheduler, power profiles, and Xwayland Satellite integration remain in use.
+`parts/features/apps/steam.nix` enables the NixOS Steam module, Protontricks, Gamescope, and GameMode. Steam supplies `steam-run`, 32-bit graphics/audio integration, and controller udev rules. ProtonPlus, MangoHud, and GOverlay are user packages in `parts/features/packages.nix`; MangoHud, Gamescope, and GameMode are also included in Steam's FHS environment so game launch options can find them. GameMode's packaged launcher references both its 64-bit and 32-bit preload libraries. The existing NVIDIA PRIME offload, LAVD scheduler, power profiles, and Xwayland Satellite integration remain in use.
 
 Gamescope is an optional nested compositor inside Niri. No separate Steam/Gamescope login session, Gamescope privileged scheduling capability, or global overlay/GPU override is enabled. Remote Play, local network transfers, and dedicated-server firewall openings remain disabled; ordinary Steam downloads and online play use the existing firewall. Individual games that host servers may need their own port rules.
 

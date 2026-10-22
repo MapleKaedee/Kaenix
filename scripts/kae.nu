@@ -215,7 +215,7 @@ def "main optimize" [] {
 #
 # Examples:
 #   kae fmt
-#   kae fmt flake.nix modules/shell
+#   kae fmt flake.nix parts/features/shell
 #   kae fmt --check
 #   kae fmt --check flake.nix
 def "main fmt" [

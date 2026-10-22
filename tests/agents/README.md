@@ -11,7 +11,11 @@ grading criteria. Fixture paths and values are synthetic, not deployment targets
 For a changed decision, select the cases covering that boundary. Wording-only
 changes need static checks and a check that scenarios still agree with guidance,
 not a model run. The initial diagnostic set is B02, B03, B06, and B07; omitted
-cases have no model result. Do not add a model trial to routine configuration
+cases have no model result. The dendritic structure refresh affects B02–B05:
+registered feature context, writable seed paths, centralized package placement,
+and explicit host selection. Static fixture inspection does not rerun these cases
+or establish fresh-chat instruction loading or runtime model routing.
+Do not add a model trial to routine configuration
 validation merely because this directory exists.
 
 ## Run an isolated paper exercise

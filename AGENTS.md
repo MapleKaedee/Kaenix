@@ -27,29 +27,28 @@ configuration, focused changes, and maintainability.
 
 See [configuration ownership](docs/CONFIGURATION.md#modules-by-category) for the
 directory map. Follow existing patterns; abstractions must reduce duplication or
-improve clarity. Legacy features use one named `.nix` file, explicitly imported
-by their category's `default.nix`. The bounded dendritic pilot auto-discovers only
-flake-parts modules under `parts/`; Kitty is registered there and selected
-explicitly by `parts/hosts/syrup.nix`. Default new features to legacy categories
-unless the request explicitly expands the pilot. Do not extend discovery beyond
+improve clarity. Each configured feature uses one named `.nix` file under
+`parts/features/<category>/`, registering `flake.modules.nixos.<name>`.
+`import-tree` discovers flake-parts modules only under `parts/`;
+`parts/hosts/syrup.nix` explicitly selects each registered NixOS module.
+Registration alone does not enable a feature. Do not extend discovery beyond
 `parts/` or introduce feature toggles without a need.
 
 Flake-parts `config` describes flake outputs; it is distinct from NixOS and Home
-Manager `config`. Pilot features register NixOS modules under
-`flake.modules.nixos`, with NixOS settings inside that registered module. Keep
+Manager `config`. Put NixOS settings inside the registered module. Keep
 `globals` as lower-level NixOS/Home Manager module arguments so fixtures can
 override them; do not capture the flake-parts argument inside a registered module.
-Keep legacy NixOS settings top-level and Home Manager settings in an inline
+Keep Home Manager settings in an inline
 `home-manager.users.${globals.username}` module with its own required
 `config`/`lib`/`pkgs` arguments. Shared identity/XDG settings stay in root
 `home.nix`; assets stay in `config/`.
 
 Keep explicit `environment.systemPackages`, `home.packages`, and `fonts.packages`
-in `modules/packages.nix`, imported by `modules/default.nix`. Package-only requests
-belong there, without a feature module. Enable flags, driver/kernel choices,
-cursor packages, and executable references stay with features; do not duplicate
-module-installed packages. Package-module comments are a guide, not a transitive
-dependency inventory.
+in `parts/features/packages.nix`, registered as `packages` and explicitly selected
+by the host. Package-only requests belong there, without a new feature module.
+Enable flags, driver/kernel choices, cursor packages, and executable references
+stay with features; do not duplicate module-installed packages. Package-module
+comments are a guide, not a transitive dependency inventory.
 
 Use globals for shared values. `globals.defaultShell` aligns the login shell,
 Alacritty, and Kitty while retaining Nushell/Fish. `globals.defaultTerminal`

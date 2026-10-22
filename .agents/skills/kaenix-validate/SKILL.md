@@ -36,8 +36,8 @@ for mixed changes without running duplicates.
 | --- | --- |
 | Documentation only | Whitespace and changed links/paths; no Nix evaluation or build |
 | Skill instructions or metadata only | Structure/frontmatter, YAML, references, and whitespace; affected behavioral scenarios for decision changes; no Nix build |
-| Flake-parts/import-tree infrastructure, host construction, or feature registration | Flake evaluation, baseline/post-change derivation comparison, non-writing Nix formatting, all existing checks, and all four shell/terminal fixture combinations |
-| Nix configuration or package lists | Flake evaluation, non-writing format checks on changed Nix files, and checks for affected features |
+| Flake-parts/import-tree foundation, shared host wiring, or full feature migration | Flake evaluation, baseline/post-change derivation comparison, non-writing Nix formatting, all existing checks, and all four shell/terminal fixture combinations |
+| Nix configuration, individual feature registration, or package lists | Flake evaluation, non-writing format checks on changed Nix files, and checks for affected features; inspect registration and host selection for a new feature |
 | Shell, prompt, greeting, or login environment | `shells`; add `terminals` if terminal shells or shared wiring are affected |
 | Terminal or XDG selection | `terminals`; add `niri-config` if launchers or bindings change |
 | Writable seed helper, manifest, declarations, or baselines | `seed-files` and `seed-integration`, plus checks for affected consumers |
@@ -57,17 +57,23 @@ changes also require checking rejection of invalid values through evaluation
 overrides without editing the original configuration. Synthetic disk/boot fixtures
 are for evaluation only.
 
-For pilot infrastructure changes, record baseline and post-change derivation paths
-for the system toplevel, Home Manager activation package, default package, `kae`,
-formatter, and each check. Compare the unchanged public output names and verify
-the added `modules.nixos.kitty` registration is explicitly selected exactly once.
+For dendritic infrastructure changes, record baseline and post-change derivation
+paths for the system toplevel, Home Manager activation package, default package,
+`kae`, formatter, and each check. Compare existing public output names and verify
+every registered `modules.nixos` feature is explicitly selected exactly once by
+the host. Compare the four shell/terminal fixture results, system/user/font
+package selections, and seed manifests by target and content. Require unique
+seed targets and test preservation in disposable homes. Trace changed derivations
+to incidental order differences or actual declaration changes; do not assume
+every path difference is harmless.
 Use a disposable baseline checkout without changing the current index or working
 tree; preserve the baseline lockfile and document any unavailable baseline.
-The current eight checks are `kae`, `terminal-apps`, `terminals`, `mpv-config`,
-`shells`, `seed-files`, `niri-config`, and `seed-integration`; confirm this against
-`parts/outputs.nix` and `tests/checks.nix` before running. Matching derivations are
-equivalence evidence for those outputs, not a full system build or runtime test.
-Record which realized results were cached rather than freshly executed.
+Run all eight checks for a full infrastructure migration: `kae`, `terminal-apps`,
+`terminals`, `mpv-config`, `shells`, `seed-files`, `niri-config`, and
+`seed-integration`; confirm this inventory against `parts/outputs.nix` and
+`tests/checks.nix` before running. Matching derivations are equivalence evidence
+for those outputs, not a full system build or runtime test. Record fresh execution,
+cached realization, and substituted results separately.
 
 If a feature has no dedicated check, inspect its relevant evaluated options and
 state the coverage gap. Do not infer working hardware/GUI behavior from evaluation

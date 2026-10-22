@@ -46,9 +46,9 @@ After activation, `kae check` runs lock-preserving flake evaluation and `kae tes
 
 For formatting changes, use the formatter output on relevant files; `nix fmt` writes changes. The `path:.` reference includes new unstaged files, while a regular Git flake reference requires them to be tracked.
 
-## Dendritic pilot comparisons
+## Dendritic migration comparisons
 
-For changes to `parts/` registration, host construction, or the flake-parts/import-tree foundation, record derivation paths before editing and after migration. Use the same existing input revisions for both evaluations. Capture the system/default output, Home Manager activation, management package, formatter, and every check:
+For a full feature migration, shared host-wiring changes, or changes to the flake-parts/import-tree foundation, record derivation paths before editing and after migration. Routine individual feature registrations or edits use evaluation, formatting, and the affected-feature checks; also inspect their registration and explicit host selection. Use the same existing input revisions for migration comparisons. Capture the system/default output, Home Manager activation, management package, formatter, and every check:
 
 ```bash
 nix eval --impure --json --no-update-lock-file --option allow-import-from-derivation false --expr '
@@ -65,9 +65,9 @@ nix eval --impure --json --no-update-lock-file --option allow-import-from-deriva
   }'
 ```
 
-Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all eight existing checks for an infrastructure migration. Confirm that discovering feature definitions alone creates no hosts, that `syrup` explicitly selects Kitty once, and that its two writable theme seeds remain unique. Verify edited Kitty files in disposable homes, never the real home.
+Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all eight existing checks for an infrastructure migration. Compare the registered module inventory with the explicit host selections: each of the 32 registered NixOS modules must be selected exactly once. Confirm that discovering feature definitions alone creates no hosts. Compare evaluated system/user/font package selections and seed manifests before and after migration; require unique seed targets and unchanged contents. Test preservation of edited seed files in disposable homes, never the real home.
 
-Matching derivations establish equality for those generated outputs. Investigate differing paths with `nix derivation show` before accepting a refactor. The Kitty pilot changes the position of its two seeds relative to the tablet seed, so manifest, activation, dependent system, and `seed-integration` derivations differ. Their targets and source paths are unchanged; compare manifests by target, require unique targets, and test preservation rather than claiming identical derivations. Record which check results were freshly executed or reused. These checks do not build or activate the full system or test the desktop session.
+Matching derivations establish equality for those generated outputs. Investigate differing paths with `nix derivation show` before accepting a refactor. Module reordering can change seed-list order and consequently manifest, activation, dependent system, and `seed-integration` derivations. Trace each difference to ordering or a substantive declaration change; compare seed manifests by target and content, package selections by their intended scope, and generated shell/terminal configurations. Do not assume every changed path is incidental or claim byte-identical outputs when order differs. Record which check results were freshly executed and which were reused from the store or substituted. These checks do not build or activate the full system or test the desktop session.
 
 ## Local validation skill
 

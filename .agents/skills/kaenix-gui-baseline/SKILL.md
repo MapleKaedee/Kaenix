@@ -32,12 +32,12 @@ points; verify the mapping before editing.
 
 | Selected preference | Repository owner to inspect |
 | --- | --- |
-| DMS settings | `config/dms/settings.nix`, generated and seeded by `modules/desktop/dms.nix` |
-| DMS plugin preferences | `pluginSettings` in `modules/desktop/dms.nix`; plugin code remains pinned in flake inputs |
-| DMS-written Niri fragments | Corresponding files in `config/niri/dms/`, seeded by `modules/desktop/niri.nix` |
-| Kitty theme or tab colors | Corresponding files in `config/kitty/`, included and seeded by `parts/features/kitty.nix` |
-| Alacritty theme colors | `config/alacritty/dank-theme.toml`, imported and seeded by `modules/apps/alacritty.nix` |
-| OpenTabletDriver preferences | Selected fields in `config/opentabletdriver/settings.json`, seeded by `modules/hardware/tablet.nix` |
+| DMS settings | `config/dms/settings.nix`, generated and seeded by `parts/features/desktop/dms.nix` |
+| DMS plugin preferences | `pluginSettings` in `parts/features/desktop/dms.nix`; plugin code remains pinned in flake inputs |
+| DMS-written Niri fragments | Corresponding files in `config/niri/dms/`, seeded by `parts/features/desktop/niri.nix` |
+| Kitty theme or tab colors | Corresponding files in `config/kitty/`, included and seeded by `parts/features/apps/kitty.nix` |
+| Alacritty theme colors | `config/alacritty/dank-theme.toml`, imported and seeded by `parts/features/apps/alacritty.nix` |
+| OpenTabletDriver preferences | Selected fields in `config/opentabletdriver/settings.json`, seeded by `parts/features/hardware/tablet.nix` |
 
 Distinguish a writable seed from declarative Home Manager configuration and
 transient application state. Non-theme terminal preferences belong in the owning

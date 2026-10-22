@@ -34,7 +34,7 @@ Trace module imports, configured package selections, overlays, overrides, and
 patches. Use the host's actual package set, including Home Manager's package-set
 wiring, rather than an unrelated registry or a fresh unoverlaid nixpkgs import.
 A matching package version alone does not establish identical behavior: the
-local [khal override](../../../modules/desktop/dms.nix) changes build attributes.
+local [khal override](../../../parts/features/desktop/dms.nix) changes build attributes.
 
 Include sources outside `flake.lock`. For vendored assets, inspect provenance,
 recorded hashes, and the relevant local code and adaptations. For mpv/PlayKit,

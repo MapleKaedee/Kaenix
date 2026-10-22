@@ -95,7 +95,7 @@ class KaeTests(unittest.TestCase):
             "update": ["kae update nixpkgs", "kae update nixpkgs dms", "With no names", "writes flake.lock", "exact commit pins", "No automatic checks"],
             "gc": ["kae gc --older-than 14d", "positive day", "user profiles first", "system/root", "rollback", "By default"],
             "optimize": ["kae optimize", "hard links", "automatically", "no checkout", "garbage collection"],
-            "fmt": ["kae fmt flake.nix modules/shell", "kae fmt --check", "kae fmt --check flake.nix", "whole repository", "read-only", "relative to the checkout"],
+            "fmt": ["kae fmt flake.nix parts/features/shell", "kae fmt --check", "kae fmt --check flake.nix", "whole repository", "read-only", "relative to the checkout"],
         }
         for command, fragments in expected.items():
             for args in [("help", command), (command, "--help")]:

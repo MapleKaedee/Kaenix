@@ -1,6 +1,6 @@
 # Reinstalling and adapting Kaenix
 
-Updated: 20 October 2026. Use this guide for reinstallation or adaptation to another machine. For routine changes on `syrup`, use the [README](../README.md#getting-started).
+Updated: 22 October 2026. Use this guide for reinstallation or adaptation to another machine. For routine changes on `syrup`, use the [README](../README.md#getting-started).
 
 ## Current configuration
 
@@ -23,7 +23,7 @@ The current configuration uses systemd-boot. If the target uses GRUB or another 
 
 ## Validate and prepare to boot
 
-Run the checks listed in the [validation guide](VALIDATION.md), including all six checks. Then, from the repository root on the target:
+Run all currently exposed checks listed in the [validation guide](VALIDATION.md). Then, from the repository root on the target:
 
 ```bash
 nix flake check --no-build path:.
