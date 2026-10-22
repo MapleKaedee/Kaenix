@@ -27,11 +27,19 @@ configuration, focused changes, and maintainability.
 
 See [configuration ownership](docs/CONFIGURATION.md#modules-by-category) for the
 directory map. Follow existing patterns; abstractions must reduce duplication or
-improve clarity. Each configured feature is one named `.nix` file, explicitly
-imported by its category's `default.nix`; add no recursive discovery or feature
-toggles without a need.
+improve clarity. Legacy features use one named `.nix` file, explicitly imported
+by their category's `default.nix`. The bounded dendritic pilot auto-discovers only
+flake-parts modules under `parts/`; Kitty is registered there and selected
+explicitly by `parts/hosts/syrup.nix`. Default new features to legacy categories
+unless the request explicitly expands the pilot. Do not extend discovery beyond
+`parts/` or introduce feature toggles without a need.
 
-Keep NixOS settings top-level and Home Manager settings in an inline
+Flake-parts `config` describes flake outputs; it is distinct from NixOS and Home
+Manager `config`. Pilot features register NixOS modules under
+`flake.modules.nixos`, with NixOS settings inside that registered module. Keep
+`globals` as lower-level NixOS/Home Manager module arguments so fixtures can
+override them; do not capture the flake-parts argument inside a registered module.
+Keep legacy NixOS settings top-level and Home Manager settings in an inline
 `home-manager.users.${globals.username}` module with its own required
 `config`/`lib`/`pkgs` arguments. Shared identity/XDG settings stay in root
 `home.nix`; assets stay in `config/`.

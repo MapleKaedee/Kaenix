@@ -4,6 +4,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
+    import-tree.url = "github:denful/import-tree";
+
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -29,14 +33,7 @@
   };
 
   outputs =
-    inputs@{
-      self,
-      nixpkgs,
-      home-manager,
-      dms,
-      chaotic,
-      ...
-    }:
+    inputs:
     let
       globals = {
         username = "kaede";
@@ -48,37 +45,12 @@
         installation = import ./installation.nix;
       };
     in
-    {
-      packages.x86_64-linux.default =
-        self.nixosConfigurations.${globals.hostname}.config.system.build.toplevel;
-      packages.x86_64-linux.kae = import ./lib/kae.nix {
-        pkgs = self.nixosConfigurations.${globals.hostname}.pkgs;
-        hostname = globals.hostname;
-        repository = "/home/${globals.username}/Kaenix";
-      };
-      formatter.x86_64-linux = self.nixosConfigurations.${globals.hostname}.pkgs.nixfmt-tree;
-      checks.x86_64-linux = import ./tests/checks.nix {
-        pkgs = self.nixosConfigurations.${globals.hostname}.pkgs;
-        homeConfig =
-          self.nixosConfigurations.${globals.hostname}.config.home-manager.users.${globals.username};
-      };
-      nixosConfigurations.${globals.hostname} = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = { inherit globals inputs; };
-        modules = [
-          ./configuration.nix
-          chaotic.nixosModules.default
-          home-manager.nixosModules.home-manager
-          ({ globals, ... }: {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit globals inputs; };
-            home-manager.backupFileExtension = "pre-kaenix";
-            home-manager.overwriteBackup = false;
-            home-manager.sharedModules = [ dms.homeModules.dank-material-shell ];
-            home-manager.users.${globals.username} = import ./home.nix;
-          })
-        ];
-      };
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.flake-parts.flakeModules.modules
+        (inputs.import-tree ./parts)
+      ];
+      systems = [ "x86_64-linux" ];
+      _module.args = { inherit globals; };
     };
 }

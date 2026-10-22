@@ -10,20 +10,38 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | --- | --- |
 | `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
-| `modules/apps/` | Alacritty, btop, Brave, Helix, Kitty, mpv, Steam, and Yazi configuration |
+| `modules/apps/` | Alacritty, btop, Brave, Helix, mpv, Steam, and Yazi configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
 | `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
 | `modules/system/` | Base system settings, users, Nix, and Home Manager infrastructure |
 
 `configuration.nix` imports hardware settings and `modules/default.nix`, then sets the host identity, installation guard, bootloader, and system state version. Each category imports its features explicitly through `default.nix`.
 
-Each feature is one named file, such as `modules/apps/kitty.nix`. There are 30 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
+Each legacy feature is one named file, such as `modules/apps/alacritty.nix`. There are 29 legacy features across six categories, plus Kitty in the dendritic pilot. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. Legacy categories retain explicit imports; the pilot below adds bounded discovery without a new enable option.
 
-Add configured features to the relevant category's imports. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
+By default, add configured features to the relevant legacy category's imports; expand the pilot only when explicitly requested. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
 For implementation, use [Kaenix Feature](../.agents/skills/kaenix-feature/SKILL.md), for example `$kaenix-feature add or update a configured application`.
 
 The `kaenix.seedFiles` infrastructure, including its option definition and activation, is in `modules/system/home-manager.nix`.
+
+## Dendritic pilot and flake outputs
+
+The root `flake.nix` retains inputs, `nixConfig`, and shared `globals`, then calls `flake-parts.lib.mkFlake`. `import-tree` discovers flake-parts modules only under `parts/`. Keep assets, helpers, tests, hardware, and the legacy `modules/` tree outside that discovery boundary; files there use their existing explicit imports.
+
+| Owner | Responsibility |
+| --- | --- |
+| `parts/outputs.nix` | Existing `packages.x86_64-linux.default`, `packages.x86_64-linux.kae`, `formatter.x86_64-linux`, and `checks.x86_64-linux` outputs |
+| `parts/hosts/syrup.nix` | Construct `nixosConfigurations.syrup`, preserving existing NixOS/Home Manager wiring and explicitly selecting Kitty |
+| `parts/features/kitty.nix` | Register `flake.modules.nixos.kitty`, including Kitty's existing inline Home Manager module |
+
+The public output names stay the same, with `modules.nixos.kitty` added for the registered feature. Discovery registers Kitty; `parts/hosts/syrup.nix` selects that module in the host's imports. Kitty is absent from `modules/apps/default.nix` to avoid duplicate imports. All other features remain in the legacy categories. Explicit package lists stay in `modules/packages.nix`.
+
+Flake-parts `config` contains flake configuration and outputs. The registered NixOS module has its own arguments and `config`, and its inline Home Manager module has another `config`; application options belong in those lower-level contexts. Root globals enter flake-parts through `_module.args`, while NixOS `specialArgs` and Home Manager `extraSpecialArgs` preserve the lower-level `globals` arguments. Do not close over flake-parts globals inside a registered feature: `tests/evaluate.nix` must still be able to override shell and terminal choices.
+
+For an explicitly approved next pilot feature, add `parts/features/NAME.nix` registering `flake.modules.nixos.NAME`, then select `config.flake.modules.nixos.NAME` in the host's module imports. Remove its legacy import if migrating an existing feature, and adjust relative asset/helper paths after moving it. Registration alone does not enable a feature. Do not add profiles, feature toggles, extra platforms, or broad recursive imports as part of this pilot.
+
+For changes to this infrastructure, compare baseline and post-change derivation paths and validate all existing checks through [Kaenix Validate](../.agents/skills/kaenix-validate/SKILL.md). Evaluation and matching derivations establish configuration equivalence within that scope; cached check results and headless checks do not establish activation or desktop runtime behavior.
 
 ## Documentation lookup and version support
 
@@ -282,7 +300,7 @@ The `wl-clipboard` package provides `wl-copy`/`wl-paste` for copying login codes
 
 `pkgs.nix-output-monitor` is installed through `home.packages` in `modules/packages.nix`, from pinned nixpkgs. There is no new flake input or replacement alias for Nix commands.
 
-The flake's `packages.x86_64-linux.default` points to the existing `syrup` system derivation. From the repository root, plain `nom build` or `nix build` builds that full system and creates the `result` symlink without activation or sudo. To explicitly include untracked sources and preserve the lockfile, use:
+The `packages.x86_64-linux.default` output in `parts/outputs.nix` points to the existing `syrup` system derivation. From the repository root, plain `nom build` or `nix build` builds that full system and creates the `result` symlink without activation or sudo. To explicitly include untracked sources and preserve the lockfile, use:
 
 ```bash
 nom build --no-update-lock-file path:.
@@ -302,7 +320,7 @@ nom build --no-link path:.#checks.x86_64-linux.shells
 
 `pkgs.nixfmt` is installed through `home.packages` in `modules/packages.nix`, using pinned nixpkgs without a new flake input or lockfile change. After rebuilding, `nixfmt` is available from Nushell and Fish.
 
-The `formatter.x86_64-linux` output in `flake.nix` uses `nixfmt-tree` from the host's package set. `nix fmt` is available before system activation. From the repository root:
+The `formatter.x86_64-linux` output in `parts/outputs.nix` uses `nixfmt-tree` from the host's package set. `nix fmt` is available before system activation. From the repository root:
 
 ```bash
 # Format one file
@@ -312,7 +330,7 @@ nixfmt modules/packages.nix
 nix fmt
 
 # Format only selected files
-nix fmt -- modules/packages.nix modules/apps/kitty.nix
+nix fmt -- modules/packages.nix parts/features/kitty.nix
 ```
 
 These commands write changes to files. No Git hook or editor format-on-save setting is installed. Format only the files being changed to limit the diff; formatting the entire repository remains an explicit action. See the [upstream guide](https://github.com/NixOS/nixfmt#installation).

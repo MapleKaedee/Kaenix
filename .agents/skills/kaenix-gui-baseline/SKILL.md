@@ -35,7 +35,7 @@ points; verify the mapping before editing.
 | DMS settings | `config/dms/settings.nix`, generated and seeded by `modules/desktop/dms.nix` |
 | DMS plugin preferences | `pluginSettings` in `modules/desktop/dms.nix`; plugin code remains pinned in flake inputs |
 | DMS-written Niri fragments | Corresponding files in `config/niri/dms/`, seeded by `modules/desktop/niri.nix` |
-| Kitty theme or tab colors | Corresponding files in `config/kitty/`, included and seeded by `modules/apps/kitty.nix` |
+| Kitty theme or tab colors | Corresponding files in `config/kitty/`, included and seeded by `parts/features/kitty.nix` |
 | Alacritty theme colors | `config/alacritty/dank-theme.toml`, imported and seeded by `modules/apps/alacritty.nix` |
 | OpenTabletDriver preferences | Selected fields in `config/opentabletdriver/settings.json`, seeded by `modules/hardware/tablet.nix` |
 

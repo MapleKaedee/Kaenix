@@ -27,8 +27,8 @@ changes to understand dependencies rather than matching filenames alone.
 
 ## Select checks from the actual implementation
 
-Read `flake.nix`, `tests/checks.nix`, the `tests/evaluate.nix` fixture, and relevant
-tests to confirm current check names, coverage, and dependencies. The table below
+Read `flake.nix`, `parts/outputs.nix`, `parts/hosts/syrup.nix`, `tests/checks.nix`,
+the `tests/evaluate.nix` fixture, and relevant tests to confirm current check names, coverage, and dependencies. The table below
 is selection guidance, not a fixed inventory of flake outputs. Combine checks
 for mixed changes without running duplicates.
 
@@ -36,6 +36,7 @@ for mixed changes without running duplicates.
 | --- | --- |
 | Documentation only | Whitespace and changed links/paths; no Nix evaluation or build |
 | Skill instructions or metadata only | Structure/frontmatter, YAML, references, and whitespace; affected behavioral scenarios for decision changes; no Nix build |
+| Flake-parts/import-tree infrastructure, host construction, or feature registration | Flake evaluation, baseline/post-change derivation comparison, non-writing Nix formatting, all existing checks, and all four shell/terminal fixture combinations |
 | Nix configuration or package lists | Flake evaluation, non-writing format checks on changed Nix files, and checks for affected features |
 | Shell, prompt, greeting, or login environment | `shells`; add `terminals` if terminal shells or shared wiring are affected |
 | Terminal or XDG selection | `terminals`; add `niri-config` if launchers or bindings change |
@@ -55,6 +56,18 @@ from the validation guide and inspect the fixture assertions; selection-helper
 changes also require checking rejection of invalid values through evaluation
 overrides without editing the original configuration. Synthetic disk/boot fixtures
 are for evaluation only.
+
+For pilot infrastructure changes, record baseline and post-change derivation paths
+for the system toplevel, Home Manager activation package, default package, `kae`,
+formatter, and each check. Compare the unchanged public output names and verify
+the added `modules.nixos.kitty` registration is explicitly selected exactly once.
+Use a disposable baseline checkout without changing the current index or working
+tree; preserve the baseline lockfile and document any unavailable baseline.
+The current eight checks are `kae`, `terminal-apps`, `terminals`, `mpv-config`,
+`shells`, `seed-files`, `niri-config`, and `seed-integration`; confirm this against
+`parts/outputs.nix` and `tests/checks.nix` before running. Matching derivations are
+equivalence evidence for those outputs, not a full system build or runtime test.
+Record which realized results were cached rather than freshly executed.
 
 If a feature has no dedicated check, inspect its relevant evaluated options and
 state the coverage gap. Do not infer working hardware/GUI behavior from evaluation

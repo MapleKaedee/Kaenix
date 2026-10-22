@@ -46,6 +46,29 @@ After activation, `kae check` runs lock-preserving flake evaluation and `kae tes
 
 For formatting changes, use the formatter output on relevant files; `nix fmt` writes changes. The `path:.` reference includes new unstaged files, while a regular Git flake reference requires them to be tracked.
 
+## Dendritic pilot comparisons
+
+For changes to `parts/` registration, host construction, or the flake-parts/import-tree foundation, record derivation paths before editing and after migration. Use the same existing input revisions for both evaluations. Capture the system/default output, Home Manager activation, management package, formatter, and every check:
+
+```bash
+nix eval --impure --json --no-update-lock-file --option allow-import-from-derivation false --expr '
+  let
+    flake = builtins.getFlake ("path:" + toString ./.);
+    host = flake.nixosConfigurations.syrup;
+  in {
+    system = host.config.system.build.toplevel.drvPath;
+    default = flake.packages.x86_64-linux.default.drvPath;
+    home = host.config.home-manager.users.kaede.home.activationPackage.drvPath;
+    kae = flake.packages.x86_64-linux.kae.drvPath;
+    formatter = flake.formatter.x86_64-linux.drvPath;
+    checks = builtins.mapAttrs (_: check: check.drvPath) flake.checks.x86_64-linux;
+  }'
+```
+
+Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all eight existing checks for an infrastructure migration. Confirm that discovering feature definitions alone creates no hosts, that `syrup` explicitly selects Kitty once, and that its two writable theme seeds remain unique. Verify edited Kitty files in disposable homes, never the real home.
+
+Matching derivations establish equality for those generated outputs. Investigate differing paths with `nix derivation show` before accepting a refactor. The Kitty pilot changes the position of its two seeds relative to the tablet seed, so manifest, activation, dependent system, and `seed-integration` derivations differ. Their targets and source paths are unchanged; compare manifests by target, require unique targets, and test preservation rather than claiming identical derivations. Record which check results were freshly executed or reused. These checks do not build or activate the full system or test the desktop session.
+
 ## Local validation skill
 
 Steam gaming has no dedicated headless game check. For changes to its feature or package list, evaluate the flake and inspect Steam/Protontricks/Gamescope/GameMode enablement, the GameMode user service, 32-bit graphics/audio, controller permissions, PRIME offload, and the unchanged firewall defaults. Build the configured Steam, Protontricks, and GameMode packages plus the pinned ProtonPlus, MangoHud, Gamescope, and GOverlay packages without activation. Inspect Steam's FHS environment for the gaming commands and GameMode's 32/64-bit preload libraries. Follow the [gaming runtime checklist](steam.md#runtime-verification) after activation; package availability does not prove that a game or overlay works in Niri.
