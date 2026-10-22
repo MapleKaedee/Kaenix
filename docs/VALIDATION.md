@@ -19,8 +19,8 @@ Updated: 22 October 2026. Run commands from the repository root. The commands an
 # Evaluate flake outputs without building checks or activating anything
 nix flake check --no-build path:.
 
-# Build all seven checks in their respective Nix environments
-nix build --no-link path:.#checks.x86_64-linux.terminal-apps path:.#checks.x86_64-linux.terminals path:.#checks.x86_64-linux.shells path:.#checks.x86_64-linux.seed-files path:.#checks.x86_64-linux.seed-integration path:.#checks.x86_64-linux.niri-config path:.#checks.x86_64-linux.mpv-config
+# Build all eight checks in their respective Nix environments
+nix build --no-link path:.#checks.x86_64-linux.kae path:.#checks.x86_64-linux.terminal-apps path:.#checks.x86_64-linux.terminals path:.#checks.x86_64-linux.shells path:.#checks.x86_64-linux.seed-files path:.#checks.x86_64-linux.seed-integration path:.#checks.x86_64-linux.niri-config path:.#checks.x86_64-linux.mpv-config
 
 # Evaluate the fixture with all four terminal and shell combinations
 nix eval --impure --json --expr 'let flake = builtins.getFlake ("path:" + toString ./.); in builtins.map (selection: import ./tests/evaluate.nix ({ inherit flake; } // selection)) [ { defaultShell = "nushell"; defaultTerminal = "alacritty"; } { defaultShell = "fish"; defaultTerminal = "alacritty"; } { defaultShell = "nushell"; defaultTerminal = "kitty"; } { defaultShell = "fish"; defaultTerminal = "kitty"; } ]'
@@ -31,7 +31,8 @@ git diff --check
 
 | Check | Coverage |
 | --- | --- |
-| `terminals` | Home Manager's generated Alacritty TOML, shared TUIOS launcher, writable theme import, XDG selection of both desktop entries, and argument forwarding; isolated PTYs check Fish/Nushell login environment, cwd, SSH/nesting/bypass/TTY guards, and fallback with a stub TUIOS |
+| `kae` | Packaged Nu entry point, isolated user configuration, command dispatch/arguments/cwd, check discovery, errors and exit codes, generation retention and privilege boundaries with stubs; pinned formatter checks and writes only in disposable fixtures |
+| `terminals` | Home Manager's generated Alacritty TOML and Kitty config, direct login-shell startup, writable theme import, XDG selection of both desktop entries, and argument forwarding |
 | `terminal-apps` | Generated btop, Helix, and Yazi configuration values plus `--version` smoke tests for all three pinned packages |
 | `mpv-config` | English UI locale, video MIME defaults, parsing/script startup on pinned mpv, shaders/presets, writable volume/resume state, and FFmpeg thumbnails from two instances in a temporary home without a display |
 | `shells` | Fish/Nushell parsing and startup, login environment, Starship, aliases, Yazi's `y` wrapper in both shells, and interactive/noninteractive greetings |
@@ -40,6 +41,8 @@ git diff --check
 | `niri-config` | Base KDL validation without DMS fragments and with baseline DMS fragments |
 
 Seed checks provide Python through Nix; a global Python installation is unnecessary. Home Manager's seed activation also uses the Nix-provided interpreter. Running unit tests directly with `python3` is only an alternative when an interpreter is available.
+
+After activation, `kae check` runs lock-preserving flake evaluation and `kae test [checks...]` builds all or selected checks; see the [command guide](CONFIGURATION.md#kaenix-management-with-kae). The `kae` check uses stubbed Nix, rebuild, and sudo commands. It does not activate a generation, collect garbage, optimize the store, or build the full system.
 
 For formatting changes, use the formatter output on relevant files; `nix fmt` writes changes. The `path:.` reference includes new unstaged files, while a regular Git flake reference requires them to be tracked.
 

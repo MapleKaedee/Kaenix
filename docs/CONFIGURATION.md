@@ -10,14 +10,14 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | --- | --- |
 | `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
-| `modules/apps/` | Alacritty, btop, Brave, Helix, Kitty, mpv, Steam, TUIOS, and Yazi configuration |
+| `modules/apps/` | Alacritty, btop, Brave, Helix, Kitty, mpv, Steam, and Yazi configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
 | `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
 | `modules/system/` | Base system settings, users, Nix, and Home Manager infrastructure |
 
 `configuration.nix` imports hardware settings and `modules/default.nix`, then sets the host identity, installation guard, bootloader, and system state version. Each category imports its features explicitly through `default.nix`.
 
-Each feature is one named file, such as `modules/apps/kitty.nix`. There are 31 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
+Each feature is one named file, such as `modules/apps/kitty.nix`. There are 30 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
 
 Add configured features to the relevant category's imports. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
@@ -31,7 +31,7 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 ## Centralized package lists
 
-`modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list, with its terminal startup wiring owned by the TUIOS feature.
+`modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list for manual startup.
 
 The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, btop, Helix, Kitty, Yazi, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
 
@@ -71,7 +71,7 @@ The baseline `Mod+T` runs `xdg-terminal-exec`. Applications using this launcher 
 
 Alacritty uses JetBrainsMono Nerd Font Mono at size 12, 12 px padding, 0.5 opacity, hidden decorations, 3000 lines of scrollback, and a block cursor blinking every 1000 ms. `Ctrl+Shift+N` opens a new window; `Ctrl++`, `Ctrl+-`, and `Ctrl+0` control font size. Kitty tabs and its `Ctrl+T` shortcut remain in Kitty; the terminals do not have identical features.
 
-Alacritty and Kitty use the shared [TUIOS startup launcher](#tuios-desktop-startup), which initializes `globals.defaultShell` in login mode. Colors are imported from `~/.config/alacritty/dank-theme.toml`, which is copied only if absent and can then be updated by DMS. The pinned DMS Alacritty template is enabled by default; if previously disabled through the GUI, enable it again in DMS theme settings. `runDmsMatugenTemplates` and `matugenTemplateAlacritty` remain GUI preferences. Do not add colors directly to the main configuration because they would override the imported file.
+Alacritty and Kitty start `globals.defaultShell` directly with `--login`. [TUIOS starts manually](#manual-tuios-sessions) when requested from that shell. Colors are imported from `~/.config/alacritty/dank-theme.toml`, which is copied only if absent and can then be updated by DMS. The pinned DMS Alacritty template is enabled by default; if previously disabled through the GUI, enable it again in DMS theme settings. `runDmsMatugenTemplates` and `matugenTemplateAlacritty` remain GUI preferences. Do not add colors directly to the main configuration because they would override the imported file.
 
 ### One-time migration after first activation
 
@@ -102,19 +102,15 @@ Seed changes do not modify bindings already present in the home. After activatio
 
 This block preserves other bindings and does not run automatically during rebuilds. Once the binding uses the generic launcher, later changes to `globals.defaultTerminal` need no further migration. Verify `xdg-terminal-exec --print-id`, then test `Mod+T` and application launchers after logging in again. Do not replace the entire binding file or DMS directory with the baseline.
 
-## TUIOS desktop startup
+## Manual TUIOS sessions
 
-TUIOS is installed for `kaede` from pinned nixpkgs (0.10.0 when added). `modules/apps/tuios.nix` sets Kitty and Alacritty's default command to the shared `lib/terminal-session.nix` launcher. Each new window or tab using that command runs `tuios new`, creating a separate persistent session. Explicit commands such as `kitty -- nu` and `alacritty -e nu` bypass the launcher. Shell startup files have no TUIOS hook, so other terminal applications and Linux text consoles keep their normal shell.
+TUIOS remains installed for `kaede` from pinned nixpkgs (0.10.0 when added). Kitty and Alacritty open the selected normal login shell; TUIOS has no automatic startup hook, alias, or desktop shortcut. Explicit terminal commands continue to work normally.
 
-The launcher initializes `globals.defaultShell` with `--login -c`, restores the terminal's incoming working directory after login initialization, and sets `$SHELL` to the selected shell for TUIOS. Pane shells inherit the daemon's environment. A running daemon retains its existing environment and shell selection; changing `globals.defaultShell` requires finishing or saving its jobs, then stopping the daemon with `tuios kill-server` before opening a new session. That command terminates its running sessions. A user-set `appearance.preferred_shell` in TUIOS takes precedence over `$SHELL`.
+Run `tuios new` to create a persistent session when wanted. Detach with `Ctrl+B`, then `d` to return to the invoking shell while the session stays running; quit with `Ctrl+B`, then `q` to end the session. Use `tuios ls` to list sessions and `tuios attach NAME` to return to one. The old `KAENIX_TUIOS_DISABLE` variable is no longer needed.
 
-Startup is skipped when stdin or stdout is not a terminal, `TERM` is empty/dumb, `KAENIX_TUIOS_DISABLE=1`, or TUIOS/tmux/Zellij/SSH environment markers are present. Detaching (`Ctrl+B`, then `d`), quitting (`Ctrl+B`, then `q`), or startup failure returns to a normal login shell without automatically restarting TUIOS. Detach keeps the session running; quit ends that session. Use `tuios ls` to list sessions and `tuios attach NAME` to return to one.
+TUIOS preferences, history, and session data remain writable under its normal XDG locations. Removing automatic startup does not stop an existing daemon or delete sessions. Pane shells retain the daemon's environment and any user-configured preferred shell; rebuilds do not replace running sessions. See the [pinned session documentation](https://github.com/Gaurav-Gosain/tuios/blob/v0.10.0/docs/SESSIONS.md) for persistence and recovery behavior.
 
-For a plain shell in a new window, run `env KAENIX_TUIOS_DISABLE=1 kitty` or `env KAENIX_TUIOS_DISABLE=1 alacritty`. From Nushell, use `with-env {KAENIX_TUIOS_DISABLE: "1"} { kitty }` if preferred. The bypass applies to that terminal's inherited environment.
-
-TUIOS preferences, history, and session data remain writable under its normal XDG locations; Kaenix does not deploy a TUIOS config file, systemd service, web listener, or agent integration. The daemon starts on demand. See the [pinned session documentation](https://github.com/Gaurav-Gosain/tuios/blob/v0.10.0/docs/SESSIONS.md) for persistence and recovery behavior.
-
-After rebuilding, open Kitty and Alacritty, check the selected shell and working directory in a pane, create another pane, and confirm no nested TUIOS appears. Open a second terminal to verify a separate session; detach and confirm the plain-shell fallback, then reattach by name. Also verify explicit-command and bypass launches. These GUI and persistence checks require the activated target session.
+After rebuilding with `sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix#syrup`, reopen Kitty and Alacritty and verify normal shell startup in new windows and Kitty tabs. Run `tuios new` manually, then test detach and reattach. These GUI and persistence checks require the activated target session.
 
 ## btop, Helix, and Yazi
 
@@ -178,6 +174,37 @@ Export DMS settings with `dms ipc call settings dump`, then translate the desire
 Niri fragments, Kitty themes, and tablet profiles can be copied back to their respective baseline locations after review. `fish_variables` is unnecessary: the module manages the Fish prompt and plugins.
 
 Plugins are pinned in flake inputs. The GUI can change settings, but plugin code must be updated/removed through Nix; see [updating flake inputs](#updating-flake-inputs).
+
+## Kaenix management with kae
+
+`kae` is a standalone Nushell command installed for `kaede` through the centralized user package list. `scripts/kae.nu` owns the logic; `lib/kae.nix` supplies pinned executables and a Nu interpreter that runs without user configuration. The same derivation is exposed as `packages.x86_64-linux.kae`.
+
+| Command | Operation |
+| --- | --- |
+| `kae`, `kae help`, `kae --help` | Show commands; use `kae help gc` or `kae gc --help` for command help |
+| `kae check` | Evaluate the flake without building checks |
+| `kae test [checks...]` | Discover available checks, validate names, and build selected checks or all checks by default |
+| `kae build` | Build `syrup` without activation; leave `result` in the checkout |
+| `kae switch` | Build and activate `syrup`, elevating activation operations through sudo |
+| `kae gc` | Collect unreachable store paths while retaining generations |
+| `kae gc --older-than 14d` | Prune profiles and collect garbage as the user, then through sudo for system/root profiles |
+| `kae optimize` | Deduplicate identical store files with `nix store optimise` |
+| `kae fmt [paths...]` | Run the flake's Nix formatter on the whole repository or selected paths |
+| `kae fmt --check [paths...]` | Check formatting without modifying source files |
+
+Commands work from any directory. The default checkout is `/home/kaede/Kaenix`; override it with `KAE_REPO` (for example, `with-env {KAE_REPO: "/path/to/checkout"} { kae check }` in Nu). Relative formatting paths are relative to that checkout. Help, garbage collection, and optimization do not require a checkout. Repository flake operations use `path:` references to include untracked files and prohibit lockfile updates. Each invocation runs only the requested operation and preserves its failure status.
+
+`kae fmt` uses the existing flake formatter, currently pinned `nixfmt-tree`. Its `--ci` flag alone rewrites files before reporting differences, so `kae fmt --check` directly uses a pinned variant of the same package with `nixfmt --check` configured. If the flake formatter is replaced or customized, update this variant alongside it. Formatting covers Nix files, not the Nu script.
+
+The `--older-than` value must be a positive number of days, such as `14d`. Pruning follows Nix's profile discovery and retention rules; deleting generations removes their rollback capability. User cleanup must succeed before system/root cleanup begins; if the second operation fails, user cleanup has already happened. Default `kae gc` does not prune generations. Existing weekly 14-day garbage collection and automatic store optimization remain configured separately.
+
+Before activation, inspect the command from any directory with its absolute flake path. A relative `path:.` refers to the current directory, so use it only from the Kaenix repository root:
+
+```bash
+nix run --no-update-lock-file path:/home/kaede/Kaenix#kae -- help
+```
+
+Install the command into the active user environment with the usual explicit rebuild: `sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix#syrup`. Thereafter, run `kae` normally; only activation and explicit system/root pruning request sudo. The [validation guide](VALIDATION.md#repeatable-checks) describes the isolated command check and its evidence limits.
 
 ## Updating flake inputs
 

@@ -14,8 +14,12 @@ def xdg(*args):
 config = tomllib.loads(Path(os.environ["alacrittyConfig"]).read_text())
 assert config["terminal"]["shell"] == {
     "program": os.environ["shellProgram"],
-    "args": [],
+    "args": ["--login"],
 }
+kitty_lines = Path(os.environ["kittyConfig"]).read_text().splitlines()
+assert [line for line in kitty_lines if line.startswith("shell ")] == [
+    f"shell {os.environ['shellProgram']} --login"
+]
 assert config["general"]["import"] == [os.environ["themePath"]]
 assert "colors" not in config, "The main config must not override the writable theme"
 theme = tomllib.loads(Path(os.environ["themeSeed"]).read_text())

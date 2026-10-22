@@ -48,15 +48,12 @@ assert cfg.programs.fish.enable && cfg.programs.nushell.enable;
 assert hm.programs.fish.enable && hm.programs.nushell.enable;
 assert hm.programs.starship.enableFishIntegration && hm.programs.starship.enableNushellIntegration;
 assert
-  hm.programs.kitty.settings.shell == toString (
-    import ../lib/terminal-session.nix {
-      lib = fixture.pkgs.lib;
-      pkgs = fixture.pkgs;
-      shell = cfg.users.users.kaede.shell;
-    }
-  );
-assert hm.programs.alacritty.settings.terminal.shell.program == hm.programs.kitty.settings.shell;
-assert hm.programs.alacritty.settings.terminal.shell.args == [ ];
+  hm.programs.kitty.settings.shell
+  == "${fixture.pkgs.lib.getExe cfg.users.users.kaede.shell} --login";
+assert
+  hm.programs.alacritty.settings.terminal.shell.program
+  == fixture.pkgs.lib.getExe cfg.users.users.kaede.shell;
+assert hm.programs.alacritty.settings.terminal.shell.args == [ "--login" ];
 assert cfg.users.users.kaede.shell.outPath == fixture.pkgs.${defaultShell}.outPath;
 assert hm.programs.kitty.enable && hm.programs.alacritty.enable;
 assert hm.programs.btop.enable;

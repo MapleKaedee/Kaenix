@@ -1,5 +1,10 @@
 # Explicit package lists. Program and service modules also install their own packages.
-{ pkgs, globals, ... }:
+{
+  pkgs,
+  globals,
+  inputs,
+  ...
+}:
 {
   environment.systemPackages = [
     # Desktop compatibility and applications.
@@ -26,7 +31,7 @@
     pkgs.osu-lazer-bin
     pkgs.spotify
 
-    # Terminal multiplexer; desktop startup is configured by the TUIOS feature.
+    # Terminal multiplexer; start manually with tuios new.
     pkgs.tuios
 
     # Gaming tools; Steam, Protontricks, Gamescope, and GameMode use the Steam feature.
@@ -35,6 +40,7 @@
     pkgs.goverlay
 
     # Nix and Wayland tools.
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.kae
     pkgs.nix-output-monitor
     pkgs.nixfmt
     pkgs.wl-clipboard
@@ -50,9 +56,9 @@
   ];
 
   # Packages installed through feature modules (not a transitive dependency list):
-  # - modules/apps/{alacritty,btop,brave,helix,kitty,mpv,steam,tuios,yazi}.nix:
+  # - modules/apps/{alacritty,btop,brave,helix,kitty,mpv,steam,yazi}.nix:
   #   Alacritty, btop, Brave, Helix, Kitty, mpv, Steam/steam-run, Protontricks,
-  #   Gamescope, GameMode, TUIOS, and Yazi.
+  #   Gamescope, GameMode, and Yazi.
   # - modules/shell/{fish,nushell,common,fastfetch,git}.nix:
   #   Fish/autopair, Nushell, Starship/eza, Fastfetch, and Home Manager's Git.
   # - modules/desktop/{niri,dms,theme}.nix: Niri, DMS/DankGreeter,

@@ -1,7 +1,7 @@
 { globals, ... }:
 {
   home-manager.users.${globals.username} =
-    { ... }:
+    { lib, pkgs, ... }:
     {
       programs.kitty = {
         enable = true;
@@ -11,6 +11,14 @@
         };
         shellIntegration.enableFishIntegration = true;
         settings = {
+          shell = "${
+            lib.getExe (
+              import ../../lib/shell-package.nix {
+                inherit lib pkgs;
+                name = globals.defaultShell;
+              }
+            )
+          } --login";
           bold_font = "auto";
           italic_font = "auto";
           bold_italic_font = "auto";
