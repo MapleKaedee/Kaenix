@@ -2,7 +2,6 @@
 {
   programs.steam = {
     enable = true;
-    platformOptimizations.enable = true;
     protontricks.enable = true;
     # Make these tools available inside Steam's FHS environment as well.
     extraPackages = [
