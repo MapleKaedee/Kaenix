@@ -59,11 +59,30 @@ assert hm.programs.alacritty.settings.terminal.shell.program == hm.programs.kitt
 assert hm.programs.alacritty.settings.terminal.shell.args == [ ];
 assert cfg.users.users.kaede.shell.outPath == fixture.pkgs.${defaultShell}.outPath;
 assert hm.programs.kitty.enable && hm.programs.alacritty.enable;
+assert hm.programs.btop.enable;
+assert
+  hm.programs.btop.settings == {
+    color_theme = "TTY";
+    theme_background = false;
+  };
+assert hm.programs.helix.enable && hm.programs.helix.defaultEditor;
+assert hm.programs.helix.settings.theme == "base16_transparent";
+assert hm.programs.helix.settings.editor.line-number == "relative";
+assert hm.programs.helix.settings.editor.color-modes;
+assert hm.home.sessionVariables.EDITOR == "hx" && hm.home.sessionVariables.VISUAL == "hx";
+assert hm.programs.yazi.enable;
+assert hm.programs.yazi.settings.mgr.sort_by == "natural";
+assert hm.programs.yazi.settings.mgr.sort_dir_first;
+assert hm.programs.yazi.shellWrapperName == "y";
+assert hm.programs.yazi.enableFishIntegration && hm.programs.yazi.enableNushellIntegration;
 assert builtins.all
   (pkg: builtins.any (installed: installed.outPath == pkg.outPath) hm.home.packages)
   [
     hm.programs.alacritty.package
     hm.programs.kitty.package
+    hm.programs.btop.package
+    hm.programs.helix.package
+    hm.programs.yazi.package
     fixture.pkgs.tuios
   ];
 assert cfg.environment.sessionVariables.TERMINAL == defaultTerminal;

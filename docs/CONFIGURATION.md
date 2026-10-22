@@ -10,14 +10,14 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | --- | --- |
 | `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
-| `modules/apps/` | Alacritty, Brave, Kitty, mpv, Steam, and TUIOS configuration |
+| `modules/apps/` | Alacritty, btop, Brave, Helix, Kitty, mpv, Steam, TUIOS, and Yazi configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
 | `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
 | `modules/system/` | Base system settings, users, Nix, and Home Manager infrastructure |
 
 `configuration.nix` imports hardware settings and `modules/default.nix`, then sets the host identity, installation guard, bootloader, and system state version. Each category imports its features explicitly through `default.nix`.
 
-Each feature is one named file, such as `modules/apps/kitty.nix`. There are 28 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
+Each feature is one named file, such as `modules/apps/kitty.nix`. There are 31 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
 
 Add configured features to the relevant category's imports. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
@@ -33,7 +33,7 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 `modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list, with its terminal startup wiring owned by the TUIOS feature.
 
-The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, Kitty, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
+The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, btop, Helix, Kitty, Yazi, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
 
 ## LAVD CPU scheduling
 
@@ -59,7 +59,7 @@ For a temporary return to the kernel's built-in fair scheduler, run `sudo system
 
 Nix manages Alacritty, Kitty, Nushell, Fish, Starship, Fastfetch, Brave/MIME, base Niri, plugin sources, and wallpaper files. Edit repository modules or assets, then rebuild. Do not edit Home Manager's generated symlinks directly.
 
-Alacritty, Kitty, Nushell, Fish, and Fastfetch use `programs.*` options. Niri uses `xdg.configFile."niri/config.kdl".text` to read repository KDL. This preserves Niri features without depending on an external Niri module schema.
+Alacritty, btop, Helix, Kitty, Nushell, Fish, Fastfetch, and Yazi use `programs.*` options. Niri uses `xdg.configFile."niri/config.kdl".text` to read repository KDL. This preserves Niri features without depending on an external Niri module schema.
 
 ## Choosing Alacritty or Kitty
 
@@ -115,6 +115,12 @@ For a plain shell in a new window, run `env KAENIX_TUIOS_DISABLE=1 kitty` or `en
 TUIOS preferences, history, and session data remain writable under its normal XDG locations; Kaenix does not deploy a TUIOS config file, systemd service, web listener, or agent integration. The daemon starts on demand. See the [pinned session documentation](https://github.com/Gaurav-Gosain/tuios/blob/v0.10.0/docs/SESSIONS.md) for persistence and recovery behavior.
 
 After rebuilding, open Kitty and Alacritty, check the selected shell and working directory in a pane, create another pane, and confirm no nested TUIOS appears. Open a second terminal to verify a separate session; detach and confirm the plain-shell fallback, then reattach by name. Also verify explicit-command and bypass launches. These GUI and persistence checks require the activated target session.
+
+## btop, Helix, and Yazi
+
+`modules/apps/btop.nix`, `helix.nix`, and `yazi.nix` enable each Home Manager program module, which installs its package and manages its configuration. btop uses its built-in `TTY` colors with a transparent background. Helix uses `base16_transparent`, relative line numbers, and color-coded modes; its `defaultEditor` option sets `EDITOR` and `VISUAL` to `hx`. Yazi sorts names naturally with directories first and leaves other behavior, including hidden-file visibility, at its default. No theme packages, plugins, or language servers are added.
+
+Yazi's `y` wrapper is enabled for Fish and Nushell. It changes the shell's working directory to Yazi's final directory when the file manager exits. Edit the owning feature module and rebuild to change these managed configurations. Validate generated configuration and executable versions with `nix build --no-link path:.#checks.x86_64-linux.terminal-apps`; `shells` checks that both shell integrations load.
 
 ## Choosing Nushell or Fish
 

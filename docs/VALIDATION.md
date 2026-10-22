@@ -19,8 +19,8 @@ Updated: 22 October 2026. Run commands from the repository root. The commands an
 # Evaluate flake outputs without building checks or activating anything
 nix flake check --no-build path:.
 
-# Build all six checks in their respective Nix environments
-nix build --no-link path:.#checks.x86_64-linux.terminals path:.#checks.x86_64-linux.shells path:.#checks.x86_64-linux.seed-files path:.#checks.x86_64-linux.seed-integration path:.#checks.x86_64-linux.niri-config path:.#checks.x86_64-linux.mpv-config
+# Build all seven checks in their respective Nix environments
+nix build --no-link path:.#checks.x86_64-linux.terminal-apps path:.#checks.x86_64-linux.terminals path:.#checks.x86_64-linux.shells path:.#checks.x86_64-linux.seed-files path:.#checks.x86_64-linux.seed-integration path:.#checks.x86_64-linux.niri-config path:.#checks.x86_64-linux.mpv-config
 
 # Evaluate the fixture with all four terminal and shell combinations
 nix eval --impure --json --expr 'let flake = builtins.getFlake ("path:" + toString ./.); in builtins.map (selection: import ./tests/evaluate.nix ({ inherit flake; } // selection)) [ { defaultShell = "nushell"; defaultTerminal = "alacritty"; } { defaultShell = "fish"; defaultTerminal = "alacritty"; } { defaultShell = "nushell"; defaultTerminal = "kitty"; } { defaultShell = "fish"; defaultTerminal = "kitty"; } ]'
@@ -32,8 +32,9 @@ git diff --check
 | Check | Coverage |
 | --- | --- |
 | `terminals` | Home Manager's generated Alacritty TOML, shared TUIOS launcher, writable theme import, XDG selection of both desktop entries, and argument forwarding; isolated PTYs check Fish/Nushell login environment, cwd, SSH/nesting/bypass/TTY guards, and fallback with a stub TUIOS |
+| `terminal-apps` | Generated btop, Helix, and Yazi configuration values plus `--version` smoke tests for all three pinned packages |
 | `mpv-config` | English UI locale, video MIME defaults, parsing/script startup on pinned mpv, shaders/presets, writable volume/resume state, and FFmpeg thumbnails from two instances in a temporary home without a display |
-| `shells` | Fish/Nushell parsing and startup, login environment, Starship, aliases, and interactive/noninteractive greetings |
+| `shells` | Fish/Nushell parsing and startup, login environment, Starship, aliases, Yazi's `y` wrapper in both shells, and interactive/noninteractive greetings |
 | `seed-files` | Copy-once helper, preservation of user changes, and path/symlink protections |
 | `seed-integration` | Contents of all 17 Home Manager seeds, JSON, and preservation of edited DMS settings and Alacritty themes when the helper runs again |
 | `niri-config` | Base KDL validation without DMS fragments and with baseline DMS fragments |

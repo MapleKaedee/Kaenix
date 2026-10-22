@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-22 — Configured terminal utilities
+
+- Enable btop, Helix, and Yazi through their Home Manager program modules, with TTY colors and transparency for btop, the built-in transparent Helix theme and relative/color-coded modes, and natural directory-first Yazi sorting. Set `EDITOR` and `VISUAL` to `hx`, and enable Yazi's `y` wrapper in Fish and Nushell. Add no duplicate package entries, theme packages, plugins, or language servers.
+- Add one explicitly imported feature per application. Extend the fixture assertions, add generated-config and version smoke tests, and verify both shell wrappers in the existing shell check. Update configuration guidance and the context index while preserving the public README and lockfile.
+- Validation passes: flake evaluation, all four Nushell/Fish and Alacritty/Kitty fixture combinations, Nix formatting, tracked/new-file whitespace, and local Markdown link/anchor checks. The `terminal-apps` check parses generated btop/Helix/Yazi settings and their pinned `--version` commands; `shells` verifies the Fish and Nushell `y` wrappers load. Both checks build successfully, with application packages realized from the configured Nix caches.
+- No full system build, activation, GUI interaction, or runtime directory-change test is performed. Rebuild with `sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix#syrup`; after activation, verify `echo $EDITOR`/`echo $VISUAL`, open btop and Helix, then run `y` in both Fish and Nushell and confirm the shell returns in the selected directory. No commit or push is performed.
+
 ## 2026-10-22 — TUIOS automatic desktop startup
 
 - Install pinned nixpkgs TUIOS 0.10.0 through the user package list. Add an explicitly imported TUIOS feature that owns Kitty and Alacritty's shared default launcher, keeping `globals.defaultShell` as the login-shell selection and preserving the existing Kitty desktop default change.

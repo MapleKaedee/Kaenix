@@ -50,8 +50,9 @@
   ];
 
   # Packages installed through feature modules (not a transitive dependency list):
-  # - modules/apps/{alacritty,brave,kitty,mpv,steam}.nix: Alacritty, Brave, Kitty,
-  #   mpv, Steam/steam-run, Protontricks, Gamescope, and GameMode.
+  # - modules/apps/{alacritty,btop,brave,helix,kitty,mpv,steam,tuios,yazi}.nix:
+  #   Alacritty, btop, Brave, Helix, Kitty, mpv, Steam/steam-run, Protontricks,
+  #   Gamescope, GameMode, TUIOS, and Yazi.
   # - modules/shell/{fish,nushell,common,fastfetch,git}.nix:
   #   Fish/autopair, Nushell, Starship/eza, Fastfetch, and Home Manager's Git.
   # - modules/desktop/{niri,dms,theme}.nix: Niri, DMS/DankGreeter,

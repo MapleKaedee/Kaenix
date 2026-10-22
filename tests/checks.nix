@@ -1,5 +1,26 @@
 { pkgs, homeConfig }:
 {
+  terminal-apps =
+    pkgs.runCommand "kaenix-terminal-apps-test"
+      {
+        nativeBuildInputs = [
+          pkgs.python3
+          homeConfig.programs.btop.package
+          homeConfig.programs.helix.package
+          homeConfig.programs.yazi.package
+        ];
+        btopConfig = homeConfig.xdg.configFile."btop/btop.conf".source;
+        helixConfig = homeConfig.xdg.configFile."helix/config.toml".source;
+        yaziConfig = homeConfig.xdg.configFile."yazi/yazi.toml".source;
+      }
+      ''
+        export HOME="$TMPDIR/test-home"
+        export XDG_CONFIG_HOME="$HOME/.config"
+        mkdir -p "$XDG_CONFIG_HOME"
+        python3 ${./test_terminal_apps.py}
+        touch "$out"
+      '';
+
   terminals =
     let
       probe =
@@ -140,6 +161,7 @@
           set -gx XDG_STATE_HOME "$HOME/.local/state"
           set -gx STARSHIP_CONFIG "$XDG_CONFIG_HOME/starship.toml"
           functions --query fish_prompt; or exit 1
+          functions --query y; or exit 1
           test "$STARSHIP_SHELL" = fish; or exit 1
           fish_greeting
           echo kaenix-fish
@@ -152,7 +174,7 @@
         test "$(cat quiet.out)" = kaenix-quiet
         nu --login -c 'use std/assert; assert equal $env.BROWSER brave; assert (($env.PATH | describe) == "list<string>"); print "kaenix-login"' > login.out
         test "$(cat login.out)" = kaenix-login
-        nu --interactive --config "$XDG_CONFIG_HOME/nushell/config.nu" -c 'use std/assert; assert equal (ls | describe | str starts-with "table") true; assert (scope aliases | any {|a| $a.name == "ll" }); assert equal $env.STARSHIP_SHELL nu; print "kaenix-interactive"' > interactive.out
+        nu --interactive --config "$XDG_CONFIG_HOME/nushell/config.nu" -c 'use std/assert; assert equal (ls | describe | str starts-with "table") true; assert (scope aliases | any {|a| $a.name == "ll" }); assert (scope commands | any {|c| $c.name == "y" }); assert equal $env.STARSHIP_SHELL nu; print "kaenix-interactive"' > interactive.out
         test "$(grep -c 'Maple-Tree' interactive.out)" = 1
         grep -q '^kaenix-interactive$' interactive.out
         touch "$out"
