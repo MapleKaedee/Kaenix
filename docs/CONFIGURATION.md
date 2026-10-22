@@ -10,14 +10,14 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | --- | --- |
 | `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
-| `modules/apps/` | Alacritty, Brave, Kitty, mpv, and Steam configuration |
+| `modules/apps/` | Alacritty, Brave, Kitty, mpv, Steam, and TUIOS configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
 | `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
 | `modules/system/` | Base system settings, users, Nix, and Home Manager infrastructure |
 
 `configuration.nix` imports hardware settings and `modules/default.nix`, then sets the host identity, installation guard, bootloader, and system state version. Each category imports its features explicitly through `default.nix`.
 
-Each feature is one named file, such as `modules/apps/kitty.nix`. There are 27 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
+Each feature is one named file, such as `modules/apps/kitty.nix`. There are 28 features across six categories. NixOS settings are at the top level; Home Manager settings, where needed, are in an inline `home-manager.users.${globals.username}` module with its own `config`, `lib`, and `pkgs` arguments. Root `home.nix` only handles identity, state version, XDG, and Home Manager activation. There is no auto-discovery or new enable option.
 
 Add configured features to the relevant category's imports. For applications that only need installation, add their packages to `modules/packages.nix` without creating empty feature modules. Keep assets in `config/`, helpers in `lib/`, scripts in `scripts/`, and wallpapers in `collection/`. Preserve system/user package scope. Use `path:.` when checking new unstaged files.
 
@@ -31,7 +31,7 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 ## Centralized package lists
 
-`modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation.
+`modules/packages.nix` is imported by `modules/default.nix` and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list, with its terminal startup wiring owned by the TUIOS feature.
 
 The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, Kitty, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
 
@@ -71,7 +71,7 @@ The baseline `Mod+T` runs `xdg-terminal-exec`. Applications using this launcher 
 
 Alacritty uses JetBrainsMono Nerd Font Mono at size 12, 12 px padding, 0.5 opacity, hidden decorations, 3000 lines of scrollback, and a block cursor blinking every 1000 ms. `Ctrl+Shift+N` opens a new window; `Ctrl++`, `Ctrl+-`, and `Ctrl+0` control font size. Kitty tabs and its `Ctrl+T` shortcut remain in Kitty; the terminals do not have identical features.
 
-Alacritty's main configuration follows `globals.defaultShell` through the same shell helper as Kitty, with the `--login` argument. Colors are imported from `~/.config/alacritty/dank-theme.toml`, which is copied only if absent and can then be updated by DMS. The pinned DMS Alacritty template is enabled by default; if previously disabled through the GUI, enable it again in DMS theme settings. `runDmsMatugenTemplates` and `matugenTemplateAlacritty` remain GUI preferences. Do not add colors directly to the main configuration because they would override the imported file.
+Alacritty and Kitty use the shared [TUIOS startup launcher](#tuios-desktop-startup), which initializes `globals.defaultShell` in login mode. Colors are imported from `~/.config/alacritty/dank-theme.toml`, which is copied only if absent and can then be updated by DMS. The pinned DMS Alacritty template is enabled by default; if previously disabled through the GUI, enable it again in DMS theme settings. `runDmsMatugenTemplates` and `matugenTemplateAlacritty` remain GUI preferences. Do not add colors directly to the main configuration because they would override the imported file.
 
 ### One-time migration after first activation
 
@@ -101,6 +101,20 @@ Seed changes do not modify bindings already present in the home. After activatio
 ```
 
 This block preserves other bindings and does not run automatically during rebuilds. Once the binding uses the generic launcher, later changes to `globals.defaultTerminal` need no further migration. Verify `xdg-terminal-exec --print-id`, then test `Mod+T` and application launchers after logging in again. Do not replace the entire binding file or DMS directory with the baseline.
+
+## TUIOS desktop startup
+
+TUIOS is installed for `kaede` from pinned nixpkgs (0.10.0 when added). `modules/apps/tuios.nix` sets Kitty and Alacritty's default command to the shared `lib/terminal-session.nix` launcher. Each new window or tab using that command runs `tuios new`, creating a separate persistent session. Explicit commands such as `kitty -- nu` and `alacritty -e nu` bypass the launcher. Shell startup files have no TUIOS hook, so other terminal applications and Linux text consoles keep their normal shell.
+
+The launcher initializes `globals.defaultShell` with `--login -c`, restores the terminal's incoming working directory after login initialization, and sets `$SHELL` to the selected shell for TUIOS. Pane shells inherit the daemon's environment. A running daemon retains its existing environment and shell selection; changing `globals.defaultShell` requires finishing or saving its jobs, then stopping the daemon with `tuios kill-server` before opening a new session. That command terminates its running sessions. A user-set `appearance.preferred_shell` in TUIOS takes precedence over `$SHELL`.
+
+Startup is skipped when stdin or stdout is not a terminal, `TERM` is empty/dumb, `KAENIX_TUIOS_DISABLE=1`, or TUIOS/tmux/Zellij/SSH environment markers are present. Detaching (`Ctrl+B`, then `d`), quitting (`Ctrl+B`, then `q`), or startup failure returns to a normal login shell without automatically restarting TUIOS. Detach keeps the session running; quit ends that session. Use `tuios ls` to list sessions and `tuios attach NAME` to return to one.
+
+For a plain shell in a new window, run `env KAENIX_TUIOS_DISABLE=1 kitty` or `env KAENIX_TUIOS_DISABLE=1 alacritty`. From Nushell, use `with-env {KAENIX_TUIOS_DISABLE: "1"} { kitty }` if preferred. The bypass applies to that terminal's inherited environment.
+
+TUIOS preferences, history, and session data remain writable under its normal XDG locations; Kaenix does not deploy a TUIOS config file, systemd service, web listener, or agent integration. The daemon starts on demand. See the [pinned session documentation](https://github.com/Gaurav-Gosain/tuios/blob/v0.10.0/docs/SESSIONS.md) for persistence and recovery behavior.
+
+After rebuilding, open Kitty and Alacritty, check the selected shell and working directory in a pane, create another pane, and confirm no nested TUIOS appears. Open a second terminal to verify a separate session; detach and confirm the plain-shell fallback, then reattach by name. Also verify explicit-command and bypass launches. These GUI and persistence checks require the activated target session.
 
 ## Choosing Nushell or Fish
 

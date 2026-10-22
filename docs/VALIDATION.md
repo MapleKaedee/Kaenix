@@ -1,6 +1,6 @@
 # Kaenix validation
 
-Updated: 21 October 2026. Run commands from the repository root. The commands and coverage below follow the repository configuration; previously executed results are recorded in the [changelog](../CHANGELOG.md).
+Updated: 22 October 2026. Run commands from the repository root. The commands and coverage below follow the repository configuration; previously executed results are recorded in the [changelog](../CHANGELOG.md).
 
 ## Evidence scope
 
@@ -31,7 +31,7 @@ git diff --check
 
 | Check | Coverage |
 | --- | --- |
-| `terminals` | Home Manager's generated Alacritty TOML, login shell, writable theme import, XDG selection of both desktop entries, and argument forwarding without opening windows |
+| `terminals` | Home Manager's generated Alacritty TOML, shared TUIOS launcher, writable theme import, XDG selection of both desktop entries, and argument forwarding; isolated PTYs check Fish/Nushell login environment, cwd, SSH/nesting/bypass/TTY guards, and fallback with a stub TUIOS |
 | `mpv-config` | English UI locale, video MIME defaults, parsing/script startup on pinned mpv, shaders/presets, writable volume/resume state, and FFmpeg thumbnails from two instances in a temporary home without a display |
 | `shells` | Fish/Nushell parsing and startup, login environment, Starship, aliases, and interactive/noninteractive greetings |
 | `seed-files` | Copy-once helper, preservation of user changes, and path/symlink protections |

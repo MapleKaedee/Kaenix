@@ -1,27 +1,12 @@
 { globals, ... }:
 {
   home-manager.users.${globals.username} =
-    {
-      config,
-      lib,
-      pkgs,
-      globals,
-      ...
-    }:
+    { config, ... }:
     {
       programs.alacritty = {
         enable = true;
         settings = {
           general.import = [ "${config.xdg.configHome}/alacritty/dank-theme.toml" ];
-          terminal.shell = {
-            program = lib.getExe (
-              import ../../lib/shell-package.nix {
-                inherit lib pkgs;
-                name = globals.defaultShell;
-              }
-            );
-            args = [ "--login" ];
-          };
           font = {
             normal.family = "JetBrainsMono Nerd Font Mono";
             size = 12;

@@ -6,5 +6,6 @@
     ./kitty.nix
     ./mpv.nix
     ./steam.nix
+    ./tuios.nix
   ];
 }

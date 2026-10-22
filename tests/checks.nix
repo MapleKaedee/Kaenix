@@ -1,6 +1,20 @@
 { pkgs, homeConfig }:
 {
   terminals =
+    let
+      probe =
+        mode:
+        pkgs.writeShellScriptBin (if mode == "--probe" then "tuios" else "shell") ''
+          exec ${pkgs.python3}/bin/python3 ${./test_terminal_session.py} ${mode} "$@"
+        '';
+      testLauncher =
+        shell:
+        import ../lib/terminal-session.nix {
+          inherit (pkgs) lib;
+          inherit pkgs shell;
+          tuios = probe "--probe";
+        };
+    in
     pkgs.runCommand "kaenix-terminals-test"
       {
         nativeBuildInputs = [
@@ -12,6 +26,19 @@
         alacrittyConfig = homeConfig.xdg.configFile."alacritty/alacritty.toml".source;
         terminalList = homeConfig.xdg.configFile."xdg-terminals.list".source;
         shellProgram = homeConfig.programs.kitty.settings.shell;
+        sessionLaunchers = builtins.toJSON {
+          fish = {
+            launcher = testLauncher pkgs.fish;
+            shell = pkgs.lib.getExe pkgs.fish;
+          };
+          nushell = {
+            launcher = testLauncher pkgs.nushell;
+            shell = pkgs.lib.getExe pkgs.nushell;
+          };
+          probe = {
+            launcher = testLauncher (probe "--shell-probe");
+          };
+        };
         themePath = "${homeConfig.xdg.configHome}/alacritty/dank-theme.toml";
         themeSeed = ../config/alacritty/dank-theme.toml;
         terminalDataDirs = "${homeConfig.programs.alacritty.package}/share:${homeConfig.programs.kitty.package}/share";
@@ -30,6 +57,7 @@
         export XDG_CURRENT_DESKTOP=niri
         export XTE_CACHE_ENABLED=0
         python3 ${./test_terminals.py}
+        python3 ${./test_terminal_session.py}
         touch "$out"
       '';
 

@@ -26,6 +26,9 @@
     pkgs.osu-lazer-bin
     pkgs.spotify
 
+    # Terminal multiplexer; desktop startup is configured by the TUIOS feature.
+    pkgs.tuios
+
     # Gaming tools; Steam, Protontricks, Gamescope, and GameMode use the Steam feature.
     pkgs.protonplus
     pkgs.mangohud

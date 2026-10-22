@@ -14,6 +14,7 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 | Documentation lookup and version support | [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md); relevant pinned sources, overrides, and vendored provenance |
 | Git workflow, conventions, and authentication | [Kaenix Git](../.agents/skills/kaenix-git/SKILL.md), [commit-message standard](CONFIGURATION.md#commit-message-standard), and [GitHub authentication](CONFIGURATION.md#github-cli-authentication) |
 | Terminal and shell selection | [Terminal](CONFIGURATION.md#choosing-alacritty-or-kitty), [shell](CONFIGURATION.md#choosing-nushell-or-fish), and [binding migration](CONFIGURATION.md#one-time-migration-after-first-activation); shared globals and `modules/shell/` / `modules/apps/` |
+| TUIOS desktop startup | [TUIOS](CONFIGURATION.md#tuios-desktop-startup); `modules/apps/tuios.nix`, `lib/terminal-session.nix` |
 | Niri, DMS, and GUI baselines | [Writable settings](CONFIGURATION.md#writable-files-and-one-time-seeding); `modules/desktop/`, `config/`, `modules/system/home-manager.nix`, `scripts/seed-files.py` |
 | Scheduling and input updates | [LAVD](CONFIGURATION.md#lavd-cpu-scheduling) and [flake updates](CONFIGURATION.md#updating-flake-inputs); `modules/services/scx.nix`, `flake.nix` |
 | Video and gaming | [mpv](MPV.md) and [Steam](steam.md); owning modules in `modules/apps/` |

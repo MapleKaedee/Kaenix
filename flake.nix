@@ -44,7 +44,7 @@
         # Choose "nushell" or "fish" for login and both terminals.
         defaultShell = "nushell";
         # Choose "alacritty" or "kitty" for desktop terminal launchers.
-        defaultTerminal = "alacritty";
+        defaultTerminal = "kitty";
         installation = import ./installation.nix;
       };
     in

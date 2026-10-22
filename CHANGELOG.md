@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-22 — TUIOS automatic desktop startup
+
+- Install pinned nixpkgs TUIOS 0.10.0 through the user package list. Add an explicitly imported TUIOS feature that owns Kitty and Alacritty's shared default launcher, keeping `globals.defaultShell` as the login-shell selection and preserving the existing Kitty desktop default change.
+- Create a separate persistent session with `tuios new` for each default terminal launch. Initialize the selected shell in login mode, restore the incoming working directory, skip SSH/nested multiplexers/non-terminal input or output/empty or dumb TERM, and support `KAENIX_TUIOS_DISABLE=1`. Preserve explicit shell arguments; detach, quit, and startup failure return to a plain login shell without an automatic restart.
+- Keep TUIOS preferences and runtime data writable, with no managed TUIOS config, new service, or agent integration. Document bypass, session reattachment, daemon environment lifetime, safe shell-selection changes, activation, and runtime verification. Update the context index and validation coverage; retain the root README and lockfile.
+- Validation passes: flake evaluation, all four shell/terminal fixture combinations, Nix formatting, tracked/new-file whitespace, and 53 local documentation links/anchors. The terminal check builds and runs isolated PTY tests using real Fish/Nushell and a stub TUIOS for login initialization, directory restoration, argument boundaries, SSH/nesting/bypass/TTY guards, and successful/error fallback. The existing shell check is available from cache. TUIOS 0.10.0 is realized from the Nix cache; `--version` and `--help` succeed with a temporary home.
+- No full system build, activation, graphical startup, real session persistence test, commit, or push is performed. Verify both terminals, pane creation, separate sessions, detach/reattach, and bypass after activation.
+
 ## 2026-10-22 — Repository Git workflow skill
 
 - Add project-local `kaenix-git` with **Kaenix Git** metadata and default automatic discovery. Cover requested inspection, staging, commits, pushes, fetches, branch creation/switching, and fast-forward synchronization, using existing tools without new dependencies, hooks, helper scripts, or Git configuration changes.
