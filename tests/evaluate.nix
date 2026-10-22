@@ -12,7 +12,7 @@ let
       username = "kaede";
       hostname = "syrup";
       inherit defaultShell defaultTerminal;
-      installation = (import ../installation.nix) // {
+      installation = (import ../installation/installation.nix) // {
         hardwareReady = true;
         bootLoader = {
           systemd-boot.enable = true;

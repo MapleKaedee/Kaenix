@@ -43,7 +43,7 @@
               }
             '';
             extraLogin = ''
-              use ${../../../scripts/import-login-env.nu} load-posix-env
+              use ${../../scripts/import-login-env.nu} load-posix-env
               load-posix-env [
                 "${pkgs.bash}/bin/bash" "--noprofile" "--norc" "${loginEnvironment}"
               ]

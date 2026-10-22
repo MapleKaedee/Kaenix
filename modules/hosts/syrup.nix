@@ -1,18 +1,34 @@
 {
   config,
-  globals,
   inputs,
   ...
 }:
 let
+  globals = config.kaenix.users.kaede // {
+    hostname = "syrup";
+    installation = import ../../installation/installation.nix;
+  };
   features = config.flake.modules.nixos;
 in
 {
+  _module.args = { inherit globals; };
+
   flake.nixosConfigurations.${globals.hostname} = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
     specialArgs = { inherit globals inputs; };
     modules = [
-      ../../configuration.nix
+      ../../installation/hardware-configuration.nix
+      ({ globals, ... }: {
+        assertions = [
+          {
+            assertion = globals.installation.hardwareReady;
+            message = "kaenix: replace installation/hardware-configuration.nix and fill installation/installation.nix from the clean install before setting hardwareReady = true.";
+          }
+        ];
+        networking.hostName = globals.hostname;
+        system.stateVersion = globals.installation.systemStateVersion;
+      })
+      features.boot
       features.packages
       # Desktop.
       features.niri
@@ -46,21 +62,14 @@ in
       features.session
       features.scx
       # System.
+      features.networking
       features.base
       features.users
       features.nix
-      features.home-manager
+      features.seed-files
       inputs.chaotic.nixosModules.default
-      inputs.home-manager.nixosModules.home-manager
-      ({ globals, ... }: {
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
-        home-manager.extraSpecialArgs = { inherit globals inputs; };
-        home-manager.backupFileExtension = "pre-kaenix";
-        home-manager.overwriteBackup = false;
-        home-manager.sharedModules = [ inputs.dms.homeModules.dank-material-shell ];
-        home-manager.users.${globals.username} = import ../../home.nix;
-      })
+      features.home-manager
+      features.home
       # Preserve Kitty's merge position from the pilot, including seed order.
       features.kitty
     ];

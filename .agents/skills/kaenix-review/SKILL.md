@@ -40,7 +40,7 @@ change rather than applying a universal checklist to unrelated files.
 
 | Area affected | Review questions |
 | --- | --- |
-| Module wiring | Is discovery restricted to `parts/`, is each registered NixOS feature explicitly selected exactly once by the host, and are moved asset/helper paths valid? Are options in the correct flake-parts, registered NixOS, or inline Home Manager context, with lower-level globals preserved for fixture overrides? |
+| Module wiring | Is discovery restricted to `modules/`, is each registered NixOS feature explicitly selected exactly once by the host, and are moved asset/helper paths valid? Are options in the correct flake-parts, registered NixOS, or inline Home Manager context, with lower-level globals preserved for fixture overrides? Is user metadata distinct from applied account/HM settings, selected explicitly by the host, with installation data outside discovery? |
 | Package ownership | Are explicit packages in the centralized lists and in the intended system/user/font scope? Does a new explicit declaration unnecessarily duplicate a module-installed package, or is there a concrete reason for both scopes? |
 | Shared choices | Do login shell and terminal consumers follow the shared globals, retaining supported alternatives and forwarding arguments correctly? |
 | Writable settings | Do seeds preserve existing files and avoid competing writers/store symlinks? Does an intended change for existing homes need a documented targeted migration? |

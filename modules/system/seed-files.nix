@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.modules.nixos.home-manager =
+  flake.modules.nixos.seed-files =
     { globals, ... }:
     {
       home-manager.users.${globals.username} =
@@ -29,7 +29,7 @@
           config.home.activation.kaenixSeedFiles =
             lib.hm.dag.entryBetween [ "reloadSystemd" ] [ "linkGeneration" ]
               ''
-                run ${pkgs.python3}/bin/python3 ${../../../scripts/seed-files.py} \
+                run ${pkgs.python3}/bin/python3 ${../../scripts/seed-files.py} \
                   --home ${lib.escapeShellArg config.home.homeDirectory} \
                   --manifest ${manifest}
               '';

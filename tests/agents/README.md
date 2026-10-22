@@ -11,9 +11,10 @@ grading criteria. Fixture paths and values are synthetic, not deployment targets
 For a changed decision, select the cases covering that boundary. Wording-only
 changes need static checks and a check that scenarios still agree with guidance,
 not a model run. The initial diagnostic set is B02, B03, B06, and B07; omitted
-cases have no model result. The dendritic structure refresh affects B02–B05:
-registered feature context, writable seed paths, centralized package placement,
-and explicit host selection. Static fixture inspection does not rerun these cases
+cases have no model result. Catalog version 5 refreshes B01–B05 for the `modules/` layout:
+B01 reads user metadata defaults, B02 retains the inline Home Manager argument
+defect, B03/B05 use the shorter asset path, and B04 retains centralized package
+placement and explicit host selection. Static fixture inspection does not rerun these cases
 or establish fresh-chat instruction loading or runtime model routing.
 Do not add a model trial to routine configuration
 validation merely because this directory exists.

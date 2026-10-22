@@ -17,7 +17,7 @@
               general.import = [ "${config.xdg.configHome}/alacritty/dank-theme.toml" ];
               terminal.shell = {
                 program = lib.getExe (
-                  import ../../../lib/shell-package.nix {
+                  import ../../lib/shell-package.nix {
                     inherit lib pkgs;
                     name = globals.defaultShell;
                   }
@@ -71,7 +71,7 @@
           kaenix.seedFiles = [
             {
               target = ".config/alacritty/dank-theme.toml";
-              source = ../../../config/alacritty/dank-theme.toml;
+              source = ../../config/alacritty/dank-theme.toml;
             }
           ];
         };

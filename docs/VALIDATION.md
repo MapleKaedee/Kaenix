@@ -25,6 +25,9 @@ nix build --no-link path:.#checks.x86_64-linux.kae path:.#checks.x86_64-linux.te
 # Evaluate the fixture with all four terminal and shell combinations
 nix eval --impure --json --expr 'let flake = builtins.getFlake ("path:" + toString ./.); in builtins.map (selection: import ./tests/evaluate.nix ({ inherit flake; } // selection)) [ { defaultShell = "nushell"; defaultTerminal = "alacritty"; } { defaultShell = "fish"; defaultTerminal = "alacritty"; } { defaultShell = "nushell"; defaultTerminal = "kitty"; } { defaultShell = "fish"; defaultTerminal = "kitty"; } ]'
 
+# Evaluate typed user preferences, output wiring, readiness, and host-free discovery
+nix eval --impure --json --no-update-lock-file --file tests/ownership.nix
+
 # Check whitespace in tracked changes
 git diff --check
 ```
@@ -65,7 +68,7 @@ nix eval --impure --json --no-update-lock-file --option allow-import-from-deriva
   }'
 ```
 
-Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all eight existing checks for an infrastructure migration. Compare the registered module inventory with the explicit host selections: each of the 32 registered NixOS modules must be selected exactly once. Confirm that discovering feature definitions alone creates no hosts. Compare evaluated system/user/font package selections and seed manifests before and after migration; require unique seed targets and unchanged contents. Test preservation of edited seed files in disposable homes, never the real home.
+Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all eight existing checks for an infrastructure migration. Compare the registered module inventory with the explicit host selections: each of the 36 registered NixOS modules must be selected exactly once. Confirm that loading module definitions, including the typed user schema and metadata but excluding `modules/hosts/syrup.nix` and `modules/outputs.nix`, creates no hosts. Evaluate both supported shell/terminal metadata values and reject invalid values through the typed `kaenix.users` options; separately confirm lower-level globals overrides remain effective. Exercise the readiness assertion with `installation/installation.nix` data overridden in a disposable fixture, never by editing the real installation or bypassing the deployment guard. Compare evaluated system/user/font package selections and seed manifests before and after migration; require unique seed targets and unchanged contents. Test preservation of edited seed files in disposable homes, never the real home.
 
 Matching derivations establish equality for those generated outputs. Investigate differing paths with `nix derivation show` before accepting a refactor. Module reordering can change seed-list order and consequently manifest, activation, dependent system, and `seed-integration` derivations. Trace each difference to ordering or a substantive declaration change; compare seed manifests by target and content, package selections by their intended scope, and generated shell/terminal configurations. Do not assume every changed path is incidental or claim byte-identical outputs when order differs. Record which check results were freshly executed and which were reused from the store or substituted. These checks do not build or activate the full system or test the desktop session.
 

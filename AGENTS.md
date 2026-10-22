@@ -28,11 +28,11 @@ configuration, focused changes, and maintainability.
 See [configuration ownership](docs/CONFIGURATION.md#modules-by-category) for the
 directory map. Follow existing patterns; abstractions must reduce duplication or
 improve clarity. Each configured feature uses one named `.nix` file under
-`parts/features/<category>/`, registering `flake.modules.nixos.<name>`.
-`import-tree` discovers flake-parts modules only under `parts/`;
-`parts/hosts/syrup.nix` explicitly selects each registered NixOS module.
+`modules/<category>/`, registering `flake.modules.nixos.<name>`.
+`import-tree` discovers flake-parts modules only under `modules/`;
+`modules/hosts/syrup.nix` explicitly selects each registered NixOS module.
 Registration alone does not enable a feature. Do not extend discovery beyond
-`parts/` or introduce feature toggles without a need.
+`modules/` or introduce feature toggles without a need.
 
 Flake-parts `config` describes flake outputs; it is distinct from NixOS and Home
 Manager `config`. Put NixOS settings inside the registered module. Keep
@@ -40,17 +40,24 @@ Manager `config`. Put NixOS settings inside the registered module. Keep
 override them; do not capture the flake-parts argument inside a registered module.
 Keep Home Manager settings in an inline
 `home-manager.users.${globals.username}` module with its own required
-`config`/`lib`/`pkgs` arguments. Shared identity/XDG settings stay in root
-`home.nix`; assets stay in `config/`.
+`config`/`lib`/`pkgs` arguments. Shared Home Manager identity/XDG settings stay in
+`modules/system/home.nix`; assets stay in `config/`.
+
+`modules/users/kaede.nix` defines typed user metadata, not a NixOS account
+module. `modules/system/users.nix` declares its schema and registers the account
+module. The host explicitly selects the record, hostname, and `installation/`
+data and assembles globals for flake outputs and lower-level module arguments.
+Keep generated hardware and installation data outside module discovery.
 
 Keep explicit `environment.systemPackages`, `home.packages`, and `fonts.packages`
-in `parts/features/packages.nix`, registered as `packages` and explicitly selected
+in `modules/packages.nix`, registered as `packages` and explicitly selected
 by the host. Package-only requests belong there, without a new feature module.
 Enable flags, driver/kernel choices, cursor packages, and executable references
 stay with features; do not duplicate module-installed packages. Package-module
 comments are a guide, not a transitive dependency inventory.
 
-Use globals for shared values. `globals.defaultShell` aligns the login shell,
+Change shared user defaults in `modules/users/kaede.nix`; use the assembled
+globals in NixOS and Home Manager modules. `globals.defaultShell` aligns the login shell,
 Alacritty, and Kitty while retaining Nushell/Fish. `globals.defaultTerminal`
 aligns `TERMINAL` and `xdg-terminal-exec` while retaining Alacritty/Kitty. Niri's
 default binding uses `xdg-terminal-exec`; existing writable bindings need a

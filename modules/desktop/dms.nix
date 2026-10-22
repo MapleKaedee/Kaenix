@@ -30,7 +30,7 @@
         let
           videoName = "moonlit-blade-of-the-white-dragon.3840x2160.mp4";
           wallpaper = "${config.home.homeDirectory}/Pictures/Wallpapers/${videoName}";
-          settings = import ../../../config/dms/settings.nix { configHome = config.xdg.configHome; };
+          settings = import ../../config/dms/settings.nix { configHome = config.xdg.configHome; };
           pluginSettings = {
             catWidget.enabled = true;
             mpvpaper = {
@@ -57,7 +57,7 @@
               mpvpaper.src = inputs.mpvpaper-plugin;
             };
           };
-          home.file."Pictures/Wallpapers/${videoName}".source = ../../../collection + "/${videoName}";
+          home.file."Pictures/Wallpapers/${videoName}".source = ../../collection + "/${videoName}";
           kaenix.seedFiles = [
             {
               target = ".config/dms/settings.json";
@@ -73,7 +73,7 @@
             }
             {
               target = ".config/dms/themes/catppuccin/theme.json";
-              source = ../../../config/dms/catppuccin.json;
+              source = ../../config/dms/catppuccin.json;
             }
           ];
         };

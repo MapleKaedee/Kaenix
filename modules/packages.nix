@@ -59,19 +59,19 @@
       ];
 
       # Packages installed through feature modules (not a transitive dependency list):
-      # - parts/features/apps/kitty.nix: Kitty.
-      # - parts/features/apps/{alacritty,btop,brave,helix,mpv,steam,yazi}.nix:
+      # - modules/apps/kitty.nix: Kitty.
+      # - modules/apps/{alacritty,btop,brave,helix,mpv,steam,yazi}.nix:
       #   Alacritty, btop, Brave, Helix, mpv, Steam/steam-run, Protontricks,
       #   Gamescope, GameMode, and Yazi.
-      # - parts/features/shell/{fish,nushell,common,fastfetch,git}.nix:
+      # - modules/shell/{fish,nushell,common,fastfetch,git}.nix:
       #   Fish/autopair, Nushell, Starship/eza, Fastfetch, and Home Manager's Git.
-      # - parts/features/desktop/{niri,dms,theme}.nix: Niri, DMS/DankGreeter,
+      # - modules/desktop/{niri,dms,theme}.nix: Niri, DMS/DankGreeter,
       #   DMS integrations, xdg-terminal-exec, and the Adwaita cursor package.
-      # - parts/features/hardware/: NVIDIA, ASUS utilities, OpenTabletDriver,
+      # - modules/hardware/: NVIDIA, ASUS utilities, OpenTabletDriver,
       #   Bluetooth, and power management through their modules.
-      # - parts/features/services/: audio, printing, automount, session integrations,
+      # - modules/services/: audio, printing, automount, session integrations,
       #   and SCX schedulers.
-      # - parts/features/system/: kernel, networking, Nix, and Home Manager infrastructure.
+      # - modules/system/: kernel, networking, Nix, and Home Manager infrastructure.
       # Keep enable flags and package selections alongside those configurations.
     };
 }

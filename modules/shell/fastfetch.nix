@@ -8,9 +8,9 @@
         {
           programs.fastfetch = {
             enable = true;
-            settings = builtins.fromJSON (builtins.readFile ../../../config/fastfetch/settings.json);
+            settings = builtins.fromJSON (builtins.readFile ../../config/fastfetch/settings.json);
           };
-          xdg.configFile."fastfetch/hakufetch.txt".source = ../../../config/fastfetch/hakufetch.txt;
+          xdg.configFile."fastfetch/hakufetch.txt".source = ../../config/fastfetch/hakufetch.txt;
         };
     };
 }

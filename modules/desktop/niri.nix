@@ -8,7 +8,7 @@
       ...
     }:
     let
-      terminal = import ../../../lib/terminal-package.nix {
+      terminal = import ../../lib/terminal-package.nix {
         inherit lib pkgs;
         name = globals.defaultTerminal;
       };
@@ -27,11 +27,11 @@
             enable = true;
             settings.default = [ terminalDesktop ];
           };
-          xdg.configFile."niri/config.kdl".text = builtins.readFile ../../../config/niri/config.kdl;
+          xdg.configFile."niri/config.kdl".text = builtins.readFile ../../config/niri/config.kdl;
           kaenix.seedFiles = map (name: {
             target = ".config/niri/dms/${name}";
-            source = ../../../config/niri/dms + "/${name}";
-          }) (lib.attrNames (builtins.readDir ../../../config/niri/dms));
+            source = ../../config/niri/dms + "/${name}";
+          }) (lib.attrNames (builtins.readDir ../../config/niri/dms));
         };
     };
 }

@@ -16,7 +16,7 @@
             settings = {
               shell = "${
                 lib.getExe (
-                  import ../../../lib/shell-package.nix {
+                  import ../../lib/shell-package.nix {
                     inherit lib pkgs;
                     name = globals.defaultShell;
                   }
@@ -52,11 +52,11 @@
           kaenix.seedFiles = [
             {
               target = ".config/kitty/dank-tabs.conf";
-              source = ../../../config/kitty/dank-tabs.conf;
+              source = ../../config/kitty/dank-tabs.conf;
             }
             {
               target = ".config/kitty/dank-theme.conf";
-              source = ../../../config/kitty/dank-theme.conf;
+              source = ../../config/kitty/dank-theme.conf;
             }
           ];
         };

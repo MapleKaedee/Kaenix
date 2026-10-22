@@ -8,7 +8,7 @@
       ...
     }:
     {
-      users.users.${globals.username}.shell = import ../../../lib/shell-package.nix {
+      users.users.${globals.username}.shell = import ../../lib/shell-package.nix {
         inherit lib pkgs;
         name = globals.defaultShell;
       };

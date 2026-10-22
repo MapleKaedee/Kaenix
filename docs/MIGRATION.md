@@ -4,7 +4,7 @@ Updated: 22 October 2026. Use this guide for reinstallation or adaptation to ano
 
 ## Current configuration
 
-The repository is at `/home/kaede/Kaenix` and targets NixOS host `syrup` with user `kaede`. `installation.nix` contains `hardwareReady = true`, UEFI systemd-boot, and both `systemStateVersion` and `homeStateVersion` set to `26.05`. The hardware configuration UUIDs matched the machine's mounts during the 18 October 2026 review.
+The repository is at `/home/kaede/Kaenix` and targets NixOS host `syrup` with user `kaede`. `installation/installation.nix` contains `hardwareReady = true`, UEFI systemd-boot, and both `systemStateVersion` and `homeStateVersion` set to `26.05`. The hardware configuration UUIDs matched the machine's mounts during the 18 October 2026 review.
 
 This does not guarantee compatibility with another machine.
 
@@ -12,11 +12,11 @@ This does not guarantee compatibility with another machine.
 
 1. Create and verify a [backup](BACKUP.md) before erasing or replacing an installation. The repository does not store application accounts, credentials, or the user's osu! data.
 2. Complete a basic installation that can boot. Ensure that the target account has a password and that a copy of the installer's configuration is available for recovery.
-3. During adaptation, block deployment with `hardwareReady = false` until the target hardware and bootloader have been checked.
-4. Replace `hardware-configuration.nix` with the configuration generated on the target. Preserve the mounts, subvolumes, swap, and initrd settings required by that installation.
-5. Copy the appropriate bootloader settings from the installer's configuration to `installation.nix`. The hardware file does not automatically contain all bootloader settings.
+3. During adaptation, block deployment with `hardwareReady = false` in `installation/installation.nix` until the target hardware and bootloader have been checked. The host readiness assertion blocks deployment; never bypass it for a real installation.
+4. Replace `installation/hardware-configuration.nix` with the configuration generated on the target. Preserve the mounts, subvolumes, swap, and initrd settings required by that installation.
+5. Copy the appropriate bootloader settings from the installer's configuration to `installation/installation.nix`. The hardware file does not automatically contain all bootloader settings.
 6. Preserve the installation's state versions. For a new home, choose an appropriate Home Manager baseline. The repository's `26.05` values do not need to increase when the OS or packages are updated.
-7. Review the username/hostname in `flake.nix`, AMD/NVIDIA configuration and PCI addresses, kernel, ASUS/tablet devices, and monitor/wallpaper outputs in the Niri/DMS assets. Preserve installer-specific requirements such as secure boot where applicable.
+7. Review user metadata in `modules/users/kaede.nix`, the selected record and hostname in `modules/hosts/syrup.nix`, AMD/NVIDIA configuration and PCI addresses, kernel in `modules/system/boot.nix`, ASUS/tablet devices, and monitor/wallpaper outputs in the Niri/DMS assets. Preserve installer-specific requirements such as secure boot where applicable.
 8. Once the target configuration is correct, set `hardwareReady = true`. Do not deploy the synthetic disk fixture in `tests/evaluate.nix`.
 
 The current configuration uses systemd-boot. If the target uses GRUB or another bootloader, use the target configuration that already boots successfully; do not automatically copy the repository's bootloader choice.

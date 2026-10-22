@@ -1,6 +1,6 @@
 {
   "suite": "kaenix-agent-behavior",
-  "version": 4,
+  "version": 5,
   "scenarios": [
     {
       "id": "B01",
@@ -8,7 +8,7 @@
       "skills": [".agents/skills/kaenix-feature/SKILL.md"],
       "request": "The default terminal has changed to Alacritty. Propose the documentation updates needed to reflect it. The fixture is the complete available checkout.",
       "files": {
-        "globals.nix": "{ defaultTerminal = \"alacritty\"; }\n",
+        "modules/users/kaede.nix": "{ ... }: { kaenix.users.kaede = { username = \"kaede\"; defaultShell = \"nushell\"; defaultTerminal = \"alacritty\"; }; }\n",
         "README.md": "# Kaenix\n\nThe default terminal is Kitty.\n",
         "docs/CONFIGURATION.md": "# Terminal selection\n\nThe default terminal is Kitty; Alacritty remains available.\n",
         "CHANGELOG.md": "# Changelog\n\n## 2026-10-20\n\n- Kitty is selected as the default terminal.\n"
@@ -30,8 +30,8 @@
       "skills": [".agents/skills/kaenix-review/SKILL.md"],
       "request": "Review this change for actionable defects. The diff and current module below are the complete available source; no checks have been run.",
       "files": {
-        "evidence/change.diff": "diff --git a/parts/features/apps/kitty.nix b/parts/features/apps/kitty.nix\n--- a/parts/features/apps/kitty.nix\n+++ b/parts/features/apps/kitty.nix\n@@ -7,6 +7,7 @@\n         { ... }:\n         {\n           programs.kitty.enable = true;\n+          programs.kitty.settings.shell = lib.getExe pkgs.nushell;\n         };\n     };\n }\n",
-        "parts/features/apps/kitty.nix": "{ ... }:\n{\n  flake.modules.nixos.kitty =\n    { globals, ... }:\n    {\n      home-manager.users.${globals.username} =\n        { ... }:\n        {\n          programs.kitty.enable = true;\n          programs.kitty.settings.shell = lib.getExe pkgs.nushell;\n        };\n    };\n}\n"
+        "evidence/change.diff": "diff --git a/modules/apps/kitty.nix b/modules/apps/kitty.nix\n--- a/modules/apps/kitty.nix\n+++ b/modules/apps/kitty.nix\n@@ -7,6 +7,7 @@\n         { ... }:\n         {\n           programs.kitty.enable = true;\n+          programs.kitty.settings.shell = lib.getExe pkgs.nushell;\n         };\n     };\n }\n",
+        "modules/apps/kitty.nix": "{ ... }:\n{\n  flake.modules.nixos.kitty =\n    { globals, ... }:\n    {\n      home-manager.users.${globals.username} =\n        { ... }:\n        {\n          programs.kitty.enable = true;\n          programs.kitty.settings.shell = lib.getExe pkgs.nushell;\n        };\n    };\n}\n"
       },
       "required": [
         "Report the newly introduced undefined lib and pkgs references in the inline Home Manager module, with the affected line or an equivalent precise location.",
@@ -55,7 +55,7 @@
         "config/niri/dms/binds.kdl": "binds {\n    Mod+T { spawn \"alacritty\"; }\n    Mod+E { spawn \"nautilus\"; }\n}\n",
         "evidence/seed-contract.md": "Activation copies a seed only when the target is absent. Existing files, including empty files and symlinks, are preserved. The Niri fragment is writable and DMS can save it.\n",
         "existing-home/.config/niri/dms/binds.kdl": "binds {\n    Mod+T { spawn \"kitty\"; }\n    Mod+E { spawn \"thunar\"; }\n}\n",
-        "parts/features/desktop/niri.nix": "{ ... }:\n{\n  flake.modules.nixos.niri =\n    { globals, ... }:\n    {\n      home-manager.users.${globals.username}.kaenix.seedFiles = [ {\n        target = \".config/niri/dms/binds.kdl\";\n        source = ../../../config/niri/dms/binds.kdl;\n      } ];\n    };\n}\n"
+        "modules/desktop/niri.nix": "{ ... }:\n{\n  flake.modules.nixos.niri =\n    { globals, ... }:\n    {\n      home-manager.users.${globals.username}.kaenix.seedFiles = [ {\n        target = \".config/niri/dms/binds.kdl\";\n        source = ../../config/niri/dms/binds.kdl;\n      } ];\n    };\n}\n"
       },
       "required": [
         "Propose changing only Mod+T in config/niri/dms/binds.kdl to spawn xdg-terminal-exec, preserving the repository Mod+E binding.",
@@ -76,11 +76,11 @@
       "skills": [".agents/skills/kaenix-feature/SKILL.md"],
       "request": "Add jq for my user account. I do not need any application configuration. The pinned package set includes pkgs.jq. Propose the smallest change using the complete source below.",
       "files": {
-        "parts/hosts/syrup.nix": "{ config, inputs, ... }: { flake.nixosConfigurations.syrup = inputs.nixpkgs.lib.nixosSystem { modules = [ config.flake.modules.nixos.packages ]; }; }\n",
-        "parts/features/packages.nix": "{ ... }:\n{\n  flake.modules.nixos.packages =\n    { globals, pkgs, ... }:\n    {\n      environment.systemPackages = [ pkgs.git ];\n      home-manager.users.${globals.username}.home.packages = [ pkgs.ripgrep ];\n      fonts.packages = [ pkgs.noto-fonts ];\n    };\n}\n"
+        "modules/hosts/syrup.nix": "{ config, inputs, ... }: { flake.nixosConfigurations.syrup = inputs.nixpkgs.lib.nixosSystem { modules = [ config.flake.modules.nixos.packages ]; }; }\n",
+        "modules/packages.nix": "{ ... }:\n{\n  flake.modules.nixos.packages =\n    { globals, pkgs, ... }:\n    {\n      environment.systemPackages = [ pkgs.git ];\n      home-manager.users.${globals.username}.home.packages = [ pkgs.ripgrep ];\n      fonts.packages = [ pkgs.noto-fonts ];\n    };\n}\n"
       },
       "required": [
-        "Propose adding pkgs.jq to the existing user home.packages list in parts/features/packages.nix.",
+        "Propose adding pkgs.jq to the existing user home.packages list in modules/packages.nix.",
         "Preserve existing packages, imports, and other package scopes.",
         "Select proportionate evaluation and format checks as proposals, without claiming to have run them."
       ],
@@ -96,10 +96,10 @@
       "skills": [".agents/skills/kaenix-validate/SKILL.md"],
       "request": "How would you validate this change? A new Niri baseline fragment and its existing module reference are untracked. The fixture records the complete available diff and check inventory. No commands have run in this exercise.",
       "files": {
-        "evidence/status.txt": "?? config/niri/dms/binds.kdl\n?? parts/features/desktop/niri.nix\nflake.lock and the index are unchanged.\n",
+        "evidence/status.txt": "?? config/niri/dms/binds.kdl\n?? modules/desktop/niri.nix\nflake.lock and the index are unchanged.\n",
         "config/niri/dms/binds.kdl": "binds { Mod+T { spawn \"xdg-terminal-exec\"; } }\n",
-        "evidence/check-inventory.md": "The fixture's flake exposes x86_64-linux checks: niri-config validates the Niri base and DMS fragments; seed-files tests the copy-once helper; seed-integration checks Home Manager seed declarations and preservation. Other checks cover shells, terminals, and mpv. The flake discovers the registered niri feature under parts/; parts/hosts/syrup.nix explicitly selects it.\n",
-        "parts/features/desktop/niri.nix": "{ ... }:\n{\n  flake.modules.nixos.niri =\n    { globals, ... }:\n    {\n      home-manager.users.${globals.username}.kaenix.seedFiles = [ {\n        target = \".config/niri/dms/binds.kdl\";\n        source = ../../../config/niri/dms/binds.kdl;\n      } ];\n    };\n}\n"
+        "evidence/check-inventory.md": "The fixture's flake exposes x86_64-linux checks: niri-config validates the Niri base and DMS fragments; seed-files tests the copy-once helper; seed-integration checks Home Manager seed declarations and preservation. Other checks cover shells, terminals, and mpv. The flake discovers the registered niri feature under modules/; modules/hosts/syrup.nix explicitly selects it.\n",
+        "modules/desktop/niri.nix": "{ ... }:\n{\n  flake.modules.nixos.niri =\n    { globals, ... }:\n    {\n      home-manager.users.${globals.username}.kaenix.seedFiles = [ {\n        target = \".config/niri/dms/binds.kdl\";\n        source = ../../config/niri/dms/binds.kdl;\n      } ];\n    };\n}\n"
       },
       "required": [
         "Propose lock-preserving flake evaluation and the niri-config, seed-files, and seed-integration checks, using path:. and --no-link on builds.",

@@ -27,7 +27,7 @@ changes to understand dependencies rather than matching filenames alone.
 
 ## Select checks from the actual implementation
 
-Read `flake.nix`, `parts/outputs.nix`, `parts/hosts/syrup.nix`, `tests/checks.nix`,
+Read `flake.nix`, `modules/outputs.nix`, `modules/hosts/syrup.nix`, `tests/checks.nix`,
 the `tests/evaluate.nix` fixture, and relevant tests to confirm current check names, coverage, and dependencies. The table below
 is selection guidance, not a fixed inventory of flake outputs. Combine checks
 for mixed changes without running duplicates.
@@ -61,7 +61,11 @@ For dendritic infrastructure changes, record baseline and post-change derivation
 paths for the system toplevel, Home Manager activation package, default package,
 `kae`, formatter, and each check. Compare existing public output names and verify
 every registered `modules.nixos` feature is explicitly selected exactly once by
-the host. Compare the four shell/terminal fixture results, system/user/font
+the host. Confirm schema and user metadata definitions load without a host
+when host/output modules are excluded. Validate supported and invalid named user
+preferences through the typed `kaenix.users` options, separately preserve
+lower-level globals overrides, and exercise the installation readiness guard in
+a disposable fixture. Compare the four shell/terminal fixture results, system/user/font
 package selections, and seed manifests by target and content. Require unique
 seed targets and test preservation in disposable homes. Trace changed derivations
 to incidental order differences or actual declaration changes; do not assume
@@ -70,7 +74,7 @@ Use a disposable baseline checkout without changing the current index or working
 tree; preserve the baseline lockfile and document any unavailable baseline.
 Run all eight checks for a full infrastructure migration: `kae`, `terminal-apps`,
 `terminals`, `mpv-config`, `shells`, `seed-files`, `niri-config`, and
-`seed-integration`; confirm this inventory against `parts/outputs.nix` and
+`seed-integration`; confirm this inventory against `modules/outputs.nix` and
 `tests/checks.nix` before running. Matching derivations are equivalence evidence
 for those outputs, not a full system build or runtime test. Record fresh execution,
 cached realization, and substituted results separately.

@@ -10,21 +10,22 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 
 | Task | Guide and implementation |
 | --- | --- |
-| Modules and packages | [Configuration ownership](CONFIGURATION.md#modules-by-category); `parts/features/`, `parts/hosts/syrup.nix` |
+| Modules and packages | [Configuration ownership](CONFIGURATION.md#modules-by-category); `modules/`, `modules/hosts/syrup.nix` |
 | Kaenix management, monitored builds, updates, and help | [kae](CONFIGURATION.md#kaenix-management-with-kae); `scripts/kae.nu`, `lib/kae.nix` |
-| Flake structure and dendritic features | [Feature registration and host selection](CONFIGURATION.md#dendritic-features-and-flake-outputs); `flake.nix`, `parts/` |
-| Default system builds and build monitoring | [Default build target and nom](CONFIGURATION.md#monitoring-nix-builds); `parts/outputs.nix` |
+| User defaults and host identity | [Ownership and metadata](CONFIGURATION.md#dendritic-features-and-flake-outputs); `modules/users/kaede.nix`, `modules/hosts/syrup.nix`, `installation/` |
+| Flake structure and dendritic features | [Feature registration and host selection](CONFIGURATION.md#dendritic-features-and-flake-outputs); `flake.nix`, `modules/` |
+| Default system builds and build monitoring | [Default build target and nom](CONFIGURATION.md#monitoring-nix-builds); `modules/outputs.nix` |
 | Documentation lookup and version support | [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md); relevant pinned sources, overrides, and vendored provenance |
 | Git workflow, conventions, and authentication | [Kaenix Git](../.agents/skills/kaenix-git/SKILL.md), [commit-message standard](CONFIGURATION.md#commit-message-standard), and [GitHub authentication](CONFIGURATION.md#github-cli-authentication) |
-| Terminal and shell selection | [Terminal](CONFIGURATION.md#choosing-alacritty-or-kitty), [shell](CONFIGURATION.md#choosing-nushell-or-fish), and [binding migration](CONFIGURATION.md#one-time-migration-after-first-activation); shared globals, `parts/features/shell/`, `parts/features/apps/`, and `parts/features/apps/kitty.nix` |
-| Manual TUIOS sessions | [TUIOS](CONFIGURATION.md#manual-tuios-sessions); package in `parts/features/packages.nix` |
-| Terminal utilities | [btop, Helix, and Yazi](CONFIGURATION.md#btop-helix-and-yazi); `parts/features/apps/` and `parts/features/shell/common.nix` |
-| Niri, DMS path migration, and GUI baselines | [Writable settings and DMS path migration](CONFIGURATION.md#writable-files-and-one-time-seeding); `parts/features/desktop/`, `config/`, `parts/features/system/home-manager.nix`, `scripts/seed-files.py` |
-| Scheduling and input updates | [LAVD](CONFIGURATION.md#lavd-cpu-scheduling) and [flake updates](CONFIGURATION.md#updating-flake-inputs); `parts/features/services/scx.nix`, `flake.nix` |
-| Removable-media automount and udiskie build failures | [Automount and the udiskie test workaround](CONFIGURATION.md#removable-media-automount-and-the-udiskie-test-workaround); `parts/features/services/automount.nix` |
-| Video and gaming | [mpv](MPV.md) and [Steam](steam.md); owning modules in `parts/features/apps/` |
+| Terminal and shell selection | [Terminal](CONFIGURATION.md#choosing-alacritty-or-kitty), [shell](CONFIGURATION.md#choosing-nushell-or-fish), and [binding migration](CONFIGURATION.md#one-time-migration-after-first-activation); `modules/users/kaede.nix`, assembled globals, `modules/shell/`, `modules/apps/`, and `modules/apps/kitty.nix` |
+| Manual TUIOS sessions | [TUIOS](CONFIGURATION.md#manual-tuios-sessions); package in `modules/packages.nix` |
+| Terminal utilities | [btop, Helix, and Yazi](CONFIGURATION.md#btop-helix-and-yazi); `modules/apps/` and `modules/shell/common.nix` |
+| Niri, DMS path migration, and GUI baselines | [Writable settings and DMS path migration](CONFIGURATION.md#writable-files-and-one-time-seeding); `modules/desktop/`, `config/`, `modules/system/seed-files.nix`, `scripts/seed-files.py` |
+| Scheduling and input updates | [LAVD](CONFIGURATION.md#lavd-cpu-scheduling) and [flake updates](CONFIGURATION.md#updating-flake-inputs); `modules/services/scx.nix`, `flake.nix` |
+| Removable-media automount and udiskie build failures | [Automount and the udiskie test workaround](CONFIGURATION.md#removable-media-automount-and-the-udiskie-test-workaround); `modules/services/automount.nix` |
+| Video and gaming | [mpv](MPV.md) and [Steam](steam.md); owning modules in `modules/apps/` |
 | Validation, reviews, and debugging | [Validation](VALIDATION.md); `tests/` and the linked project skills |
-| Reinstallation or another device | [Migration](MIGRATION.md); installation and hardware configuration |
+| Reinstallation or another device | [Migration](MIGRATION.md); `installation/`, `modules/hosts/syrup.nix`, and `modules/users/kaede.nix` |
 | Backups and recovery guidance | [Backup](BACKUP.md); selected repository and writable user data |
 
 Agent guidance is checked with [behavioral scenarios](../tests/agents/README.md); the review skill owns the [documentation checklist](../.agents/skills/kaenix-review/SKILL.md#documentation-and-comment-checklist).

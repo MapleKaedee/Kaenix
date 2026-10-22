@@ -34,23 +34,11 @@
 
   outputs =
     inputs:
-    let
-      globals = {
-        username = "kaede";
-        hostname = "syrup";
-        # Choose "nushell" or "fish" for login and both terminals.
-        defaultShell = "nushell";
-        # Choose "alacritty" or "kitty" for desktop terminal launchers.
-        defaultTerminal = "kitty";
-        installation = import ./installation.nix;
-      };
-    in
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.flake-parts.flakeModules.modules
-        (inputs.import-tree ./parts)
+        (inputs.import-tree ./modules)
       ];
       systems = [ "x86_64-linux" ];
-      _module.args = { inherit globals; };
     };
 }

@@ -6,7 +6,7 @@
       home-manager.users.${globals.username} =
         { lib, pkgs, ... }:
         let
-          assets = ../../../config/mpv;
+          assets = ../../config/mpv;
           # Dolby Vision thumbnail tone mapping requires FFmpeg's libplacebo filter.
           thumbnailFfmpeg = pkgs.ffmpeg.override { withPlacebo = true; };
           files = [
