@@ -23,6 +23,7 @@
         pkgs.wget
         pkgs.codex
         pkgs.nil
+        pkgs.nixd
       ];
 
       home-manager.users.${globals.username}.home.packages = [
