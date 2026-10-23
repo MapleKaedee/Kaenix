@@ -2,8 +2,8 @@
 # when adapting to another installation. Preserve the initial state versions.
 {
   hardwareReady = true;
-  systemStateVersion = "26.05";
-  homeStateVersion = "26.05";
+  systemStateVersion = "26.11";
+  homeStateVersion = "26.11";
 
   # Keep bootloader settings from the target installation here.
   # They are not contained in hardware-configuration.nix.
