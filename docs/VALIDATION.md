@@ -1,6 +1,6 @@
 # Kaenix validation
 
-Updated: 22 October 2026. Run commands from the repository root. The commands and coverage below follow the repository configuration; previously executed results are recorded in the [changelog](../CHANGELOG.md).
+Updated: 23 October 2026. Run commands from the repository root. The commands and coverage below follow the repository configuration; previously executed results are recorded in the [changelog](../CHANGELOG.md).
 
 ## Evidence scope
 
@@ -89,6 +89,11 @@ For documentation and comment reviews, use the [documentation checklist](../.age
 ## Agent behavioral scenarios
 
 The [agent scenario guide](../tests/agents/README.md) and its synthetic fixtures cover agent decisions about Kaenix ownership, review boundaries, writable seeds, package placement, validation, and documentation evidence. They complement skill structure and link checks; they are not Nix configuration checks. Select cases affected by a decision change, and keep wording-only checks static. Model trials require isolated sessions and follow the guide's protocol; dated results are in the changelog.
+
+The validation skill loads context according to the requested scope; documentation
+and skill checks need Nix implementation only when a claim or dependency requires
+it. B09 exercises documentation-only context selection; B10–B12 cover partial
+staging, root lock-graph research, and exact-pin updates respectively.
 
 ## Build failure diagnosis
 

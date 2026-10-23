@@ -27,10 +27,18 @@ changes to understand dependencies rather than matching filenames alone.
 
 ## Select checks from the actual implementation
 
-Read `flake.nix`, `modules/outputs.nix`, `modules/hosts/syrup.nix`, `tests/checks.nix`,
-the `tests/evaluate.nix` fixture, and relevant tests to confirm current check names, coverage, and dependencies. The table below
-is selection guidance, not a fixed inventory of flake outputs. Combine checks
-for mixed changes without running duplicates.
+Choose checks from the requested scope and affected dependencies. For
+documentation-only changes, inspect the changed text and referenced targets;
+for skill-only changes, inspect the affected instructions, metadata, references,
+and relevant scenarios. Read implementation only when needed to verify a claim
+or dependency in that scope.
+
+When Nix evaluation or builds are selected, inspect `flake.nix`,
+`modules/outputs.nix`, `tests/checks.nix`, and relevant tests to confirm current
+check names, coverage, and dependencies. Read `modules/hosts/syrup.nix` and affected
+bundles/features for wiring questions, and `tests/evaluate.nix` when shell/terminal
+fixtures are needed. The table below is selection guidance, not a fixed inventory
+of flake outputs. Combine checks for mixed changes without running duplicates.
 
 | Change | Selected checks |
 | --- | --- |

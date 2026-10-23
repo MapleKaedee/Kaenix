@@ -1,6 +1,6 @@
 # Kaenix — project context and local documentation
 
-Updated: 22 October 2026. Kaenix is a personal NixOS configuration for host `syrup`, user `kaede`, platform `x86_64-linux`, and time zone `Asia/Jakarta`, located at `/home/kaede/Kaenix`.
+Updated: 23 October 2026. Kaenix is a personal NixOS configuration for host `syrup`, user `kaede`, platform `x86_64-linux`, and time zone `Asia/Jakarta`, located at `/home/kaede/Kaenix`.
 
 ## Purpose and documentation ownership
 
@@ -29,6 +29,8 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 | Backups and recovery guidance | [Backup](BACKUP.md); selected repository and writable user data |
 
 Agent guidance is checked with [behavioral scenarios](../tests/agents/README.md); the review skill owns the [documentation checklist](../.agents/skills/kaenix-review/SKILL.md#documentation-and-comment-checklist).
+Scenarios include scoped validation context, partial staging, root lock-graph
+research, and exact-pin updates; see [agent validation](VALIDATION.md#agent-behavioral-scenarios).
 
 ## Documentation storage
 

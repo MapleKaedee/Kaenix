@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-10-23 — Scoped skill context and targeted agent scenarios
+
+- Make `kaenix-validate` context loading conditional: documentation and skill checks read affected text, metadata, references, and scenarios; implementation is consulted for relevant claims or dependencies. Read the Nix check inventory when selecting Nix checks, host/bundle wiring for selection questions, and shell/terminal fixtures when needed. Preserve existing check selection and action boundaries; update the validation guide and context index.
+- Extend the scenario catalog from v6/eight cases to v7/twelve, preserving B01–B08 unchanged. Add B09 for documentation-only context selection, B10 for staged-only commits with partial staging, B11 for root lock mappings and `follows` across multiple revisions, and B12 for declaration-first exact-pin updates. Require complete, untruncated actor packets in the trial guide.
+- Run isolated paper exercises with fresh, parent-history-free actors, at most two concurrently and no worker delegation. Actors receive only their case request/files, root guidance, applicable skill bodies, and the inactive protocol; grading criteria and earlier answers are withheld. The harness still injects its standard environment/system/developer context. Inspect persisted tool traces: each actor makes only its single packet read, with no protocol violations or real repository operations. Raw packets, responses, traces, hashes, and per-required-outcome grading are retained outside the checkout in `/tmp/kaenix-skill-review-20261023-gildkdls/` and may be removed by temporary-directory cleanup.
+- Record every attempt: the Luna High B09 baseline, first B09 final, and first B12 final have truncated input and are invalid observations. With complete input, Luna High B09 passes; Luna High B10 omits post-commit verification, B11 omits the separate helper-graph explanation, and B12 omits why lock refresh alone retains the exact declaration, so those samples fail their respective rubrics. Fresh Sol High reassessments of B10, B11, and B12 satisfy every required outcome with no forbidden outcomes. Runtime settings are confirmed from session records. B01–B08 are not rerun. These are individual observations, with no valid B09 baseline, A/B comparison, pass-rate estimate, measured context saving, automatic discovery, or runtime-enforcement claim.
+- Independently review the changes and B12's draft rubric. Remove its documentation-planning requirement because the case requests an update proposal and supplies no documentation needing correction; the skill requires documentation for implemented updates. Regrade the same B12 responses against the corrected rubric without counting another actor sample. Preserve the initial outcomes and rubric correction in the external results record; make no unrelated Git/docs/update skill changes based on response omissions.
+- Freeze inputs at repository revision `e8fa642ea947eed80b1d46b8ba23697bf95e8e72` plus these local changes. SHA-256 values:
+
+  | Input | SHA-256 |
+  | --- | --- |
+  | Root `AGENTS.md` | `700a71fe7980072efde7a10922f5737edfd157338ab367151850c706c17512d2` |
+  | Scenario catalog v7, corrected rubric | `1a3bdece2a29199b9cee1712ca32eb5e15b9b7f0c4008c67917772b5676f578d` |
+  | `kaenix-validate` before | `3948426200009b731d303b272a72bdffd7a9258e4feae71fa833249895528c79` |
+  | `kaenix-validate` after | `16b243b357affc9ec65e0a72e1efe6bec8a34f81ba9e4db7c3a6e6263ba08d1b` |
+  | `kaenix-git` | `5a0a983df7e115f74f81f28b5f8a60d22b44da78d7bbd8e6c33740688a1fafca` |
+  | `kaenix-docs` | `2d5cbb01057cd6878128d80600d94677f134930681eb0f267a94ca06e21820d9` |
+  | `kaenix-update` | `f0e1d8f214d1c428004846d207297d6e82ee7a11a562bb2f038c13ab56c7d815` |
+
+- Static validation passes: all ten skills' bundled structure/frontmatter checks, UI YAML/invocation consistency, 102 local links/anchors, catalog structure and original-case preservation, whitespace, and protected-file/index hashes. Independent source review reports no actionable findings; its rubric clarification is incorporated above. Preserve root README, agent instructions, input declarations/lockfile, configuration, and Git index. No Nix evaluation/build, activation, live GUI/service change, staging, commit, or push is performed.
+
 ## 2026-10-22 — Shallow composition bundles
 
 - Add six import-only flake-parts bundles under `modules/bundles/`: `core`, `workstation`, `terminal`, `applications`, `gaming`, and `hardware-syrup`. Syrup now selects those six plus `packages`, with generated hardware/inline host settings first and the upstream Chaotic module last. Preserve all 36 existing registrations and their feature contents; the registry now contains 42 modules. Each of the 35 bundled features has one owner, while `packages` remains directly selected. Keep bundles shallow, existing inline Home Manager configuration and globals flow intact, and output wiring unchanged; defer `perSystem` restructuring.

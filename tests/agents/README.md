@@ -3,7 +3,7 @@
 These synthetic paper exercises test decisions made with Kaenix guidance. They
 complement skill structure, YAML, links, and whitespace checks; they do not run
 Nix, activate configuration, or prove automatic skill discovery or real tool
-enforcement. The [catalog](scenarios.json) contains eight fixed cases and their
+enforcement. The [catalog](scenarios.json) contains twelve fixed cases and their
 grading criteria. Fixture paths and values are synthetic, not deployment targets.
 
 ## Select cases
@@ -19,7 +19,11 @@ or establish fresh-chat instruction loading or runtime model routing. Catalog
 version 6 updates B05's composition evidence: the host selects `workstation`,
 which imports `niri`. B04 continues to select `packages` directly. Case intents
 and historical observations remain unchanged; this fixture refresh has no new
-model-trial result.
+model-trial result. Catalog version 7 adds B09 for documentation-only validation
+context, B10 for staged-only commits with partial staging, B11 for root lock-graph
+and `follows` resolution, and B12 for selected updates of exact commit pins.
+The earlier eight fixtures and rubrics remain unchanged. Trial results and input
+versions are recorded separately in the changelog.
 Do not add a model trial to routine configuration
 validation merely because this directory exists.
 
@@ -34,8 +38,11 @@ validation merely because this directory exists.
    root guidance, and the skill bodies listed in `skills`. Treat file-map paths as
    labels: do not write synthetic home paths to a real home. Do not supply
    `required`, `forbidden`, `artifact_check`, this guide, other cases, or previous
-   answers. Do not follow skill links outside the supplied packet; report missing
-   evidence instead. The packet is the complete available synthetic checkout.
+   answers. Read the complete packet with sufficient tool output budget and
+   confirm it was not truncated. A truncated packet invalidates the trial;
+   correct its delivery before attributing an omission to the skill. Do not follow
+   skill links outside the supplied packet; report missing evidence instead. The
+   packet is the complete available synthetic checkout.
 3. Ask the actor to read only its packet and return JSON with `actions` (proposed
    actions), `artifacts` (a map of proposed file paths to full text), and `report`
    (findings, evidence, and limits). Review-only cases propose no edited files.
