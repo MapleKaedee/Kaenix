@@ -9,55 +9,55 @@
       ...
     }:
     {
-      environment.systemPackages = [
+      environment.systemPackages = with pkgs; [
         # Desktop compatibility and applications.
-        pkgs.xwayland-satellite
-        pkgs.nautilus
-        pkgs.zed-editor
-        pkgs.chatgpt
+        xwayland-satellite
+        nautilus
+        zed-editor
+        chatgpt
 
         # Git and command-line utilities.
-        pkgs.git
-        pkgs.gh
-        pkgs.curl
-        pkgs.wget
-        pkgs.codex
-        pkgs.nil
-        pkgs.nixd
+        git
+        gh
+        curl
+        wget
+        codex
+        nil
+        nixd
       ];
 
-      home-manager.users.${globals.username}.home.packages = [
+      home-manager.users.${globals.username}.home.packages = with pkgs; [
         # DMS video wallpaper support.
-        pkgs.mpvpaper
-        pkgs.ffmpeg
+        mpvpaper
+        ffmpeg
 
         # Applications.
-        pkgs.discord
-        pkgs.osu-lazer-bin
-        pkgs.spotify
+        discord
+        osu-lazer-bin
+        spotify
 
         # Terminal multiplexer; start manually with tuios new.
-        pkgs.tuios
+        tuios
 
         # Gaming tools; Steam, Protontricks, Gamescope, and GameMode use the Steam feature.
-        pkgs.protonplus
-        pkgs.mangohud
-        pkgs.goverlay
+        protonplus
+        mangohud
+        goverlay
 
         # Nix and Wayland tools.
         inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.kae
-        pkgs.nix-output-monitor
-        pkgs.nixfmt
-        pkgs.wl-clipboard
+        nix-output-monitor
+        nixfmt
+        wl-clipboard
 
         # PipeWire mixer and effects; no EasyEffects service or preset.
-        pkgs.pavucontrol
-        pkgs.easyeffects
+        pavucontrol
+        easyeffects
       ];
 
-      fonts.packages = [
-        pkgs.nerd-fonts.jetbrains-mono
-        pkgs.jetbrains-mono
+      fonts.packages = with pkgs; [
+        nerd-fonts.jetbrains-mono
+        jetbrains-mono
       ];
 
       # Packages installed through feature modules (not a transitive dependency list):
