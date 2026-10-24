@@ -1,6 +1,6 @@
 # Kaenix — project context and local documentation
 
-Updated: 23 October 2026. Kaenix is a personal NixOS configuration for host `syrup`, user `kaede`, platform `x86_64-linux`, and time zone `Asia/Jakarta`, located at `/home/kaede/Kaenix`.
+Updated: 24 October 2026. Kaenix is a personal NixOS configuration for host `syrup`, user `kaede`, platform `x86_64-linux`, and time zone `Asia/Jakarta`, located at `/home/kaede/Kaenix`.
 
 ## Purpose and documentation ownership
 
@@ -23,7 +23,7 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 | Niri, DMS path migration, and GUI baselines | [Writable settings and DMS path migration](CONFIGURATION.md#writable-files-and-one-time-seeding); `modules/desktop/`, `config/`, `modules/system/seed-files.nix`, `scripts/seed-files.py` |
 | Scheduling and input updates | [LAVD](CONFIGURATION.md#lavd-cpu-scheduling) and [flake updates](CONFIGURATION.md#updating-flake-inputs); `modules/services/scx.nix`, `flake.nix` |
 | Removable-media automount and udiskie build failures | [Automount and the udiskie test workaround](CONFIGURATION.md#removable-media-automount-and-the-udiskie-test-workaround); `modules/services/automount.nix` |
-| Video and gaming | [mpv](MPV.md) and [Steam](steam.md); owning modules in `modules/apps/` |
+| Video and gaming | [mpv](MPV.md), [osu! low-latency audio](CONFIGURATION.md#osu-low-latency-audio), and [Steam](steam.md); owning modules in `modules/apps/` |
 | Validation, reviews, and debugging | [Validation](VALIDATION.md); `tests/` and the linked project skills |
 | Reinstallation or another device | [Migration](MIGRATION.md); `installation/`, `modules/hosts/syrup.nix`, and `modules/users/kaede.nix` |
 | Backups and recovery guidance | [Backup](BACKUP.md); selected repository and writable user data |
