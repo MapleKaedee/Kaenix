@@ -42,7 +42,7 @@ git diff --check
 | `seed-files` | Copy-once helper, preservation of user changes, and path/symlink protections |
 | `seed-integration` | Contents of all 17 Home Manager seeds, JSON, canonical DMS paths/theme baseline, preservation of DMS settings/plugins/session/theme in a migrated home with compatibility symlinks, and preservation of edited DMS settings and Alacritty themes when the helper runs again |
 | `niri-config` | Base KDL validation without DMS fragments and with baseline DMS fragments |
-| `mango-config` | Generated Mango configuration parsing with the pinned Mango package |
+| `mango-config` | Pinned package session-target presence and generated Mango configuration parsing |
 
 Seed checks provide Python through Nix; a global Python installation is unnecessary. Home Manager's seed activation also uses the Nix-provided interpreter. Running unit tests directly with `python3` is only an alternative when an interpreter is available.
 

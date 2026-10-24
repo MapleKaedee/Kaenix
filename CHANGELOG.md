@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-24 — Mango DMS session startup correction
+
+- Use Mango 0.18.2's packaged `mango-session.target` and environment startup instead of overriding the target or launching it through config hooks. Attach the DMS user service to both Mango and Niri session units. This corrects the transition race observed when DMS retried against Niri's disappearing Wayland socket and hit systemd's start limit before Mango startup completed.
+- Extend ownership evaluation and the focused Mango check to verify DMS's two session links, absence of a generated target override, and presence of the packaged target. Keep live activation and Mango GUI verification separate.
+
 ## 2026-10-24 — MangoWM alternate desktop session
 
 - Add Mango as a selectable session through the pinned nixpkgs `programs.mango` module, preserving Niri as the display-manager default and DankGreeter compositor. Add a declarative Mango configuration that starts the DMS user service with the required Wayland environment and maps the common DMS controls plus window/tag navigation.

@@ -52,8 +52,11 @@ let
     assert builtins.elem cfg.programs.mango.package cfg.services.displayManager.sessionPackages;
     assert cfg.services.displayManager.dms-greeter.compositor.name == "niri";
     assert hm.programs.dank-material-shell.systemd.target == "niri.service";
+    assert builtins.elem "niri.service" (hm.systemd.user.services.dms.Install.WantedBy or [ ]);
+    assert builtins.elem "mango-session.target" (hm.systemd.user.services.dms.Install.WantedBy or [ ]);
+    assert builtins.elem "niri.service" (hm.systemd.user.services.dms.Unit.PartOf or [ ]);
     assert builtins.elem "mango-session.target" (hm.systemd.user.services.dms.Unit.PartOf or [ ]);
-    assert builtins.elem "dms.service" (hm.systemd.user.targets.mango-session.Unit.Wants or [ ]);
+    assert !(builtins.hasAttr "mango-session" hm.systemd.user.targets);
     assert hm.xdg.configFile."mango/config.conf".text != "";
     assert cfg.users.users.kaede.shell.outPath == host.pkgs.${selection.defaultShell}.outPath;
     assert

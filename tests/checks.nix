@@ -193,6 +193,7 @@
         export HOME="$TMPDIR/test-home"
         mkdir -p "$HOME/.config/mango"
         cp "$mangoConfig" "$HOME/.config/mango/config.conf"
+        test -f ${pkgs.mango}/share/systemd/user/mango-session.target
         mango -c "$HOME/.config/mango/config.conf" -p
         touch "$out"
       '';
