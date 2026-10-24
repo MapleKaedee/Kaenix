@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-24 — Mango DMS config includes
+
+- Declare optional Mango includes for DMS-managed outputs, layout, input, window rules, cursor, and bindings fragments. This avoids DMS's first-time setup trying and failing to append to Home Manager's read-only `config.conf` symlink while keeping DMS fragments writable.
+- Verify all six `source_optional` directives with Mango 0.18.2's config parser and the focused `mango-config` check. Live DMS UI behavior remains unverified until activation.
+
+## 2026-10-24 — Mango screenshot shortcut
+
+- Bind `Print` in Mango to DMS's screenshot CLI for interactive region captures, matching the Niri session's primary screenshot shortcut.
+- Validate the updated Mango config with the focused Mango parser check. This does not verify screenshot capture in a live session.
+
 ## 2026-10-24 — Mango DMS session startup correction
 
 - Use Mango 0.18.2's packaged `mango-session.target` and environment startup instead of overriding the target or launching it through config hooks. Attach the DMS user service to both Mango and Niri session units. This corrects the transition race observed when DMS retried against Niri's disappearing Wayland socket and hit systemd's start limit before Mango startup completed.
