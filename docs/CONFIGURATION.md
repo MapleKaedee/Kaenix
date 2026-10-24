@@ -9,7 +9,7 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | Category | Contents |
 | --- | --- |
 | `modules/bundles/` | Six shallow, import-only composition modules selected by the host |
-| `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
+| `modules/desktop/` | Niri, MangoWM, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Default login shell, Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
 | `modules/apps/` | Alacritty, Kitty, btop, Brave, Helix, mpv, Steam, and Yazi configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
@@ -17,12 +17,12 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | `modules/system/` | Base, boot, networking, account/groups, Nix, Home Manager, home identity/XDG, and seed infrastructure |
 | `modules/users/` | Typed user metadata definitions selected by the host |
 
-`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 35 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, and zram stay in `modules/system/base.nix`.
+`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 36 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, and zram stay in `modules/system/base.nix`.
 
 | Bundle | Ordered leaf imports |
 | --- | --- |
 | `core` | `boot`, `networking`, `base`, `users`, `nix`, `seed-files`, `home-manager`, `home` |
-| `workstation` | `niri`, `dms`, `theme`, `audio`, `session`, `printing`, `automount` |
+| `workstation` | `niri`, `mango`, `dms`, `theme`, `audio`, `session`, `printing`, `automount` |
 | `terminal` | `default-shell`, `fish`, `nushell`, `common`, `fastfetch`, `git`, `alacritty`, `kitty`, `btop`, `helix`, `yazi` |
 | `applications` | `brave`, `mpv` |
 | `gaming` | `steam` (including its existing Gamescope and GameMode configuration) |
@@ -53,7 +53,7 @@ The root `flake.nix` retains inputs, `nixConfig`, and the platform declaration, 
 | `modules/packages.nix` | Register `flake.modules.nixos.packages` with centralized explicit package lists |
 | `installation/installation.nix` and `installation/hardware-configuration.nix` | Installation readiness, bootloader/state data, and generated machine hardware configuration |
 
-Existing public output names remain available. The `modules.nixos` output contains 36 leaf registrations and six bundle registrations, for 42 total. User metadata is typed flake-parts data, not an applied account or a NixOS module registration. Discovery registers definitions; explicit host selection and bundle imports enable them. Loading definitions, including bundles, the user schema, and metadata, while excluding `modules/hosts/syrup.nix` and `modules/outputs.nix` must create no host. This layout adds no user/host framework, feature enable switches, or extra platforms.
+Existing public output names remain available. The `modules.nixos` output contains 37 leaf registrations and six bundle registrations, for 43 total. User metadata is typed flake-parts data, not an applied account or a NixOS module registration. Discovery registers definitions; explicit host selection and bundle imports enable them. Loading definitions, including bundles, the user schema, and metadata, while excluding `modules/hosts/syrup.nix` and `modules/outputs.nix` must create no host. This layout adds no user/host framework, feature enable switches, or extra platforms.
 
 Flake-parts `config` contains flake configuration and outputs. The registered NixOS module has its own arguments and `config`, and its inline Home Manager module has another `config`; application options belong in those lower-level contexts. The host exposes its assembled globals through flake-parts `_module.args` for outputs and NixOS `specialArgs`; Home Manager receives them through `extraSpecialArgs`. Registered modules must take their own lower-level `globals` arguments so `tests/evaluate.nix` can override shell and terminal choices. Do not close over flake-parts globals inside a registered feature.
 
@@ -102,6 +102,12 @@ For a temporary return to the kernel's built-in fair scheduler, run `sudo system
 Nix manages Alacritty, Kitty, Nushell, Fish, Starship, Fastfetch, Brave/MIME, base Niri, plugin sources, and wallpaper files. Edit repository modules or assets, then rebuild. Do not edit Home Manager's generated symlinks directly.
 
 Alacritty, btop, Helix, Kitty, Nushell, Fish, Fastfetch, and Yazi use `programs.*` options. Niri uses `xdg.configFile."niri/config.kdl".text` to read repository KDL. This preserves Niri features without depending on an external Niri module schema.
+
+## Niri and MangoWM sessions
+
+Niri remains the display manager's default session and the compositor used by DankGreeter. Mango is an additional selectable session, enabled through pinned nixpkgs' `programs.mango` module. At login, choose Mango in the session selector; Niri remains the default. The declarative Mango configuration is in `config/mango/config.conf` and is installed at `~/.config/mango/config.conf`; it uses `xdg-terminal-exec` and translates the common DMS launcher, lock, media, audio, brightness, tag/workspace, focus, and window movement controls. Niri-specific column controls stay in the Niri bindings. See Mango's [configuration guide](https://mangowm.github.io/docs/configuration/basics/) for the file format and [DMS's compositor-specific systemd guidance](https://github.com/AvengeMedia/DankLinux-Docs/blob/master/docs/dankmaterialshell/installation.mdx#compositor-specific-systemd-setup) for session behavior.
+
+DMS runs as a user service in either compositor session. Niri starts it through `niri.service`; Mango first exports its Wayland environment to systemd, then starts `mango-session.target`, which pulls in DMS and stops with the graphical session. Mango's systemd integration is separate because wlroots compositors do not provide Niri's native session startup behavior. The Mango config check parses the generated file with the pinned Mango package; it does not verify a live graphical session.
 
 ## Choosing Alacritty or Kitty
 

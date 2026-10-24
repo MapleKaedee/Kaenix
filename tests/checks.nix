@@ -183,6 +183,20 @@
         touch "$out"
       '';
 
+  mango-config =
+    pkgs.runCommand "kaenix-mango-config-test"
+      {
+        nativeBuildInputs = [ pkgs.mango ];
+        mangoConfig = homeConfig.xdg.configFile."mango/config.conf".source;
+      }
+      ''
+        export HOME="$TMPDIR/test-home"
+        mkdir -p "$HOME/.config/mango"
+        cp "$mangoConfig" "$HOME/.config/mango/config.conf"
+        mango -c "$HOME/.config/mango/config.conf" -p
+        touch "$out"
+      '';
+
   seed-integration =
     pkgs.runCommand "kaenix-seed-integration-test"
       {

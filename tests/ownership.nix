@@ -47,6 +47,14 @@ let
       cfg = host.config;
       hm = cfg.home-manager.users.kaede;
     in
+    assert cfg.programs.mango.enable;
+    assert cfg.services.displayManager.defaultSession == "niri";
+    assert builtins.elem cfg.programs.mango.package cfg.services.displayManager.sessionPackages;
+    assert cfg.services.displayManager.dms-greeter.compositor.name == "niri";
+    assert hm.programs.dank-material-shell.systemd.target == "niri.service";
+    assert builtins.elem "mango-session.target" (hm.systemd.user.services.dms.Unit.PartOf or [ ]);
+    assert builtins.elem "dms.service" (hm.systemd.user.targets.mango-session.Unit.Wants or [ ]);
+    assert hm.xdg.configFile."mango/config.conf".text != "";
     assert cfg.users.users.kaede.shell.outPath == host.pkgs.${selection.defaultShell}.outPath;
     assert
       hm.programs.alacritty.settings.terminal.shell.program == lib.getExe cfg.users.users.kaede.shell;
@@ -102,6 +110,7 @@ let
     ];
     workstation = [
       "niri"
+      "mango"
       "dms"
       "theme"
       "audio"

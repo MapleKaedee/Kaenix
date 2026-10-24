@@ -19,8 +19,8 @@ Updated: 24 October 2026. Run commands from the repository root. The commands an
 # Evaluate flake outputs without building checks or activating anything
 nix flake check --no-build path:.
 
-# Build all eight checks in their respective Nix environments
-nix build --no-link path:.#checks.x86_64-linux.kae path:.#checks.x86_64-linux.terminal-apps path:.#checks.x86_64-linux.terminals path:.#checks.x86_64-linux.shells path:.#checks.x86_64-linux.seed-files path:.#checks.x86_64-linux.seed-integration path:.#checks.x86_64-linux.niri-config path:.#checks.x86_64-linux.mpv-config
+# Build all nine checks in their respective Nix environments
+nix build --no-link path:.#checks.x86_64-linux.kae path:.#checks.x86_64-linux.terminal-apps path:.#checks.x86_64-linux.terminals path:.#checks.x86_64-linux.shells path:.#checks.x86_64-linux.seed-files path:.#checks.x86_64-linux.seed-integration path:.#checks.x86_64-linux.niri-config path:.#checks.x86_64-linux.mango-config path:.#checks.x86_64-linux.mpv-config
 
 # Evaluate the fixture with all four terminal and shell combinations
 nix eval --impure --json --expr 'let flake = builtins.getFlake ("path:" + toString ./.); in builtins.map (selection: import ./tests/evaluate.nix ({ inherit flake; } // selection)) [ { defaultShell = "nushell"; defaultTerminal = "alacritty"; } { defaultShell = "fish"; defaultTerminal = "alacritty"; } { defaultShell = "nushell"; defaultTerminal = "kitty"; } { defaultShell = "fish"; defaultTerminal = "kitty"; } ]'
@@ -42,6 +42,7 @@ git diff --check
 | `seed-files` | Copy-once helper, preservation of user changes, and path/symlink protections |
 | `seed-integration` | Contents of all 17 Home Manager seeds, JSON, canonical DMS paths/theme baseline, preservation of DMS settings/plugins/session/theme in a migrated home with compatibility symlinks, and preservation of edited DMS settings and Alacritty themes when the helper runs again |
 | `niri-config` | Base KDL validation without DMS fragments and with baseline DMS fragments |
+| `mango-config` | Generated Mango configuration parsing with the pinned Mango package |
 
 Seed checks provide Python through Nix; a global Python installation is unnecessary. Home Manager's seed activation also uses the Nix-provided interpreter. Running unit tests directly with `python3` is only an alternative when an interpreter is available.
 
@@ -68,7 +69,7 @@ nix eval --impure --json --no-update-lock-file --option allow-import-from-deriva
   }'
 ```
 
-Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all eight existing checks for an infrastructure migration. Inspect declared edges before Nix import deduplication: require exactly 42 registrations, the ordered seven project selections in the host, exact ordered bundle memberships, and no duplicate selection paths. All 36 leaf registrations must be reachable once: 35 through their single bundle owner and `packages` directly. `tests/ownership.nix` checks these graph invariants and rejects duplicate bundle selections, direct leaf selections, repeated members, and nested bundles, alongside the existing ownership contracts. Inspect bundle source separately to confirm that it contains imports only, without settings, options, or captured globals.
+Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all nine existing checks for an infrastructure migration. Inspect declared edges before Nix import deduplication: require exactly 43 registrations, the ordered seven project selections in the host, exact ordered bundle memberships, and no duplicate selection paths. All 37 leaf registrations must be reachable once: 36 through their single bundle owner and `packages` directly. `tests/ownership.nix` checks these graph invariants and rejects duplicate bundle selections, direct leaf selections, repeated members, and nested bundles, alongside the existing ownership contracts. Inspect bundle source separately to confirm that it contains imports only, without settings, options, or captured globals.
 
 Confirm that loading module definitions, including bundles, the typed user schema, and metadata but excluding `modules/hosts/syrup.nix` and `modules/outputs.nix`, creates no hosts. Evaluate all four supported shell/terminal metadata combinations and reject invalid values through the typed `kaenix.users` options; separately confirm all four lower-level globals fixture overrides remain effective. Exercise the readiness assertion with `installation/installation.nix` data overridden in a disposable fixture, never by editing the real installation or bypassing the deployment guard. Compare evaluated system/user/font package selections, generated file contents and priorities/precedence, and seed manifests before and after migration; require unique seed targets and unchanged contents. Test preservation of all 17 edited seed files in disposable homes, never the real home.
 

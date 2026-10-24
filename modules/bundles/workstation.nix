@@ -3,6 +3,7 @@
   flake.modules.nixos.workstation = {
     imports = [
       config.flake.modules.nixos.niri
+      config.flake.modules.nixos.mango
       config.flake.modules.nixos.dms
       config.flake.modules.nixos.theme
       config.flake.modules.nixos.audio

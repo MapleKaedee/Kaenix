@@ -47,7 +47,7 @@
           programs.dank-material-shell = {
             enable = true;
             systemd.enable = true;
-            systemd.target = "graphical-session.target";
+            systemd.target = "niri.service";
             enableDynamicTheming = true;
             enableSystemMonitoring = true;
             # GUI state must stay writable. The official settings/session options create store symlinks.

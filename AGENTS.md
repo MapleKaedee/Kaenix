@@ -32,7 +32,7 @@ improve clarity. Each configured feature uses one named `.nix` file under
 `import-tree` discovers flake-parts modules only under `modules/`;
 `modules/hosts/syrup.nix` explicitly selects six shallow composition bundles and
 `packages`. Each bundle in `modules/bundles/` registers an import-only NixOS
-module with explicit leaf feature imports. Each of the 35 bundled features has
+module with explicit leaf feature imports. Each of the 36 bundled features has
 one bundle owner; bundles never import bundles, and features never import bundles.
 Add configured features to one appropriate bundle; keep `packages` directly
 selected by the host. Registration alone does not enable a feature: trace

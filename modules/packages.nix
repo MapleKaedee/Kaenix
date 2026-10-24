@@ -68,7 +68,7 @@
       #   Gamescope, GameMode, and Yazi.
       # - modules/shell/{fish,nushell,common,fastfetch,git}.nix:
       #   Fish/autopair, Nushell, Starship/eza, Fastfetch, and Home Manager's Git.
-      # - modules/desktop/{niri,dms,theme}.nix: Niri, DMS/DankGreeter,
+      # - modules/desktop/{niri,mango,dms,theme}.nix: Niri, Mango, DMS/DankGreeter,
       #   DMS integrations, xdg-terminal-exec, and the Adwaita cursor package.
       # - modules/hardware/: NVIDIA, ASUS utilities, OpenTabletDriver,
       #   Bluetooth, and power management through their modules.

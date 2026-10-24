@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-24 — MangoWM alternate desktop session
+
+- Add Mango as a selectable session through the pinned nixpkgs `programs.mango` module, preserving Niri as the display-manager default and DankGreeter compositor. Add a declarative Mango configuration that starts the DMS user service with the required Wayland environment and maps the common DMS controls plus window/tag navigation.
+- Bind DMS startup to Niri's native session service and Mango's explicit session target. Update ownership assertions, add a headless Mango config parser check, and refresh current module counts and desktop-session guidance.
+- Validation passes: lock-preserving `nix flake check --no-build --no-update-lock-file path:.`; ownership evaluation with 43 registered modules, complete unique bundle ownership, Niri default/greeter preservation, and DMS wiring to both session targets; and the focused `mango-config` check using Mango 0.18.2's parser. Non-writing Nix formatting, Nix parsing, and `git diff --check` pass. The parser check caught and corrected Mango binding-field and startup-keyword mismatches before passing. No full system build, activation, session launch, live GUI verification, staging, commit, or push is performed.
+
 ## 2026-10-24 — Global PipeWire low-latency policy
 
 - Add nix-gaming at `2b027ac8c57e1ea2db14f9f6bb1b350aea562bd8`, following the existing nixpkgs input and importing only its `pipewireLowLatency` module inside the audio feature. Enable its global minimum/client buffering policy at quantum 64 and nominal rate 48000, retaining upstream realtime, Pulse, and client resampling defaults. Keep optional ALSA device overrides disabled and preserve base PipeWire/ALSA/32-bit/Pulse/RTKit enablement and user-managed devices/preferences. This does not force every stream to 64 samples or validate its live stability.
