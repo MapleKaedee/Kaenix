@@ -126,10 +126,7 @@ let
       "brave"
       "mpv"
     ];
-    gaming = [
-      "steam"
-      "osu"
-    ];
+    gaming = [ "steam" ];
     hardware-syrup = [
       "nvidia"
       "asus"

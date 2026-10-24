@@ -11,13 +11,13 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | `modules/bundles/` | Six shallow, import-only composition modules selected by the host |
 | `modules/desktop/` | Niri, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Default login shell, Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
-| `modules/apps/` | Alacritty, Kitty, btop, Brave, Helix, mpv, osu!, Steam, and Yazi configuration |
+| `modules/apps/` | Alacritty, Kitty, btop, Brave, Helix, mpv, Steam, and Yazi configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
 | `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
 | `modules/system/` | Base, boot, networking, account/groups, Nix, Home Manager, home identity/XDG, and seed infrastructure |
 | `modules/users/` | Typed user metadata definitions selected by the host |
 
-`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 36 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, and zram stay in `modules/system/base.nix`.
+`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 35 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, and zram stay in `modules/system/base.nix`.
 
 | Bundle | Ordered leaf imports |
 | --- | --- |
@@ -25,7 +25,7 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | `workstation` | `niri`, `dms`, `theme`, `audio`, `session`, `printing`, `automount` |
 | `terminal` | `default-shell`, `fish`, `nushell`, `common`, `fastfetch`, `git`, `alacritty`, `kitty`, `btop`, `helix`, `yazi` |
 | `applications` | `brave`, `mpv` |
-| `gaming` | `steam` (including its existing Gamescope and GameMode configuration), `osu` |
+| `gaming` | `steam` (including its existing Gamescope and GameMode configuration) |
 | `hardware-syrup` | `nvidia`, `asus`, `power`, `tablet`, `bluetooth`, `scx` |
 
 The host keeps generated hardware and its inline host settings first, then selects `core`, `packages`, `workstation`, `terminal`, `applications`, `gaming`, and `hardware-syrup` in that order, with the upstream Chaotic module last. Bundles contain explicit leaf imports only; they introduce no options, globals capture, nested bundles, or settings. Features do not import bundles. This keeps the selection path host → bundle → feature, with `packages` directly selected by the host.
@@ -53,7 +53,7 @@ The root `flake.nix` retains inputs, `nixConfig`, and the platform declaration, 
 | `modules/packages.nix` | Register `flake.modules.nixos.packages` with centralized explicit package lists |
 | `installation/installation.nix` and `installation/hardware-configuration.nix` | Installation readiness, bootloader/state data, and generated machine hardware configuration |
 
-Existing public output names remain available. The `modules.nixos` output contains 37 leaf registrations and six bundle registrations, for 43 total. User metadata is typed flake-parts data, not an applied account or a NixOS module registration. Discovery registers definitions; explicit host selection and bundle imports enable them. Loading definitions, including bundles, the user schema, and metadata, while excluding `modules/hosts/syrup.nix` and `modules/outputs.nix` must create no host. This layout adds no user/host framework, feature enable switches, or extra platforms.
+Existing public output names remain available. The `modules.nixos` output contains 36 leaf registrations and six bundle registrations, for 42 total. User metadata is typed flake-parts data, not an applied account or a NixOS module registration. Discovery registers definitions; explicit host selection and bundle imports enable them. Loading definitions, including bundles, the user schema, and metadata, while excluding `modules/hosts/syrup.nix` and `modules/outputs.nix` must create no host. This layout adds no user/host framework, feature enable switches, or extra platforms.
 
 Flake-parts `config` contains flake configuration and outputs. The registered NixOS module has its own arguments and `config`, and its inline Home Manager module has another `config`; application options belong in those lower-level contexts. The host exposes its assembled globals through flake-parts `_module.args` for outputs and NixOS `specialArgs`; Home Manager receives them through `extraSpecialArgs`. Registered modules must take their own lower-level `globals` arguments so `tests/evaluate.nix` can override shell and terminal choices. Do not close over flake-parts globals inside a registered feature.
 
@@ -67,7 +67,7 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 ## Centralized package lists
 
-`modules/packages.nix` registers `flake.modules.nixos.packages`, selected explicitly by the host, and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list for manual startup. The configured osu! feature owns its game package and optional low-latency launcher.
+`modules/packages.nix` registers `flake.modules.nixos.packages`, selected explicitly by the host, and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list for manual startup.
 
 The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, btop, Helix, Kitty, Yazi, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
 
@@ -367,31 +367,30 @@ Pavucontrol and EasyEffects are installed through `home.packages` in `modules/pa
 
 Keep physical speakers/headsets/microphones as the default devices; do not select EasyEffects virtual devices as the defaults. This follows [upstream guidance](https://github.com/wwmm/easyeffects).
 
-## osu! low-latency audio
+### Global low-latency tuning
 
-`modules/apps/osu.nix`, selected by the `gaming` bundle, installs the pinned `osu-lazer-bin` package and an optional **osu! — Low Latency** desktop entry. The ordinary **osu!** entry, executable, and file/URL associations remain available.
+The audio feature imports only `inputs.nix-gaming.nixosModules.pipewireLowLatency`. The locked nix-gaming revision is `2b027ac8c57e1ea2db14f9f6bb1b350aea562bd8`, with its nixpkgs following Kaenix's existing input. No nix-gaming overlay or game package replaces the pinned nixpkgs packages. Adjust these settings in `modules/services/audio.nix`:
 
-Fully quit osu! before switching launchers: launching a second instance can forward arguments to the existing instance, which retains its original environment. Start the tuned instance from the desktop entry or a terminal:
-
-```bash
-osu-lowlatency
+```nix
+services.pipewire.lowLatency = {
+  enable = true;
+  quantum = 64;
+  rate = 48000;
+  alsa.enable = false;
+};
 ```
 
-The launcher sets `PIPEWIRE_QUANTUM=128/48000` only for its process and executes the pinned game by absolute path, forwarding all arguments. PipeWire's ALSA plugin uses this stream-level setting to force 128 samples at 48 kHz while the stream is active; other audio sharing that graph is affected too. The server's `clock.force-quantum` metadata is not changed. See the [PipeWire 1.6.9 stream implementation](https://github.com/PipeWire/pipewire/blob/1.6.9/src/pipewire/stream.c).
+The [locked upstream module](https://github.com/fufexan/nix-gaming/blob/2b027ac8c57e1ea2db14f9f6bb1b350aea562bd8/modules/pipewireLowLatency.nix) sets the graph's minimum quantum to 64, Pulse minimum request/quantum/fragment values to `64/48000`, and client latency defaults to `64/48000`. It also applies its realtime defaults (`nice.level = -15`, `rt.prio = 88`, soft/hard realtime limits of 200000) and client resampling quality of 1. Accept these upstream defaults together; this is a global buffering policy, not a guarantee that every stream runs at exactly 64 samples or that every device uses 48 kHz. Client requests, backend behavior, and device negotiation still matter.
 
-Audio-device selection stays user-managed. The launcher follows the selected output, including when the RAYS are disconnected. It changes no BASS buffering, game preferences, renderer, GPU selection, GameMode settings, or desktop-wide environment/configuration.
+The optional WirePlumber ALSA device overrides remain disabled; the existing `services.pipewire.alsa.enable = true` and 32-bit compatibility remain enabled. Device selection and writable preferences stay user-managed. Browser audio, Discord, games, and other streams can share the affected graph. No server metadata or global `PIPEWIRE_QUANTUM` environment override is added.
 
-On 24 October 2026, separate five-minute tests with the MOONDROP RAYS measured average ALSA driver-reported delays of 21.05 ms at server-forced 128 samples and 24.63 ms at automatically negotiated 256 samples. The user reported similar gameplay without audible problems in both runs. The 128 run recorded three new osu! stream errors; the 256 run recorded none, and neither run recorded RAYS output errors. The roughly 3.6 ms difference is driver-reported delay, not end-to-end keypress-to-sound latency. These tests do not establish error-free operation or validate the packaged launcher; accepting 128 is a user-selected tradeoff.
+The custom `osu-lowlatency` command and **osu! — Low Latency** entry are removed. The unchanged `osu-lazer-bin` package is back in `modules/packages.nix`; launch ordinary **osu!** or `'osu!'` as before, retaining its file/URL associations and game data. Fully quit any previously tuned osu! instance before testing this policy, because removing a launcher does not change an already running process's inherited environment. Avoid keeping external PipeWire environment overrides when comparing results.
 
-For immediate fallback, quit the tuned instance and start ordinary **osu!** without PipeWire environment overrides:
+On 24 October 2026, separate five-minute tests with the MOONDROP RAYS measured average ALSA driver-reported delays of 21.05 ms at server-forced 128 samples and 24.63 ms at automatically negotiated 256 samples. Similar gameplay had no user-reported audible problems, but the 128 run added three osu! stream errors while 256 added none; both had zero RAYS output errors. These earlier tests do not measure the global 64 policy, establish its stability, or measure end-to-end keypress-to-sound latency.
 
-```bash
-'osu!'
-```
+After an explicitly requested rebuild/activation and audio-session restart, inspect actual quanta/rates and increases in error counters with `pw-top`. Test osu! gameplay, browser playback, Discord output/capture, and usual device switching; listen for crackling, dropouts, or increasing delay. `pw-metadata -n settings 0` should show no test-imposed force values. An exact 64-sample graph is not an acceptance requirement for this adaptive policy. Evaluation and generated-config builds do not prove active audio behavior.
 
-When the tuned stream closes, its forced quantum/rate cease to apply and automatic negotiation resumes. The observed ordinary-gameplay quantum was 256 samples at 48 kHz; automatic negotiation is not a fixed 256-sample guarantee. For permanent removal, remove the `lowLatency` package from `home.packages` and the `xdg.desktopEntries.osu-lowlatency` declaration in the feature, remove its unused launcher definition, then rebuild/activate through the usual explicitly requested workflow. Keep the `osu` package entry for ordinary gameplay; no full system rollback is necessary.
-
-After an authorized activation/launch, verify the actual output quantum/rate and errors with `pw-top`, and confirm `pw-metadata -n settings 0` still shows `clock.force-quantum` as `0`. Quit osu!, check that automatic negotiation resumes, and separately test the ordinary launcher. Passing evaluation/build checks does not establish that this worked in the active session.
+For recovery, increase `lowLatency.quantum` to 128 or 256, or set `lowLatency.enable = false`, then rebuild/activate and restart the audio session or log out/in. Disabling the option removes its PipeWire, Pulse, and client tuning while the audio feature keeps base PipeWire, ALSA, Pulse compatibility, and RTKit enabled. No full system rollback is necessary. A session restart interrupts active audio; perform it only when explicitly requested.
 
 ## Steam gaming
 

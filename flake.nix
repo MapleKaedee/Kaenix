@@ -11,6 +11,9 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    nix-gaming.url = "github:fufexan/nix-gaming";
+    nix-gaming.inputs.nixpkgs.follows = "nixpkgs";
+
     dms.url = "github:AvengeMedia/DankMaterialShell/stable";
     dms.inputs.nixpkgs.follows = "nixpkgs";
 
