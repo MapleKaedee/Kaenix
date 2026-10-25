@@ -17,7 +17,7 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | `modules/system/` | Base, boot, networking, account/groups, Nix, Home Manager, home identity/XDG, and seed infrastructure |
 | `modules/users/` | Typed user metadata definitions selected by the host |
 
-`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 36 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, and zram stay in `modules/system/base.nix`.
+`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 36 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, ZRAM, VM memory tuning, and device I/O scheduler rules stay in `modules/system/base.nix`.
 
 | Bundle | Ordered leaf imports |
 | --- | --- |
@@ -76,6 +76,14 @@ The `programs` and `services` options also install packages through their module
 `modules/services/automount.nix` enables UDisks2 and GVfs, plus Home Manager's udiskie service with automounting, notifications, and an automatic tray icon. Its `services.udiskie.package` overrides only the pinned udiskie package's test assertion: after invalidating a synthetic key, lookup must raise either `KeyNotAvailable` (`ENOKEY`) or `KeyRevoked` (`EKEYREVOKED`). The original assertion accepts only `ENOKEY`, but the local build returns `EKEYREVOKED`. Both results deny access to the invalidated key; all 15 package tests remain enabled, and application code is unchanged. See the [kernel key-request documentation](https://www.kernel.org/doc/html/latest/security/keys/request-key.html) for lookup errors.
 
 This workaround is verified for udiskie 2.7.0 from nixpkgs `02c087f3fe673c9e317f206a627cb6b910336dbe`. After updating nixpkgs or udiskie, recheck the assertion and remove the override when upstream handles the result. Build the effective `home-manager.users.kaede.services.udiskie.package` and inspect its test log; evaluation alone does not verify the fix. Package tests do not prove removable-drive mounting in the desktop session.
+
+## ZRAM, VM memory, and I/O scheduling
+
+`modules/system/base.nix` configures ZRAM with zstd, a maximum size of 100% of RAM, and swap priority 100. The related VM policy starts with `vm.swappiness=100`; a udev rule raises it to 150 and disables zswap when `zram0` finishes initializing. It also sets VFS cache pressure to 50, caps dirty-page thresholds at 256 MiB/64 MiB, sets writeback wakeups to 15 seconds, and disables swap read-ahead clustering.
+
+The same module assigns `bfq` to rotational disks, `mq-deadline` to non-rotational SATA/eMMC devices, and `kyber` to NVMe devices when udev sees them. These are the selected CachyOS settings adapted into Kaenix's existing base module; other CachyOS sysctls and unrelated device/service tweaks are not enabled.
+
+After activation, inspect `zramctl`, `swapon --show`, `sysctl vm.swappiness vm.vfs_cache_pressure vm.dirty_bytes vm.dirty_background_bytes vm.dirty_writeback_centisecs vm.page-cluster`, and `/sys/block/<device>/queue/scheduler`. Confirm ZRAM reports the selected compression and priority, swappiness reaches 150 after zram initialization, and each device exposes the selected scheduler. A successful evaluation alone does not verify runtime udev behavior or performance.
 
 ## LAVD CPU scheduling
 

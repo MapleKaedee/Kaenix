@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-25 — Adopt selected CachyOS memory and I/O settings
+
+- Increase ZRAM capacity to 100% of RAM with swap priority 100; apply CachyOS VM cache, dirty-page, writeback, and swap read-ahead settings, including swappiness 150 after ZRAM initialization and disabling zswap.
+- Add device-specific udev I/O scheduler rules for rotational disks, SATA/eMMC SSDs, and NVMe. Keep unrelated CachyOS settings out of scope.
+- Document the policy and runtime inspection commands. Preserve the separate pending audio-module change; do not activate the configuration here.
+
 ## 2026-10-25 — Order DMS after Mango session startup
 
 - Order the DMS user service after Mango's packaged session target. Runtime logs showed DMS restarting as the prior session's Wayland socket disappeared, then launching Quickshell before Mango's socket existed and exhausting systemd's restart limit.
