@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-25 — Align CachyOS kernel with Chaotic cache
+
+- Track Chaotic Nyx's `nyxpkgs-unstable` branch and retain its own nixpkgs pin so the CachyOS kernel matches the derivation published to Chaotic's cache. Document why this input does not follow Kaenix's root nixpkgs.
+- Validate the configured and cache-branch kernel output paths, evaluate the `syrup` configuration, and build the selected kernel to verify substitution. Activation is separate.
+
 ## 2026-10-25 — Adopt selected CachyOS memory and I/O settings
 
 - Increase ZRAM capacity to 100% of RAM with swap priority 100; apply CachyOS VM cache, dirty-page, writeback, and swap read-ahead settings, including swappiness 150 after ZRAM initialization and disabling zswap.

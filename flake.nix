@@ -26,8 +26,7 @@
       flake = false;
     };
 
-    chaotic.url = "github:chaotic-cx/nyx";
-    chaotic.inputs.nixpkgs.follows = "nixpkgs";
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
   };
 
   nixConfig = {

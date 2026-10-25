@@ -277,6 +277,8 @@ Use [Kaenix Update](../.agents/skills/kaenix-update/SKILL.md), for example `$kae
 
 Preserve input release lines and shared nixpkgs relationships. The `cat-widget` and `mpvpaper-plugin` declarations pin exact commits: verify and change the intended commit before refreshing the selected lock entries. A lockfile refresh alone does not advance those declared pins. Reassess affected workarounds, including the [khal override](#dms-calendar-and-the-khal-build-workaround), and distinguish passing configuration checks from real-session plugin compatibility. Vendored mpv/PlayKit assets follow their separate [update guidance](../config/mpv/UPSTREAM.md#attribution-and-updates).
 
+The Chaotic Nyx input intentionally tracks `nyxpkgs-unstable` without following the root nixpkgs input. Chaotic publishes cache-aligned packages on that branch; making it follow Kaenix's nixpkgs can produce different kernel derivations and force local builds. Keep its separate nixpkgs pin when updating the `chaotic` input.
+
 ## Commit-message standard
 
 Use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) for future commits:
