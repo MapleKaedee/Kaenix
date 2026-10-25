@@ -56,6 +56,7 @@ let
     assert builtins.elem "mango-session.target" (hm.systemd.user.services.dms.Install.WantedBy or [ ]);
     assert builtins.elem "niri.service" (hm.systemd.user.services.dms.Unit.PartOf or [ ]);
     assert builtins.elem "mango-session.target" (hm.systemd.user.services.dms.Unit.PartOf or [ ]);
+    assert builtins.elem "mango-session.target" (hm.systemd.user.services.dms.Unit.After or [ ]);
     assert !(builtins.hasAttr "mango-session" hm.systemd.user.targets);
     assert hm.xdg.configFile."mango/config.conf".text != "";
     assert

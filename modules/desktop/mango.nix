@@ -20,7 +20,10 @@
 
           systemd.user.services.dms = {
             Install.WantedBy = [ "mango-session.target" ];
-            Unit.PartOf = [ "mango-session.target" ];
+            Unit = {
+              After = [ "mango-session.target" ];
+              PartOf = [ "mango-session.target" ];
+            };
           };
         };
     };

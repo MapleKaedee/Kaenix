@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-25 — Order DMS after Mango session startup
+
+- Order the DMS user service after Mango's packaged session target. Runtime logs showed DMS restarting as the prior session's Wayland socket disappeared, then launching Quickshell before Mango's socket existed and exhausting systemd's restart limit.
+- Extend the ownership evaluation to assert the ordering while retaining DMS's Niri wiring. Evaluation verifies the generated unit declaration; live behavior requires activation and a new Mango login.
+
 ## 2026-10-25 — Track DMS-generated Mango configuration
 
 - Restore Home Manager ownership of Mango's main `config.conf` after DMS setup and add the generated seven DMS fragments as copy-once writable seeds. Adapt the main file to use optional includes, retain the scrolling layout default, and omit the standalone `dms run` hook because DMS starts through its user service.
