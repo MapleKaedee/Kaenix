@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-25 — Move mpv configuration into its own flake
+
+- Move the mpv Home Manager feature, vendored configuration/assets, provenance guide, and headless test implementation into `/home/kaede/Projects/mpv-configs`. Export the feature through `flakeModules.mpv` and expose a check builder that uses Kaenix's evaluated Home Manager configuration and package set.
+- Add the local `mpv-configs` flake input, import its feature module, and retain explicit selection through the applications bundle. Keep the mpvpaper DMS integration and package in Kaenix. The local mpv check remains available through the external flake's check builder.
+- Switch Kaenix from the local-path `mpv-configs` input to the published GitHub flake and lock its current `main` commit.
+- Validation passes: lock-preserving `nix flake check --no-build path:.`, ownership evaluation with `mpv` registered once under `applications`, and the forwarded `mpv-config` check. All nine Kaenix checks build. Baseline comparison confirms identical system, Home Manager, `kae`, formatter, and non-mpv check derivations; the mpv check has a new derivation name after moving its builder. Nix formatting and `git diff --check` pass. No system activation is performed.
+
 ## 2026-10-25 — Align CachyOS kernel with Chaotic cache
 
 - Track Chaotic Nyx's `nyxpkgs-unstable` branch and retain its own nixpkgs pin so the CachyOS kernel matches the derivation published to Chaotic's cache. Document why this input does not follow Kaenix's root nixpkgs.

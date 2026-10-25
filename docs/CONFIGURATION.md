@@ -11,7 +11,7 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | `modules/bundles/` | Six shallow, import-only composition modules selected by the host |
 | `modules/desktop/` | Niri, MangoWM, DMS/DankGreeter, font defaults, and cursor |
 | `modules/shell/` | Default login shell, Fish, Nushell, Starship/eza, Fastfetch, and Git configuration |
-| `modules/apps/` | Alacritty, Kitty, btop, Brave, Helix, mpv, Steam, and Yazi configuration |
+| `modules/apps/` | Alacritty, Kitty, btop, Brave, Helix, Steam, and Yazi configuration |
 | `modules/hardware/` | NVIDIA/PRIME, ASUS, power, tablet, and Bluetooth |
 | `modules/services/` | Audio, printing, automount, session services, and SCX scheduling |
 | `modules/system/` | Base, boot, networking, account/groups, Nix, Home Manager, home identity/XDG, and seed infrastructure |
@@ -275,7 +275,7 @@ For command-line lockfile updates, use `kae update` for all inputs or `kae updat
 
 Use [Kaenix Update](../.agents/skills/kaenix-update/SKILL.md), for example `$kaenix-update update dms and review compatibility`, for selected inputs or an explicitly requested full update. The skill owns the review/update procedure and compatibility-fix boundaries; activation remains separate.
 
-Preserve input release lines and shared nixpkgs relationships. The `cat-widget` and `mpvpaper-plugin` declarations pin exact commits: verify and change the intended commit before refreshing the selected lock entries. A lockfile refresh alone does not advance those declared pins. Reassess affected workarounds, including the [khal override](#dms-calendar-and-the-khal-build-workaround), and distinguish passing configuration checks from real-session plugin compatibility. Vendored mpv/PlayKit assets follow their separate [update guidance](../config/mpv/UPSTREAM.md#attribution-and-updates).
+Preserve input release lines and shared nixpkgs relationships. The `cat-widget` and `mpvpaper-plugin` declarations pin exact commits: verify and change the intended commit before refreshing the selected lock entries. A lockfile refresh alone does not advance those declared pins. The `mpv-configs` input comes from [MapleKaedee/mpv-configs](https://github.com/MapleKaedee/mpv-configs), maintained locally at `/home/kaede/Projects/mpv-configs`. After publishing changes to that repository, run `kae update mpv-configs` to refresh its lock entry. Reassess affected workarounds, including the [khal override](#dms-calendar-and-the-khal-build-workaround), and distinguish passing configuration checks from real-session plugin compatibility. The mpv flake's README records vendored asset provenance and update guidance.
 
 The Chaotic Nyx input intentionally tracks `nyxpkgs-unstable` without following the root nixpkgs input. Chaotic publishes cache-aligned packages on that branch; making it follow Kaenix's nixpkgs can produce different kernel derivations and force local builds. Keep its separate nixpkgs pin when updating the `chaotic` input.
 
@@ -375,7 +375,7 @@ Official Discord is installed through `home.packages` in `modules/packages.nix`,
 
 ## mpv and video defaults
 
-`modules/apps/mpv.nix` enables mpv through Home Manager and makes it the video default. Configuration, controls, writable state, asset provenance, and validation are covered in the [mpv_PlayKit main guide](MPV.md).
+The `mpv-configs` flake input registers the `mpv` feature selected by the `applications` bundle. It enables mpv through Home Manager, configures video MIME defaults, and owns the player assets and regression check. Its README covers controls, writable state, asset provenance, and validation. The separate DMS mpvpaper wallpaper integration remains configured in Kaenix.
 
 ## Audio settings
 

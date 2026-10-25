@@ -22,7 +22,7 @@ My personal [NixOS](https://nixos.org/) configuration.
 | Nix formatting | nixfmt (`nixfmt`, `nix fmt`) |
 | Browser | Brave |
 | Editor | Zed + Helix (default CLI editor) |
-| Media player | mpv |
+| Media player | mpv (from the [`mpv-configs` flake](https://github.com/MapleKaedee/mpv-configs)) |
 | Gaming | Steam, Protontricks, Gamescope, GameMode |
 | Theme | Catppuccin Mocha with Mauve |
 | Fonts | JetBrains Mono and its Nerd Font variant |

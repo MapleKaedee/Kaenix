@@ -242,6 +242,21 @@
         "type": "github"
       }
     },
+    "mpv-configs": {
+      "locked": {
+        "lastModified": 1792914522,
+        "narHash": "sha256-Em4aN3xjjidhLZlDYB1DqiwwiykoaZr7LFo31SLHIhM=",
+        "owner": "MapleKaedee",
+        "repo": "mpv-configs",
+        "rev": "b45f3654a05b48a91decea09c7fe96188e431c1f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MapleKaedee",
+        "repo": "mpv-configs",
+        "type": "github"
+      }
+    },
     "mpvpaper-plugin": {
       "flake": false,
       "locked": {
@@ -334,6 +349,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager_2",
         "import-tree": "import-tree",
+        "mpv-configs": "mpv-configs",
         "mpvpaper-plugin": "mpvpaper-plugin",
         "nix-gaming": "nix-gaming",
         "nixpkgs": "nixpkgs_2"

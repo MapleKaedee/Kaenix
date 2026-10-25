@@ -63,8 +63,8 @@
 
       # Packages installed through feature modules (not a transitive dependency list):
       # - modules/apps/kitty.nix: Kitty.
-      # - modules/apps/{alacritty,btop,brave,helix,mpv,steam,yazi}.nix:
-      #   Alacritty, btop, Brave, Helix, mpv, Steam/steam-run, Protontricks,
+      # - modules/apps/{alacritty,btop,brave,helix,steam,yazi}.nix:
+      #   Alacritty, btop, Brave, Helix, Steam/steam-run, Protontricks,
       #   Gamescope, GameMode, and Yazi.
       # - modules/shell/{fish,nushell,common,fastfetch,git}.nix:
       #   Fish/autopair, Nushell, Starship/eza, Fastfetch, and Home Manager's Git.

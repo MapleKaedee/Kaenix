@@ -1,4 +1,9 @@
-{ self, globals, ... }:
+{
+  self,
+  globals,
+  inputs,
+  ...
+}:
 {
   flake = {
     packages.x86_64-linux.default =
@@ -9,10 +14,15 @@
       repository = "/home/${globals.username}/Kaenix";
     };
     formatter.x86_64-linux = self.nixosConfigurations.${globals.hostname}.pkgs.nixfmt-tree;
-    checks.x86_64-linux = import ../tests/checks.nix {
-      pkgs = self.nixosConfigurations.${globals.hostname}.pkgs;
-      homeConfig =
-        self.nixosConfigurations.${globals.hostname}.config.home-manager.users.${globals.username};
-    };
+    checks.x86_64-linux =
+      let
+        pkgs = self.nixosConfigurations.${globals.hostname}.pkgs;
+        homeConfig =
+          self.nixosConfigurations.${globals.hostname}.config.home-manager.users.${globals.username};
+      in
+      (import ../tests/checks.nix { inherit pkgs homeConfig; })
+      // {
+        mpv-config = inputs.mpv-configs.lib.mpvConfigCheck { inherit pkgs homeConfig; };
+      };
   };
 }

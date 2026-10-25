@@ -11,6 +11,8 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    mpv-configs.url = "github:MapleKaedee/mpv-configs";
+
     nix-gaming.url = "github:fufexan/nix-gaming";
     nix-gaming.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -40,6 +42,7 @@
       imports = [
         inputs.flake-parts.flakeModules.modules
         (inputs.import-tree ./modules)
+        inputs.mpv-configs.flakeModules.mpv
       ];
       systems = [ "x86_64-linux" ];
     };

@@ -57,30 +57,6 @@
         touch "$out"
       '';
 
-  mpv-config =
-    pkgs.runCommand "kaenix-mpv-config-test"
-      {
-        nativeBuildInputs = [
-          homeConfig.programs.mpv.finalPackage
-          pkgs.ffmpeg
-          pkgs.python3
-        ];
-        mpvAssets = ../config/mpv;
-        mpvDeployment = pkgs.linkFarm "kaenix-mpv-deployed-config" (
-          pkgs.lib.mapAttrsToList (name: file: {
-            name = pkgs.lib.removePrefix "mpv/" name;
-            path = file.source;
-          }) (pkgs.lib.filterAttrs (name: _: pkgs.lib.hasPrefix "mpv/" name) homeConfig.xdg.configFile)
-        );
-        mimeDefaults = pkgs.writeText "kaenix-mpv-mime.json" (
-          builtins.toJSON homeConfig.xdg.mimeApps.defaultApplications
-        );
-      }
-      ''
-        python3 ${./test_mpv.py}
-        touch "$out"
-      '';
-
   shells =
     pkgs.runCommand "kaenix-shells-test"
       {

@@ -18,6 +18,7 @@ let
             imports = [
               flake.inputs.flake-parts.flakeModules.modules
               (flake.inputs.import-tree ../modules)
+              flake.inputs.mpv-configs.flakeModules.mpv
               extra
               # Expose typed metadata only within this disposable evaluation.
               ({ config, ... }: { flake.testUser = config.kaenix.users.kaede; })
@@ -95,6 +96,7 @@ let
   discovery = flake.inputs.flake-parts.lib.mkFlake { inputs = flake.inputs; } {
     imports = [
       flake.inputs.flake-parts.flakeModules.modules
+      flake.inputs.mpv-configs.flakeModules.mpv
       (
         (flake.inputs.import-tree.filter (
           path: !(lib.hasInfix "/hosts/" path) && !(lib.hasSuffix "/outputs.nix" path)
@@ -179,6 +181,7 @@ let
     expectedLeaves ++ builtins.attrNames expectedBundles
   );
   projectPrefix = "${flake.outPath}/flake.nix#modules.nixos.";
+  mpvInputPrefix = "${flake.inputs.mpv-configs.outPath}/";
   # Stop at the next project registration. Skip only its same-name wrappers;
   # graph retains declared imports before the module system deduplicates them.
   frontier =
@@ -189,6 +192,8 @@ let
         name =
           if lib.hasPrefix projectPrefix node.file then
             builtins.unsafeDiscardStringContext (lib.removePrefix projectPrefix node.file)
+          else if lib.hasPrefix mpvInputPrefix node.file && lib.hasInfix "mpv" node.file then
+            "mpv"
           else
             null;
       in
