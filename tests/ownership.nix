@@ -58,6 +58,20 @@ let
     assert builtins.elem "mango-session.target" (hm.systemd.user.services.dms.Unit.PartOf or [ ]);
     assert !(builtins.hasAttr "mango-session" hm.systemd.user.targets);
     assert hm.xdg.configFile."mango/config.conf".text != "";
+    assert
+      builtins.sort builtins.lessThan (
+        map (seed: seed.target) (
+          builtins.filter (seed: lib.hasPrefix ".config/mango/dms/" seed.target) hm.kaenix.seedFiles
+        )
+      ) == builtins.sort builtins.lessThan [
+        ".config/mango/dms/binds.conf"
+        ".config/mango/dms/colors.conf"
+        ".config/mango/dms/cursor.conf"
+        ".config/mango/dms/input.conf"
+        ".config/mango/dms/layout.conf"
+        ".config/mango/dms/outputs.conf"
+        ".config/mango/dms/windowrules.conf"
+      ];
     assert cfg.users.users.kaede.shell.outPath == host.pkgs.${selection.defaultShell}.outPath;
     assert
       hm.programs.alacritty.settings.terminal.shell.program == lib.getExe cfg.users.users.kaede.shell;

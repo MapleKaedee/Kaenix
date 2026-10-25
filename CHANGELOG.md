@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-25 — Track DMS-generated Mango configuration
+
+- Restore Home Manager ownership of Mango's main `config.conf` after DMS setup and add the generated seven DMS fragments as copy-once writable seeds. Adapt the main file to use optional includes, retain the scrolling layout default, and omit the standalone `dms run` hook because DMS starts through its user service.
+- Preserve DMS's timestamped backups and fragments it skipped during setup. Extend ownership and parser checks to cover the writable fragment set and parsed generated configuration. Live DMS behavior remains for the user to verify after activation.
+
 ## 2026-10-24 — Mango DMS config includes
 
 - Declare optional Mango includes for DMS-managed outputs, layout, input, window rules, cursor, and bindings fragments. This avoids DMS's first-time setup trying and failing to append to Home Manager's read-only `config.conf` symlink while keeping DMS fragments writable.

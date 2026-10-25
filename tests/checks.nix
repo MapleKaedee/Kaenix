@@ -191,8 +191,9 @@
       }
       ''
         export HOME="$TMPDIR/test-home"
-        mkdir -p "$HOME/.config/mango"
+        mkdir -p "$HOME/.config/mango/dms"
         cp "$mangoConfig" "$HOME/.config/mango/config.conf"
+        cp ${../config/mango/dms}/*.conf "$HOME/.config/mango/dms/"
         test -f ${pkgs.mango}/share/systemd/user/mango-session.target
         mango -c "$HOME/.config/mango/config.conf" -p
         touch "$out"
@@ -244,7 +245,7 @@
         from pathlib import Path
         root = Path("test-home")
         entries = json.loads(Path(os.environ["manifest"]).read_text())
-        assert len(entries) == 17
+        assert len(entries) == 24
         assert {entry["target"] for entry in entries if entry["target"].startswith((".config/dms/", ".local/state/dms/"))} == {
             ".config/dms/settings.json",
             ".config/dms/plugin_settings.json",
@@ -262,6 +263,8 @@
         assert json.loads(settings.read_text())["customThemeFile"] == os.environ["dmsThemePath"]
         settings.write_text('{"fromGUI": true}')
         (root / ".config/alacritty/dank-theme.toml").write_text('[colors.primary]\nbackground = "#123456"\n')
+        mango_binds = root / ".config/mango/dms/binds.conf"
+        mango_binds.write_text("# edited in DMS\n")
         PY
         python3 ${../scripts/seed-files.py} --home "$PWD/test-home" --manifest "$manifest"
         python3 - <<'PY'
@@ -269,6 +272,7 @@
         from pathlib import Path
         assert json.loads(Path("test-home/.config/dms/settings.json").read_text()) == {"fromGUI": True}
         assert Path("test-home/.config/alacritty/dank-theme.toml").read_text() == '[colors.primary]\nbackground = "#123456"\n'
+        assert Path("test-home/.config/mango/dms/binds.conf").read_text() == "# edited in DMS\n"
         PY
         touch "$out"
       '';
