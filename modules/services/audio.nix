@@ -13,7 +13,7 @@
         alsa.support32Bit = true;
         pulse.enable = true;
         lowLatency = {
-          enable = true;
+          enable = false;
           quantum = 64;
           rate = 48000;
           alsa.enable = false;
