@@ -54,6 +54,7 @@ assert builtins.elem "zswap.enabled=0" cfg.boot.kernelParams;
 assert !(fixture.pkgs.lib.hasInfix "vm.swappiness" cfg.services.udev.extraRules);
 assert !(fixture.pkgs.lib.hasInfix "zswap" cfg.services.udev.extraRules);
 assert builtins.all (module: builtins.elem module cfg.boot.initrd.kernelModules) [
+  "amdgpu"
   "nvidia"
   "nvidia_modeset"
   "nvidia_drm"

@@ -21,6 +21,7 @@
 
       hardware.nvidia.modesetting.enable = true;
       boot.initrd.kernelModules = [
+        "amdgpu"
         "nvidia"
         "nvidia_modeset"
         "nvidia_drm"

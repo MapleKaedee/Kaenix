@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-26 — Load AMD early for Plymouth
+
+- Add `amdgpu` to the existing initrd module list alongside NVIDIA, retaining AMD-primary PRIME offload and the MikuPlymouth theme. The observed boot started Plymouth at about 1.5 seconds but initialized the AMD display at about 8.3 seconds, shortly before the quit request at about 9.2 seconds; late display initialization is the likely cause of the briefly visible splash.
+- Extend the existing evaluation fixture to require both AMD and NVIDIA early-boot modules, and document the post-reboot timing and visual checks. The visual improvement remains unverified until activation and reboot.
+- Validation passes: lock-preserving flake evaluation without builds, the default evaluation fixture, non-writing Nix formatting, and whitespace checks. The evaluated initrd module list includes `amdgpu`, `nvidia`, `nvidia_modeset`, and `nvidia_drm`. No full system build, activation, reboot, commit, or push is performed.
+
 ## 2026-10-26 — Fix Mango brightness and make memory policy deterministic
 
 - Pass the required empty device argument in both Mango brightness shortcuts, matching the pinned DMS handler contract. Keep the fragments writable and copy-once; document the targeted existing-home migration, unique backup, parser validation, and session test without applying it to live files.
