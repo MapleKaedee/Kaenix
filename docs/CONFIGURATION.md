@@ -79,7 +79,9 @@ The `programs` and `services` options also install packages through their module
 
 ### Nix package and option search
 
-The user package list installs pinned `nix-search-tv` and `fzf`. After activation, run the [upstream fzf integration](https://github.com/3timeslazy/nix-search-tv/blob/v2.2.9/README.md#fzf) from Nushell or Fish:
+The user package list installs pinned `nix-search-tv`, `fzf`, and an `ns` wrapper built with `writeShellApplication` from the pinned package source's `nixpkgs.sh`. The wrapper includes `fzf` and `nix-search-tv` on its runtime PATH. After activation, run `ns` from Nushell or Fish for the [upstream fzf interface](https://github.com/3timeslazy/nix-search-tv/blob/v2.2.9/README.md#fzf), including index switching, source/homepage links, a full-screen preview, and a `nix-shell` shortcut. The on-screen header lists the shortcuts.
+
+The basic pipeline also remains available:
 
 ```sh
 nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-26 — Add ns search wrapper
+
+- Install `ns` through the existing Home Manager package list using `writeShellApplication`, the pinned `nix-search-tv` source's `nixpkgs.sh`, and explicit `fzf`/`nix-search-tv` runtime inputs.
+- Document the short command and upstream interactive shortcuts, retaining the basic search pipeline.
+- Validation passes: lock-preserving flake evaluation without builds, exactly one evaluated `ns` package, a fresh wrapper build with Bash syntax and ShellCheck checks, generated executable/runtime PATH inspection, non-writing Nix formatting, the documentation route, and whitespace. The input lockfile and root README remain unchanged. No full system build, activation, interactive search test, commit, or push is performed.
+
 ## 2026-10-26 — Add nix-search-tv
 
 - Add pinned `nix-search-tv` and `fzf` to the Home Manager tool list, using the existing host-selected package module. Keep application configuration and cache user-managed.
