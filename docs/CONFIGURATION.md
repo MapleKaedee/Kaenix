@@ -69,11 +69,23 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 ## Centralized package lists
 
-`modules/packages.nix` registers `flake.modules.nixos.packages`, selected explicitly by the host, and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, OBS Studio, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list for manual startup.
+`modules/packages.nix` registers `flake.modules.nixos.packages`, selected explicitly by the host, and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Loupe, OBS Studio, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list for manual startup.
+
+Loupe uses the pinned `loupe` package in the user application list. After activation, launch `loupe` or **Image Viewer** from the application launcher. Preferences remain application-managed; select it as the image viewer through DMS **Settings → Applications → Default apps**. Kaenix does not enforce image MIME defaults. Verify opening an image from Nautilus after choosing the default; package evaluation alone does not prove GUI behavior.
 
 OBS Studio uses the standard pinned `obs-studio` package in the user list, with no additional plugins or virtual-camera configuration. Its preferences, scenes, and profiles remain GUI-managed. After activation, launch `obs` and add [Screen Capture (PipeWire)](https://obsproject.com/kb/display-capture-sources) for Wayland capture using the existing PipeWire and desktop portals. Verify a short recording with microphone and system audio in the active session; evaluation alone does not establish capture or encoder behavior.
 
 The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, btop, Helix, Kitty, Yazi, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
+
+### Nix package and option search
+
+The user package list installs pinned `nix-search-tv` and `fzf`. After activation, run the [upstream fzf integration](https://github.com/3timeslazy/nix-search-tv/blob/v2.2.9/README.md#fzf) from Nushell or Fish:
+
+```sh
+nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history
+```
+
+The first search downloads and builds its search indexes; later searches reuse the cache. Results use upstream indexes rather than Kaenix's exact lockfile revision, so confirm package and option availability against the pinned inputs before changing the configuration. Configuration and cache remain user-managed.
 
 ## Removable-media automount and the udiskie test workaround
 

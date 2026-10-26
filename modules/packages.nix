@@ -34,6 +34,7 @@
 
         # Applications.
         discord
+        loupe
         obs-studio
         osu-lazer-bin
         spotify
@@ -49,6 +50,8 @@
         # Nix and Wayland tools.
         inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.kae
         nix-output-monitor
+        nix-search-tv
+        fzf
         nixfmt
         wl-clipboard
 

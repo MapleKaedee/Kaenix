@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-26 — Add nix-search-tv
+
+- Add pinned `nix-search-tv` and `fzf` to the Home Manager tool list, using the existing host-selected package module. Keep application configuration and cache user-managed.
+- Document interactive package/option search and the distinction between upstream search indexes and Kaenix's locked inputs, with a route from the context index.
+- Validation passes: lock-preserving flake evaluation without builds, evaluated user package membership (`nix-search-tv` 2.2.9 and `fzf` 0.74.5 exactly once), absence of managed search configuration, non-writing Nix formatting, the new documentation route, and whitespace. Preserve the pending Loupe changes and input lockfile. No package/full system build, activation, interactive search test, commit, or push is performed.
+
+## 2026-10-26 — Add Loupe image viewer
+
+- Add pinned `loupe` to the Home Manager application package list. Leave preferences and default-app selection GUI-managed, with no additional configuration files or enforced image MIME associations.
+- Document launching Image Viewer and selecting it through DMS after activation, with a route from the context index.
+- Validation passes: lock-preserving flake evaluation without builds, evaluated Home Manager package membership (Loupe 50.0 exactly once), absence of managed Loupe configuration and image MIME defaults, non-writing Nix formatting, changed documentation references, and whitespace. No package/full system build, activation, live GUI test, commit, or push is performed.
+
 ## 2026-10-26 — Preserve DMS default applications across rebuilds
 
 - Keep generated Brave/mpv MIME defaults and the selected initial terminal as copy-once writable seeds. Disable Home Manager installation of both MIME list symlinks and the terminal list, so the first switch removes obsolete managed links before seeding while preserving existing regular files. DMS choices remain authoritative on later rebuilds; existing backups are neither restored nor removed.
