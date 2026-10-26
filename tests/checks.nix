@@ -1,5 +1,24 @@
 { pkgs, homeConfig }:
 {
+  dsh-desktop =
+    let
+      package = pkgs.callPackage ../lib/dsh-desktop.nix { };
+    in
+    pkgs.runCommand "kaenix-dsh-desktop-test"
+      {
+        nativeBuildInputs = [ pkgs.python3 ];
+        DSH_DESKTOP_EXE = "${package}/bin/.dsh-desktop-wrapped";
+        DSH_DESKTOP_PACKAGE = package;
+        RUNTIME_HELPER = ../scripts/dsh-desktop-runtime.py;
+        MANAGED_PATCH = ../config/dsh-desktop/managed-runtime.patch;
+        KAENIX_INIT_SOURCE = ../config/dsh-desktop/kaenix.rs;
+      }
+      ''
+        export PYTHONDONTWRITEBYTECODE=1
+        python3 ${./test_dsh_desktop.py}
+        touch "$out"
+      '';
+
   kae = import ./kae.nix { inherit pkgs; };
 
   terminal-apps =

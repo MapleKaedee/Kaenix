@@ -1,0 +1,1013 @@
+# Kaenix managed-runtime policy for upstream dsh-desktop.
+# Base commit: e9dc7283846f31ec9f3215525c4e9deeacaf0f9b
+# Package supplies src-tauri/src/kaenix.rs and substitutes @kaenixResources@.
+# Plugin/profile management and opt-in remote access remain upstream-owned.
+
+diff --git a/src-tauri/src/controls.rs b/src-tauri/src/controls.rs
+index c29d93f..88b6a2e 100644
+--- a/src-tauri/src/controls.rs
++++ b/src-tauri/src/controls.rs
+@@ -66,7 +66,6 @@
+ //! now ([`busy`]).
+ 
+ use tauri::{AppHandle, Manager, Url, WebviewWindow};
+-use tauri_plugin_autostart::ManagerExt;
+ use tauri_plugin_opener::OpenerExt;
+ 
+ /// The scheme the injected buttons signal on. Not registered with anything — it
+@@ -607,23 +606,17 @@ pub fn perform(app: &AppHandle, action: Action) {
+         Action::PluginsDone => return crate::leave_plugins(app),
+         Action::PluginsDirectory => return crate::plugins::open_directory(app),
+         Action::PluginsPick(tarball) => return crate::plugins::pick_local(app, tarball),
+-        Action::SetupUse(i) => return crate::setup::answered(crate::setup::Choice::Use(i)),
+-        Action::SetupInstallDsh(i) => {
+-            return crate::setup::answered(crate::setup::Choice::InstallDsh(i))
+-        }
+-        Action::SetupInstallNode => {
+-            return crate::setup::answered(crate::setup::Choice::InstallNode)
+-        }
+-        Action::SetupUninstallDsh(i) => {
+-            return crate::setup::answered(crate::setup::Choice::UninstallDsh(i))
+-        }
+-        Action::SetupRemoveNode => return crate::setup::answered(crate::setup::Choice::RemoveNode),
+-        Action::SetupDeleteNode(i) => {
+-            return crate::setup::answered(crate::setup::Choice::DeleteNode(i))
+-        }
+-        Action::SetupRescan => return crate::setup::answered(crate::setup::Choice::Rescan),
+-        Action::SetupClose => return crate::setup::answered(crate::setup::Choice::Close),
+-        Action::SetupQuit => return crate::setup::answered(crate::setup::Choice::Quit),
++        // Kaenix: forged/stale chooser navigations get the same policy note.
++        Action::SetupUse(_)
++        | Action::SetupInstallDsh(_)
++        | Action::SetupInstallNode
++        | Action::SetupUninstallDsh(_)
++        | Action::SetupRemoveNode
++        | Action::SetupDeleteNode(_)
++        | Action::SetupRescan
++        | Action::SetupClose
++        | Action::SetupQuit => return crate::dsh::managed_note(app),
++
+         Action::SetupLogs => return crate::dsh::open_logs(app),
+         Action::Runtime => return crate::open_runtime(app),
+         Action::Registry => return crate::open_registry(app),
+@@ -698,11 +691,8 @@ pub fn sync(window: &WebviewWindow) {
+ /// toggle and on every page load, and it reports what the system actually ended
+ /// up with rather than what was asked for.
+ pub fn sync_autostart(app: &AppHandle) {
+-    let enabled = app.autolaunch().is_enabled().unwrap_or(false);
+-    eval(
+-        app,
+-        &format!("window.__dshAutostart && window.__dshAutostart({enabled})"),
+-    );
++    // Kaenix: informational row only; never instantiate the autostart manager.
++    eval(app, "window.__dshAutostart && window.__dshAutostart(false)");
+ }
+ 
+ /// Put the checkmark on the notification item, or take it off — and say
+@@ -967,8 +957,8 @@ fn notes() -> String {
+         (
+             "runtime",
+             t!(
+-                "选哪个 Node 跑 dsh，以及装上或卸掉 dsh 本身。",
+-                "Which Node runs dsh, and installing or removing dsh itself."
++                "由 Nix 管理；请修改 Kaenix 配置并重新构建。",
++                "Managed by Nix; change the Kaenix configuration and rebuild."
+             ),
+         ),
+         (
+@@ -981,16 +971,15 @@ fn notes() -> String {
+         (
+             "channel",
+             t!(
+-                "用稳定的 rc 版，还是跑在前面的 alpha 版。切之前先备份数据。",
+-                "The steady rc line, or the alpha that runs ahead of it. \
+-                 Back your data up before switching."
++                "由 Nix 管理；请修改 Kaenix 配置并重新构建。",
++                "Managed by Nix; change the Kaenix configuration and rebuild."
+             ),
+         ),
+         (
+             "autostart",
+             t!(
+-                "登录后自动把 dsh desktop 启动起来。",
+-                "Start dsh desktop after you log in."
++                "由 Nix 管理；应用内自启动开关已禁用。",
++                "Managed by Nix; the built-in login startup switch is disabled."
+             ),
+         ),
+         (
+@@ -1367,7 +1356,8 @@ pub fn script() -> String {
+     // rows are the same question asked about a source and about a version.
+     {{ verb: 'channel' }},
+     {{ verb: 'group-general', heading: true }},
+-    {{ verb: 'autostart', check: true }},
++    // Kaenix: explanation action, not a writable autostart toggle.
++    {{ verb: 'autostart' }},
+     {{ verb: 'notify-turns', check: true }},
+     {{ verb: 'keep-awake', check: true }},
+     {{ verb: 'group-keys', heading: true }},
+diff --git a/src-tauri/src/dsh.rs b/src-tauri/src/dsh.rs
+index 1bbf8b9..d43b57b 100644
+--- a/src-tauri/src/dsh.rs
++++ b/src-tauri/src/dsh.rs
+@@ -860,8 +860,9 @@ fn node_version(printed: &str) -> Option<Version> {
+ /// [`gate`] asks the two halves itself, because it has the answer to the first
+ /// in hand either way. This is for the autostart path in `main`, which does not
+ /// run the gate and must not reach a different conclusion than it would have.
+-pub fn needs_setup(app: &AppHandle) -> bool {
+-    current(app).is_none() || !node_is_new_enough(app)
++pub fn needs_setup(_app: &AppHandle) -> bool {
++    // Kaenix: early init validates the managed launcher; never offer bootstrap.
++    false
+ }
+ 
+ /// What the loading page is told while the checks and the install they can lead
+@@ -877,62 +878,10 @@ pub type Report<'a> = dyn Fn(&str, f64) + 'a;
+ /// Everything that can hold this up is bounded except the user: the check has
+ /// [`CHECK_TIMEOUT`], and a check that fails or times out boots what is already
+ /// on disk. The dialogs block, so this must run off the main thread.
+-pub fn gate(app: &AppHandle, report: &Report) -> bool {
+-    let Some(installed) = current(app) else {
+-        // Nothing to run. Rather than install one unasked — which on a machine
+-        // that already had a Node, just not the one this script would have
+-        // picked, could put a second beside it — ask. [`setup::present`] lists
+-        // every Node on the machine and lets the user choose: switch to one that
+-        // already has dsh, install dsh into one, or install a fresh Node.
+-        return crate::setup::present(app, report);
+-    };
+-
+-    // A dsh that is here but cannot run: same question, same chooser. Without
+-    // this the whole chooser only ever reaches machines that had no dsh at all,
+-    // and the machines this was written for — the ones an older version of this
+-    // app installed a dsh onto, beside a Node nobody checked — never see it.
+-    if !node_is_new_enough(app) {
+-        return crate::setup::present(app, report);
+-    }
+-
+-    if checked_recently(app) {
+-        return true;
+-    }
+-
+-    report(t!("正在检查 dsh 更新…", "Checking for a dsh update…"), -1.0);
+-
+-    let Some(latest) = latest(app) else {
+-        eprintln!(
+-            "dsh-desktop: could not ask for the latest dsh; using the installed {}",
+-            installed.version
+-        );
+-        return true;
+-    };
+-    mark_checked(app);
+-
+-    if latest <= installed.version || skipped(app).is_some_and(|skipped| skipped == latest) {
+-        return true;
+-    }
+-
+-    // Nothing here can aim an install at that tree, so telling the user is the
+-    // whole of it — and recording it as skipped is what keeps that to once per
+-    // release rather than every time the six hours are up.
+-    let Some(prefix) = updatable(&installed) else {
+-        tell(app, &installed.version, &latest);
+-        skip(app, &latest);
+-        return true;
+-    };
+-
+-    if !ask(app, &installed.version, &latest) {
+-        skip(app, &latest);
+-        return true;
+-    }
+-
+-    // Nothing is running yet, so there is nothing to stop and nothing to restart
+-    // for: npm replaces the tree in place and the boot carries straight on into
+-    // the new version. A failed update is still a boot: the dsh that was here
+-    // before it is the one this launch runs.
+-    update(app, prefix, &installed.version, report) != Updated::Quit
++pub fn gate(_app: &AppHandle, _report: &Report) -> bool {
++    // Kaenix: init already validated the runtime. No registry checks or installs.
++    // Keep current() unchanged: opaque launchers report their own --version.
++    true
+ }
+ 
+ /// What the window shows while this is waiting on npm, and `""` when the wait is
+@@ -947,83 +896,9 @@ pub type Saying<'a> = dyn Fn(&str) + 'a;
+ /// Every outcome is reported, including "nothing to do": a menu item that does
+ /// nothing visible looks broken. A version turned down earlier is offered again
+ /// — the whole point of this is being asked.
+-pub fn requested(app: &AppHandle, saying: &Saying) -> Option<(PathBuf, Version)> {
+-    // `latest` is a `npm view`, which is the network and up to CHECK_TIMEOUT of
+-    // it. Everything after it is instant, so the line comes down here rather
+-    // than in front of each of the dialogs below.
+-    saying(t!("正在检查 dsh 更新…", "Checking for a dsh update…"));
+-    let found = current(app).map(|installed| {
+-        let latest = latest(app);
+-        (installed, latest)
+-    });
+-    saying("");
+-
+-    let Some((installed, latest)) = found else {
+-        // Nothing installs itself any more — a restart only brings the chooser
+-        // back — so the way out is the chooser, one click from here.
+-        let answering = app.clone();
+-        crate::dialog::ask(
+-            app,
+-            crate::dialog::Ask {
+-                title: t!("找不到 dsh", "No dsh found").to_string(),
+-                body: t!(
+-                    "这台机器上还没有能用的 dsh。在「运行环境」里可以一键装好。",
+-                    "There is no working dsh on this machine. The runtime panel can set one up in one click."
+-                )
+-                .to_string(),
+-                choices: vec![
+-                    crate::dialog::Choice::new("cancel", t!("取消", "Cancel")),
+-                    crate::dialog::Choice::primary(
+-                        "runtime",
+-                        t!("打开运行环境", "Open the runtime panel"),
+-                    ),
+-                ],
+-                answered: Box::new(move |_, id| {
+-                    if id == "runtime" {
+-                        crate::open_runtime(&answering);
+-                    }
+-                }),
+-            },
+-        );
+-        return None;
+-    };
+-
+-    let Some(latest) = latest else {
+-        note(
+-            app,
+-            t!("检查 dsh 更新失败", "Could not check for a dsh update"),
+-            t!(
+-                "无法查询 dsh 的最新版本，通常是网络或代理的问题。",
+-                "The latest dsh version could not be looked up, which is usually the network or a proxy."
+-            ),
+-        );
+-        return None;
+-    };
+-    mark_checked(app);
+-
+-    if latest <= installed.version {
+-        note(
+-            app,
+-            t!("dsh 已是最新版本", "dsh is up to date"),
+-            &t!(
+-                "当前的 dsh {} 已经是最新的。",
+-                "The installed dsh {} is the latest there is.",
+-                installed.version
+-            ),
+-        );
+-        return None;
+-    }
+-
+-    let Some(prefix) = updatable(&installed).map(Path::to_path_buf) else {
+-        tell(app, &installed.version, &latest);
+-        return None;
+-    };
+-
+-    if !confirm(app, &installed.version, &latest) {
+-        return None;
+-    }
+-
+-    Some((prefix, installed.version))
++pub fn requested(app: &AppHandle, _saying: &Saying) -> Option<(PathBuf, Version)> {
++    managed_note(app);
++    None
+ }
+ 
+ /// How an [`update`] ended.
+@@ -1097,164 +972,10 @@ pub fn update(app: &AppHandle, prefix: &Path, installed: &Version, report: &Repo
+ /// The script emits `::status <text>` and `::progress <percent>` lines for
+ /// this, and everything else it prints is npm's own log, which goes to stderr
+ /// for whoever is watching the app from a console.
+-pub(crate) fn run(app: &AppHandle, args: &[&OsStr], report: &Report) -> Result<bool, String> {
+-    let script = script(app).ok_or_else(|| {
+-        t!("找不到安装脚本 {}", "the install script {} is missing", SCRIPT)
+-    })?;
+-
+-    // Whether this run is going to reach a registry at all -- see `FETCHES`.
+-    // The chooser's `list` and `switch` install nothing, so neither the question
+-    // below nor the channel beside it means anything to them.
+-    let fetching =
+-        mode_of(args).is_some_and(|mode| FETCHES.iter().any(|fetches| OsStr::new(fetches) == mode));
+-
+-    // Before the spawn and not inside it: this can put a dialog up, and the
+-    // question is about the install that is being started here.
+-    let source = fetching.then(|| registry_source(app)).flatten();
+-
+-    let mut command = interpreter(&script);
+-    command
+-        .args(args)
+-        // Turns the plain log into `::` lines and switches stdout to UTF-8,
+-        // which is what the reader below expects.
+-        .arg("-Progress")
+-        // The language the loading page is in, so what the script says onto it
+-        // is too. The scripts default to Chinese, which is what the uninstaller
+-        // and a run by hand have always had.
+-        .arg("-Lang")
+-        .arg(crate::i18n::tag())
+-        .stdin(Stdio::null())
+-        .stdout(Stdio::piped())
+-        // Kept now, for the log: a PowerShell exception or a shell error lands
+-        // here and nowhere else.
+-        .stderr(Stdio::piped());
+-
+-    if let Some(source) = source {
+-        command.arg("-Registry").arg(source.as_str());
+-    }
+-
+-    // Which release line the install takes. Passed on every fetching mode
+-    // rather than only on a switch, so that a user on alpha stays on it through
+-    // an ordinary update and a fresh `install-dsh` — the script defaults to rc,
+-    // and a missing flag here would quietly move them back.
+-    if fetching {
+-        let channel = crate::settings::dsh_channel(app);
+-        command.arg("-Channel").arg(channel.as_str());
+-        // And which of the rc line's two tags, when it is not the one the
+-        // scripts take on their own. Only ever added, so a run by hand or from
+-        // the installer hooks keeps installing `latest`.
+-        if channel == Channel::Rc {
+-            let tag = rc_tag(app);
+-            if tag != Channel::Rc.tag() {
+-                command.arg("-RcTag").arg(tag);
+-            }
+-        }
+-    }
+-
+-    #[cfg(windows)]
+-    command.creation_flags(CREATE_NO_WINDOW);
+-    // npm is a tree of its own, and this one runs for minutes.
+-    #[cfg(unix)]
+-    crate::server::group_leader(&mut command);
+-
+-    // Claimed before the spawn, so that two callers cannot both end up in the
+-    // slot below with one of the children left unowned. `main` keeps them from
+-    // reaching this at once at all; this is the backstop that makes the slot's
+-    // invariant true rather than merely likely.
+-    let mut running = RUNNING.lock().unwrap();
+-    if running.is_some() {
+-        return Err(t!(
+-            "已经有一个 dsh 安装或更新在进行中",
+-            "a dsh install or update is already running"
+-        )
+-        .to_string());
+-    }
+-
+-    let mut child = crate::server::tethered(command).map_err(|error| error.to_string())?;
+-    let stdout = child
+-        .stdout
+-        .take()
+-        .ok_or(t!("无法读取脚本输出", "the script's output cannot be read"))?;
+-
+-    // Everything the script says, both streams, for the failure dialog to hand
+-    // over. Without it a failed install on someone else's machine is one
+-    // sentence and nothing behind it.
+-    let log = Arc::new(Mutex::new(open_log(app, args)));
+-    if let Some(stderr) = child.stderr.take() {
+-        let log = Arc::clone(&log);
+-        std::thread::spawn(move || {
+-            for line in BufReader::new(stderr).lines().map_while(Result::ok) {
+-                logged(&log, &format!("[stderr] {line}"));
+-            }
+-        });
+-    }
+-
+-    #[cfg(windows)]
+-    let job = crate::server::Job::hold(&child);
+-
+-    *running = Some(Running {
+-        child,
+-        #[cfg(windows)]
+-        _job: job,
+-    });
+-    drop(running);
+-
+-    // Read on this thread, so that the reporter does not have to be `Send` — it
+-    // writes to the window, which the caller owns.
+-    //
+-    // The two kinds of line are independent: a status without a percentage must
+-    // not disturb the bar, so the last one seen is repeated rather than made up.
+-    let mut failure = None;
+-    let mut percent = -1.0;
+-    for line in BufReader::new(stdout).lines().map_while(Result::ok) {
+-        logged(&log, &line);
+-        if let Some(text) = line.strip_prefix("::status ") {
+-            report(text, percent);
+-        } else if let Some(reported) = line.strip_prefix("::progress ") {
+-            if let Ok(reported) = reported.trim().parse() {
+-                percent = reported;
+-                report("", percent);
+-            }
+-        } else if let Some(text) = line.strip_prefix("::error ") {
+-            failure = Some(text.to_string());
+-        } else {
+-            eprintln!("[bootstrap] {line}");
+-        }
+-    }
+-
+-    // The pipe closed, so the script is finished or a syscall away from it.
+-    let status = loop {
+-        let mut running = RUNNING.lock().unwrap();
+-        // Taken by `stop`: the app is on its way out.
+-        let Some(active) = running.as_mut() else {
+-            return Ok(false);
+-        };
+-
+-        let finished = match active.child.try_wait() {
+-            Ok(Some(status)) => Some(Ok(status)),
+-            Ok(None) => None,
+-            Err(error) => Some(Err(error.to_string())),
+-        };
+-        if let Some(result) = finished {
+-            *running = None;
+-            break result?;
+-        }
+-
+-        drop(running);
+-        std::thread::sleep(POLL);
+-    };
+-
+-    if status.success() {
+-        Ok(true)
+-    } else {
+-        let failure = failure
+-            .unwrap_or_else(|| t!("脚本退出码 {}", "the script exited with {}", status));
+-        logged(&log, &format!("-- failed: {failure}"));
+-        Err(match hint(&failure) {
+-            Some(hint) => format!("{failure}\n\n{hint}"),
+-            None => failure,
+-        })
+-    }
++pub(crate) fn run(_app: &AppHandle, _args: &[&OsStr], _report: &Report) -> Result<bool, String> {
++    // Kaenix: hard backstop for every bootstrap mode, not just visible menus.
++    // Includes install/update/switch/uninstall/remove-node/delete-node.
++    Err(MANAGED_NOTE.to_string())
+ }
+ 
+ /// Where the last bootstrap run's whole output is kept: one file, replaced by
+@@ -2067,8 +1788,9 @@ pub fn app_dir(app: &AppHandle) -> Option<PathBuf> {
+     Some(simplified(app.path().app_local_data_dir().ok()?))
+ }
+ 
+-pub fn resources(app: &AppHandle) -> Option<PathBuf> {
+-    Some(simplified(app.path().resource_dir().ok()?).join("resources"))
++pub fn resources(_app: &AppHandle) -> Option<PathBuf> {
++    // Kaenix package substitutes the immutable directory containing resources.
++    Some(PathBuf::from("@kaenixResources@"))
+ }
+ 
+ /// Where a channel switch would install, and what is installed there now.
+@@ -2118,6 +1840,14 @@ pub(crate) fn interpreter(script: &Path) -> Command {
+     command
+ }
+ 
++// Kaenix policy: plugin/profile management remains available, but the desktop,
++// Node, DSH release, and login startup are declarative configuration, not app state.
++pub(crate) const MANAGED_NOTE: &str = "Managed by Nix. Change the Kaenix configuration and rebuild to update dsh desktop, Node or DSH, change release channels, or configure startup at login. Built-in runtime installation, switching, removal and autostart are disabled.";
++
++pub(crate) fn managed_note(app: &AppHandle) {
++    note(app, "Nix-managed runtime", MANAGED_NOTE);
++}
++
+ /// A dialog with nothing to answer. Public because the tray has one thing to say
+ /// that this module knows nothing about — see `update_dsh` in `main.rs`.
+ pub fn note(app: &AppHandle, title: &str, detail: &str) {
+diff --git a/src-tauri/src/main.rs b/src-tauri/src/main.rs
+index 0222476..cde486a 100644
+--- a/src-tauri/src/main.rs
++++ b/src-tauri/src/main.rs
+@@ -14,6 +14,7 @@ mod cookies;
+ mod dialog;
+ mod dsh;
+ mod folder;
++mod kaenix; // Kaenix supplies the fail-closed managed-runtime initializer.
+ mod memory;
+ mod notify;
+ mod panel;
+@@ -42,7 +43,6 @@ use tauri::menu::{IsMenuItem, Menu, MenuItem, PredefinedMenuItem};
+ use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+ use tauri::webview::{NewWindowResponse, PageLoadEvent};
+ use tauri::{Manager, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+-use tauri_plugin_autostart::{ManagerExt, MacosLauncher};
+ use tauri_plugin_opener::OpenerExt;
+ 
+ /// The origin `dsh web` bound to, once it has. Navigation inside it stays in the
+@@ -119,6 +119,7 @@ struct Session {
+ }
+ 
+ fn main() {
++    kaenix::init();
+     // Before anything else, and from the thread that is about to become the
+     // event loop: `dialog::confirm` blocks on a message only this thread can
+     // deliver, and this is what lets it assert it is not being called here.
+@@ -141,11 +142,8 @@ fn main() {
+         }))
+         .plugin(tauri_plugin_opener::init())
+         .plugin(shortcut::plugin())
+-        .plugin(tauri_plugin_updater::Builder::new().build())
+-        .plugin(tauri_plugin_autostart::init(
+-            MacosLauncher::LaunchAgent,
+-            Some(vec![AUTOSTART_FLAG]),
+-        ))
++        // Kaenix: Nix owns updates and login startup. Do not register either
++        // plugin, including its IPC handlers or autostart filesystem effects.
+         .setup(move |app| {
+             let preference = theme::preference();
+             let origin: Origin = Arc::new(RwLock::new(None));
+@@ -781,15 +779,8 @@ fn build_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
+ /// Add or remove the login item, and leave the checkmark showing what the
+ /// system actually ended up with rather than what was asked for.
+ fn toggle_autostart(app: &tauri::AppHandle) {
+-    let manager = app.autolaunch();
+-    let was = manager.is_enabled().unwrap_or(false);
+-
+-    let changed = if was { manager.disable() } else { manager.enable() };
+-    if let Err(error) = changed {
+-        eprintln!("dsh-desktop: could not change the login item: {error}");
+-    }
+-
+-    controls::sync_autostart(app);
++    // Kaenix: never query or mutate the platform login-item manager.
++    dsh::managed_note(app);
+ }
+ 
+ /// Turn this app's notifications on or off, and repaint the checkmark.
+@@ -985,114 +976,8 @@ fn open_registry(app: &tauri::AppHandle) {
+ /// On its own thread: the lookup waits on npm, the question waits on the user,
+ /// and the install runs for minutes.
+ fn open_channel(app: &tauri::AppHandle) {
+-    if BUSY.swap(true, Ordering::SeqCst) {
+-        dsh::note(
+-            app,
+-            t!("请稍等", "One moment"),
+-            t!(
+-                "dsh 正在启动或更新中，等它忙完再试。",
+-                "dsh is starting or updating; try again once it has finished."
+-            ),
+-        );
+-        return;
+-    }
+-
+-    let session = app.state::<Session>().inner().clone();
+-    let app = app.clone();
+-
+-    std::thread::spawn(move || {
+-        let _busy = Busy;
+-
+-        // A registry away, and the menu has just closed over a window with
+-        // nothing to show for the click yet.
+-        let saying = |text: &str| controls::busy(&app, text);
+-        saying(t!("正在查询 dsh 的版本…", "Looking up dsh's versions…"));
+-        let found = dsh::tags(&app);
+-        let installable = dsh::installable(&app);
+-        saying("");
+-
+-        let Some(tags) = found else {
+-            dsh::note(
+-                &app,
+-                t!("查不到版本", "The versions could not be looked up"),
+-                t!(
+-                    "无法查询 dsh 的版本，通常是网络或代理的问题。",
+-                    "dsh's versions could not be looked up, which is usually the \
+-                     network or a proxy."
+-                ),
+-            );
+-            return;
+-        };
+-
+-        // Asked before the question is put rather than after it is answered: an
+-        // agreement this cannot act on is worse than saying so up front.
+-        let Some((prefix, installed)) = installable else {
+-            dsh::note(
+-                &app,
+-                t!("不能从这里切换", "This cannot be switched from here"),
+-                &t!(
+-                    "这台机器上的 dsh 不在本应用能写的目录里，或者还没装好。\n\n\
+-                     要换一条线，请自己在终端里执行：\n\nnpm install -g {}@alpha",
+-                    "The dsh on this machine is not in a directory this app may \
+-                     write to, or is not installed yet.\n\nTo change lines, run it \
+-                     yourself in a terminal:\n\nnpm install -g {}@alpha",
+-                    dsh::PACKAGE
+-                ),
+-            );
+-            return;
+-        };
+-
+-        let current = settings::dsh_channel(&app);
+-        let wanted = match current {
+-            settings::Channel::Rc => settings::Channel::Alpha,
+-            settings::Channel::Alpha => settings::Channel::Rc,
+-        };
+-
+-        // The one state with nothing to ask: on rc, with an alpha that is not
+-        // ahead. Told rather than drawn as a row greyed out on the card — the
+-        // card would have to know the answer before it could grey anything out,
+-        // and that answer is a registry away.
+-        if current == settings::Channel::Rc && !tags.alpha_is_ahead() {
+-            dsh::note(
+-                &app,
+-                t!("现在不能切到 alpha", "Alpha is not ahead right now"),
+-                &t!(
+-                    "rc 是 {}，alpha 是 {}。\n\n\
+-                     alpha 没有跑在 rc 前面，切过去等于装一个更旧的 dsh，\
+-                     所以现在不让切。等 alpha 发出比 rc 新的版本再来。",
+-                    "The rc line is at {}, the alpha line at {}.\n\n\
+-                     Alpha is not ahead of rc, so switching would install an older \
+-                     dsh than the one you have. Come back once alpha has published \
+-                     something newer than rc.",
+-                    tags.rc,
+-                    alpha_or_none(&tags)
+-                ),
+-            );
+-            return;
+-        }
+-
+-        if !agreed(&app, &tags, wanted) {
+-            return;
+-        }
+-
+-        // Written before the install rather than after it, because
+-        // [`dsh::run`] reads it back to put `-Channel` on the script's command
+-        // line. So a refusal has to put it back: npm can turn a switch down
+-        // flat — a dependency range in the line being switched to that nothing
+-        // published satisfies is enough — and a preference left naming a
+-        // channel that was never installed has the app describing one line
+-        // while running the other's dsh. The row would then offer the line the
+-        // user is already on, and the way back to the one they asked for would
+-        // be a switch away and a switch back.
+-        //
+-        // Only a refusal. An install the app quit out of was interrupted, not
+-        // turned down, and leaving the answer recorded is what lets the next
+-        // launch's update check carry the switch through.
+-        settings::set_dsh_channel(&app, wanted);
+-        if reinstall_dsh(&app, &session, &prefix, &installed) == dsh::Updated::Failed {
+-            settings::set_dsh_channel(&app, current);
+-        }
+-    });
++    // Kaenix: no channel preference write, registry query, or runtime replacement.
++    dsh::managed_note(app);
+ }
+ 
+ /// `alpha` as the dialogs say it: the version, or that there is no such release
+diff --git a/src-tauri/src/setup.rs b/src-tauri/src/setup.rs
+index 3591225..c43e55c 100644
+--- a/src-tauri/src/setup.rs
++++ b/src-tauri/src/setup.rs
+@@ -313,8 +313,10 @@ fn parse_nodes(json: &str) -> Option<Vec<NodeInfo>> {
+ /// quitting or the panel timing out. Runs on the boot's worker thread, like
+ /// [`crate::dsh::gate`], and blocks on the user the way [`crate::dialog::confirm`]
+ /// does.
+-pub fn present(app: &AppHandle, report: &Report) -> bool {
+-    show(app, report, Mode::Required)
++pub fn present(app: &AppHandle, _report: &Report) -> bool {
++    // Kaenix: a missing managed runtime must not open the bootstrap chooser.
++    crate::dsh::managed_note(app);
++    false
+ }
+ 
+ /// The same panel, opened from the titlebar menu over a dsh that is already
+@@ -330,15 +332,8 @@ pub fn present(app: &AppHandle, report: &Report) -> bool {
+ /// rather than onto the loading page, which is not the page underneath this
+ /// time.
+ pub fn manage(app: &AppHandle) {
+-    // One panel at a time. The boot's is not reachable behind itself, but a
+-    // second click on the menu item while the first is still up would replace
+-    // the pending answer and leave the first loop waiting on a dead channel.
+-    if PENDING.lock().unwrap().is_some() {
+-        return;
+-    }
+-
+-    let status = |text: &str, percent: f64| crate::setup_status(app, text, percent);
+-    show(app, &status, Mode::Manage);
++    // Kaenix: do not enumerate Nodes or expose mutating runtime controls.
++    crate::dsh::managed_note(app);
+ }
+ 
+ /// The loop both callers run; [`Mode`] is what differs.
+diff --git a/src-tauri/src/update.rs b/src-tauri/src/update.rs
+index 43de631..b4148c2 100644
+--- a/src-tauri/src/update.rs
++++ b/src-tauri/src/update.rs
+@@ -1,288 +1,14 @@
+-//! Self-update against the release feed named in `tauri.conf.json`.
++//! Kaenix managed-runtime policy: Nix owns the desktop release.
+ //!
+-//! Everything here is optional and never blocks the app: a check that fails is
+-//! a check that did not happen. The user is asked before anything is downloaded,
+-//! and — everywhere but Windows, where the installer takes the decision out of
+-//! our hands — again before the app restarts, because a restart drops a session
+-//! the agent may be in the middle of.
+-//!
+-//! The download itself reports into the titlebar's status line rather than onto
+-//! the loading page: the user is on dsh's own page when they ask for this, and
+-//! navigating away from it to draw a progress bar would drop the session the
+-//! restart is being so careful about.
+-
+-use std::time::{Duration, Instant};
++//! Keep both upstream entry points, but no updater/check/install implementation
++//! or updater plugin IPC is registered. Plugin updates are independent.
+ 
+ use tauri::AppHandle;
+-use tauri_plugin_updater::{Update, UpdaterExt};
+ 
+-/// How often the download may repaint the status line. Every chunk would be a
+-/// `window.eval` every few milliseconds.
+-const REPORT_EVERY: Duration = Duration::from_millis(250);
++/// Startup checks must not contact an update feed or prompt for replacement.
++pub fn check_quietly(_app: &AppHandle) {}
+ 
+-/// How long the check may wait on the release feed before giving up. Without one
+-/// a network that is refusing connections slowly rather than quickly leaves the
+-/// status line saying "checking" for as long as the app is open. It caps the
+-/// check alone: the plugin hands the `Update` its own timeout of `None`, so a
+-/// download that takes longer than this is not cut off.
+-const CHECK_TIMEOUT: Duration = Duration::from_secs(20);
+-
+-/// Check on startup: silent unless there is something to install.
+-#[cfg_attr(debug_assertions, allow(dead_code))] // dev builds never auto-check
+-pub fn check_quietly(app: &AppHandle) {
+-    check(app.clone(), false);
+-}
+-
+-/// Check from the menu: reports the outcome either way, because a menu item that
+-/// does nothing visible looks broken — including while it is still working, which
+-/// is a request to a release feed and takes as long as that takes.
++/// User requests explain the declarative update path instead.
+ pub fn check_now(app: &AppHandle) {
+-    crate::controls::busy(app, t!("正在检查应用更新…", "Checking for app updates…"));
+-    check(app.clone(), true);
+-}
+-
+-fn check(app: AppHandle, verbose: bool) {
+-    tauri::async_runtime::spawn(async move {
+-        // Replaces the plugin's own hook, which is only the second line: see
+-        // `crate::shut_down` for why the first one is needed.
+-        let exiting = app.clone();
+-        let found = match app
+-            .updater_builder()
+-            .timeout(CHECK_TIMEOUT)
+-            .on_before_exit(move || {
+-                crate::shut_down_now(&exiting);
+-                exiting.cleanup_before_exit();
+-            })
+-            .build()
+-        {
+-            Ok(updater) => updater.check().await,
+-            Err(error) => Err(error),
+-        };
+-        // Only the one `check_now` put up: the quiet check runs behind a boot,
+-        // and taking the line down would take down whatever *that* is saying.
+-        if verbose {
+-            crate::controls::busy(&app, "");
+-        }
+-
+-        match found {
+-            Ok(Some(update)) => offer(&app, update),
+-            Ok(None) if verbose => note(
+-                &app,
+-                t!("已是最新版本", "Up to date"),
+-                &t!(
+-                    "当前版本 {} 已经是最新的。",
+-                    "Version {} is the latest there is.",
+-                    app.package_info().version
+-                ),
+-            ),
+-            Ok(None) => {}
+-            Err(error) if verbose => note(
+-                &app,
+-                t!("检查更新失败", "Update check failed"),
+-                &explain(&error),
+-            ),
+-            Err(error) => eprintln!("dsh-desktop: the update check failed: {error}"),
+-        }
+-    });
+-}
+-
+-/// Ask before spending the user's bandwidth.
+-fn offer(app: &AppHandle, update: Update) {
+-    let version = update.version.clone();
+-    let notes = update.body.clone().unwrap_or_default();
+-
+-    let body = if notes.is_empty() {
+-        t!(
+-            "发现新版本 {}，是否现在下载并安装？",
+-            "Version {} is available. Download and install it now?",
+-            version
+-        )
+-    } else {
+-        t!(
+-            "发现新版本 {}，是否现在下载并安装？\n\n{}",
+-            "Version {} is available. Download and install it now?\n\n{}",
+-            version,
+-            notes
+-        )
+-    };
+-
+-    // The update is not `Clone` and the callback is a `Box<dyn FnOnce>` that
+-    // has to be `Send`; a mutex is how it is carried into one and taken out
+-    // again exactly once.
+-    let carried = std::sync::Mutex::new(Some(update));
+-
+-    crate::dialog::ask(
+-        app,
+-        crate::dialog::Ask {
+-            title: t!("有可用更新", "Update available").to_string(),
+-            body,
+-            choices: vec![
+-                crate::dialog::Choice::new("later", t!("稍后", "Later")),
+-                crate::dialog::Choice::primary("now", t!("现在更新", "Update now")),
+-            ],
+-            answered: Box::new(move |app, id| {
+-                if id != "now" {
+-                    return;
+-                }
+-                let Some(update) = carried.lock().ok().and_then(|mut held| held.take()) else {
+-                    return;
+-                };
+-                install(app.clone(), update);
+-            }),
+-        },
+-    );
+-}
+-
+-fn install(app: AppHandle, update: Update) {
+-    tauri::async_runtime::spawn(async move {
+-        // Before the first chunk, which is a request to a release feed away: the
+-        // dialog has just closed, and until something arrives there is nothing on
+-        // screen to say the answer was heard.
+-        crate::controls::busy(&app, t!("正在下载新版本…", "Downloading the update…"));
+-
+-        let downloading = app.clone();
+-        let installing = app.clone();
+-
+-        // How much has come down, and when it was last said out loud. Both live
+-        // in the closure, which the updater calls once per chunk.
+-        let mut done: u64 = 0;
+-        let mut said: Option<Instant> = None;
+-
+-        let finished = update
+-            .download_and_install(
+-                move |chunk, total| {
+-                    done += chunk as u64;
+-                    if said.is_some_and(|at| at.elapsed() < REPORT_EVERY) {
+-                        return;
+-                    }
+-                    said = Some(Instant::now());
+-                    crate::controls::busy(&downloading, &downloaded(done, total));
+-                },
+-                move || {
+-                    // On Windows this is the last thing the app says: `install`
+-                    // hands the installer to ShellExecute and ends the process,
+-                    // and the installer draws its own progress from there.
+-                    crate::controls::busy(
+-                        &installing,
+-                        t!(
+-                            "正在安装新版本，应用即将重启…",
+-                            "Installing the update; the app is about to restart…"
+-                        ),
+-                    );
+-                },
+-            )
+-            .await;
+-
+-        // An `else` rather than an early return: on Windows the block below is
+-        // compiled out, which would leave the `return` as the last statement in
+-        // the function — redundant, and clippy is right to say so.
+-        if let Err(error) = finished {
+-            crate::controls::busy(&app, "");
+-            note(&app, t!("更新失败", "Update failed"), &explain(&error));
+-        } else {
+-            // Windows never reaches this: `Update::install` there ends in
+-            // `std::process::exit(0)` after starting the NSIS installer, which
+-            // is passed `/P /R` and so restarts the app itself. Everywhere else
+-            // the install returns and the restart is ours to ask about.
+-            #[cfg(not(windows))]
+-            {
+-                crate::controls::busy(&app, "");
+-
+-                crate::dialog::ask(
+-                    &app,
+-                    crate::dialog::Ask {
+-                        title: t!("更新就绪", "Update ready").to_string(),
+-                        body: t!(
+-                            "新版本已安装，重启后生效。正在进行的会话会被中断。",
+-                            "The update is installed and takes effect on restart. \
+-                             A session in progress will be interrupted."
+-                        )
+-                        .to_string(),
+-                        choices: vec![
+-                            crate::dialog::Choice::new("later", t!("稍后", "Later")),
+-                            crate::dialog::Choice::primary("now", t!("立即重启", "Restart now")),
+-                        ],
+-                        answered: Box::new(|app, id| {
+-                            if id == "now" {
+-                                // `request_restart` rather than `restart`: this
+-                                // answer is delivered on the main thread, and
+-                                // `restart` called there skips `RunEvent::Exit`,
+-                                // which is the one place `dsh web` is stopped
+-                                // and its process tree waited on. What that
+-                                // skipped shutdown left behind was the `dsh web`
+-                                // from before the update, still holding the
+-                                // `session.lock` of every session it had open,
+-                                // beside the one the restarted app starts: two
+-                                // servers, and one project whose sessions will
+-                                // not resume. Asking the event loop for the exit
+-                                // runs the shutdown there, and the restart
+-                                // follows it.
+-                                app.request_restart();
+-                            }
+-                        }),
+-                    },
+-                );
+-            }
+-        }
+-    });
+-}
+-
+-/// What the status line says while the new version comes down. The total is what
+-/// the server declared, which it need not have.
+-fn downloaded(done: u64, total: Option<u64>) -> String {
+-    const MB: f64 = 1024.0 * 1024.0;
+-    let megabytes = done as f64 / MB;
+-
+-    match total {
+-        Some(total) if total > 0 => t!(
+-            "正在下载新版本 {:.1} MB / {:.1} MB（{:.0}%）",
+-            "Downloading the update: {:.1} MB / {:.1} MB ({:.0}%)",
+-            megabytes,
+-            total as f64 / MB,
+-            done as f64 / total as f64 * 100.0
+-        ),
+-        _ => t!(
+-            "正在下载新版本 {:.1} MB",
+-            "Downloading the update: {:.1} MB",
+-            megabytes
+-        ),
+-    }
+-}
+-
+-/// What to say when the network is the thing that failed.
+-///
+-/// `reqwest`'s own words are "error sending request for url (…)" with the
+-/// endpoint spelled out: true, and no help to read. The endpoint is not
+-/// something the user picked, and what broke is between them and it rather than
+-/// in it. `ReleaseNotFound` means the same thing from the outside — it is what
+-/// the plugin returns once every endpoint has answered with something that was
+-/// not a feed. Anything else is a fault in the release itself, an unreadable
+-/// signature or a platform missing from the feed, and goes through verbatim:
+-/// that is the kind of thing a bug report needs quoted.
+-fn explain(error: &tauri_plugin_updater::Error) -> String {
+-    use tauri_plugin_updater::Error;
+-
+-    match error {
+-        Error::Reqwest(_) | Error::Network(_) | Error::ReleaseNotFound => t!(
+-            "无法连接到更新服务器。请检查网络后重试，或前往 dsh-desktop.cc.cd 下载最新版本。",
+-            "Could not reach the update server. Check your connection and try again, \
+-             or download the latest version from dsh-desktop.cc.cd."
+-        )
+-        .to_string(),
+-        other => other.to_string(),
+-    }
+-}
+-
+-/// Say something that needs no answer. One button, because the only thing to do
+-/// about "up to date" or "the check failed" is to stop reading it.
+-fn note(app: &AppHandle, title: &str, detail: &str) {
+-    crate::dialog::ask(
+-        app,
+-        crate::dialog::Ask {
+-            title: title.to_string(),
+-            body: detail.to_string(),
+-            choices: vec![crate::dialog::Choice::primary("ok", t!("知道了", "OK"))],
+-            answered: Box::new(|_, _| {}),
+-        },
+-    );
++    crate::dsh::managed_note(app);
+ }
+diff --git a/src-tauri/src/server.rs b/src-tauri/src/server.rs
+index 0f46fed..cec2619 100644
+--- a/src-tauri/src/server.rs
++++ b/src-tauri/src/server.rs
+@@ -494,19 +494,10 @@ impl Drop for Job {
+ 
+ /// The command that boots the browser UI.
+ ///
+-/// [`crate::dsh::current`] resolves it to an absolute path — `DSH_BIN`, or the
+-/// npm shim in the global prefix — rather than leaving the lookup to
+-/// `Command::new`, which would search the PATH this process started with. On a
+-/// machine the installer has just put Node on, that PATH is already out of date.
+-///
+-/// Falling back to the bare name is for the case where nothing was found at
+-/// all: the error from a failed spawn is what the loading page reports, and
+-/// "dsh 不存在" is a better one than "找不到应用数据目录".
++/// Kaenix: always use the package-bound private launcher, including restarts.
++/// A later validation failure must never fall back to the user's PATH dsh.
+ fn command(app: &tauri::AppHandle, port: Option<u16>) -> Command {
+-    let mut command = match crate::dsh::current(app) {
+-        Some(dsh) => Command::new(dsh.bin),
+-        None => Command::new(if cfg!(windows) { "dsh.cmd" } else { "dsh" }),
+-    };
++    let mut command = Command::new(crate::kaenix::backend());
+ 
+     // `--port 0` is dsh's own way of saying "any free one"; a number is the one
+     // a reconnect is trying to land back on.

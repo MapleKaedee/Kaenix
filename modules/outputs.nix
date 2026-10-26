@@ -13,6 +13,9 @@
       hostname = globals.hostname;
       repository = "/home/${globals.username}/Kaenix";
     };
+    packages.x86_64-linux.dsh-desktop =
+      self.nixosConfigurations.${globals.hostname}.pkgs.callPackage ../lib/dsh-desktop.nix
+        { };
     formatter.x86_64-linux = self.nixosConfigurations.${globals.hostname}.pkgs.nixfmt-tree;
     checks.x86_64-linux =
       let

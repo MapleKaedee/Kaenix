@@ -19,8 +19,8 @@ Updated: 26 October 2026. Run commands from the repository root. The commands an
 # Evaluate flake outputs without building checks or activating anything
 nix flake check --no-build path:.
 
-# Build all nine checks in their respective Nix environments
-nix build --no-link path:.#checks.x86_64-linux.kae path:.#checks.x86_64-linux.terminal-apps path:.#checks.x86_64-linux.terminals path:.#checks.x86_64-linux.shells path:.#checks.x86_64-linux.seed-files path:.#checks.x86_64-linux.seed-integration path:.#checks.x86_64-linux.niri-config path:.#checks.x86_64-linux.mango-config path:.#checks.x86_64-linux.mpv-config
+# Build all ten checks in their respective Nix environments
+nix build --no-link path:.#checks.x86_64-linux.dsh-desktop path:.#checks.x86_64-linux.kae path:.#checks.x86_64-linux.terminal-apps path:.#checks.x86_64-linux.terminals path:.#checks.x86_64-linux.shells path:.#checks.x86_64-linux.seed-files path:.#checks.x86_64-linux.seed-integration path:.#checks.x86_64-linux.niri-config path:.#checks.x86_64-linux.mango-config path:.#checks.x86_64-linux.mpv-config
 
 # Evaluate the fixture with all four terminal and shell combinations
 nix eval --impure --json --expr 'let flake = builtins.getFlake ("path:" + toString ./.); in builtins.map (selection: import ./tests/evaluate.nix ({ inherit flake; } // selection)) [ { defaultShell = "nushell"; defaultTerminal = "alacritty"; } { defaultShell = "fish"; defaultTerminal = "alacritty"; } { defaultShell = "nushell"; defaultTerminal = "kitty"; } { defaultShell = "fish"; defaultTerminal = "kitty"; } ]'
@@ -34,6 +34,7 @@ git diff --check
 
 | Check | Coverage |
 | --- | --- |
+| `dsh-desktop` | Disposable-home private runtime setup/check/backend tests with mocked npm/Node; exact-version local installation, argument forwarding, existing-state preservation, failed/idempotent setup, symlink/lock safety, concurrent-process lock lifetime, source policy assertions, and raw-ELF pre-Tauri `--kaenix-check-runtime` tests with the real packaged Node and a fake backend; no GUI, provider credentials, network download, or live DSH profile |
 | `kae` | Packaged Nu entry point, isolated user configuration, command dispatch/arguments/cwd, all/selected input update dispatch, informative help through both help forms, check discovery, errors and exit codes, generation retention and privilege boundaries with stubs; pinned formatter checks and writes only in disposable fixtures |
 | `terminals` | Home Manager's generated Alacritty TOML and Kitty config, direct login-shell startup, writable theme import, XDG selection of both desktop entries, and argument forwarding |
 | `terminal-apps` | Generated btop, Helix, and Yazi configuration values plus `--version` smoke tests for all three pinned packages |
@@ -69,7 +70,7 @@ nix eval --impure --json --no-update-lock-file --option allow-import-from-deriva
   }'
 ```
 
-Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all nine existing checks for an infrastructure migration. Inspect declared edges before Nix import deduplication: require exactly 43 registrations, the ordered seven project selections in the host, exact ordered bundle memberships, and no duplicate selection paths. All 37 leaf registrations must be reachable once: 36 through their single bundle owner and `packages` directly. `tests/ownership.nix` checks these graph invariants and rejects duplicate bundle selections, direct leaf selections, repeated members, and nested bundles, alongside the existing ownership contracts. Inspect bundle source separately to confirm that it contains imports only, without settings, options, or captured globals.
+Also compare all four shell/terminal fixture results using the command above under [repeatable checks](#repeatable-checks). Run all ten existing checks for an infrastructure migration. Inspect declared edges before Nix import deduplication: require exactly 43 registrations, the ordered seven project selections in the host, exact ordered bundle memberships, and no duplicate selection paths. All 37 leaf registrations must be reachable once: 36 through their single bundle owner and `packages` directly. `tests/ownership.nix` checks these graph invariants and rejects duplicate bundle selections, direct leaf selections, repeated members, and nested bundles, alongside the existing ownership contracts. Inspect bundle source separately to confirm that it contains imports only, without settings, options, or captured globals.
 
 Confirm that loading module definitions, including bundles, the typed user schema, and metadata but excluding `modules/hosts/syrup.nix` and `modules/outputs.nix`, creates no hosts. Evaluate all four supported shell/terminal metadata combinations and reject invalid values through the typed `kaenix.users` options; separately confirm all four lower-level globals fixture overrides remain effective. Exercise the readiness assertion with `installation/installation.nix` data overridden in a disposable fixture, never by editing the real installation or bypassing the deployment guard. Compare evaluated system/user/font package selections, generated file contents and priorities/precedence, and seed manifests before and after migration; require unique seed targets and unchanged contents. Test preservation of all 26 edited seed files in disposable homes, never the real home.
 

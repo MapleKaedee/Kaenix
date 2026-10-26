@@ -23,6 +23,7 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 | Manual TUIOS sessions | [TUIOS](CONFIGURATION.md#manual-tuios-sessions); package in `modules/packages.nix` |
 | Nix package and option search | [ns wrapper and nix-search-tv with fzf](CONFIGURATION.md#nix-package-and-option-search); packages in `modules/packages.nix` |
 | Node.js and npm DeepSeek Harness | [Official prebuilt Node package and npm DSH](CONFIGURATION.md#centralized-package-lists); `lib/nodejs-prebuilt.nix`, `modules/packages.nix`, and the Steam fallback in `modules/apps/steam.nix` |
+| Isolated unofficial DSH Desktop | [Private desktop/runtime integration](CONFIGURATION.md#isolated-dsh-desktop); `lib/dsh-desktop.nix`, `config/dsh-desktop/`, `scripts/dsh-desktop-runtime.py`, and `tests/test_dsh_desktop.py` |
 | Terminal utilities | [btop, Helix, and Yazi](CONFIGURATION.md#btop-helix-and-yazi); `modules/apps/` and `modules/shell/common.nix` |
 | Niri and MangoWM sessions, DMS path migration, and GUI baselines | [Desktop sessions](CONFIGURATION.md#niri-and-mangowm-sessions), [Mango brightness migration](CONFIGURATION.md#existing-home-mango-brightness-migration), [writable settings and DMS path migration](CONFIGURATION.md#writable-files-and-one-time-seeding); `modules/desktop/`, `config/`, `modules/system/seed-files.nix`, `scripts/seed-files.py` |
 | Scheduling and input updates | [LAVD](CONFIGURATION.md#lavd-cpu-scheduling) and [flake updates](CONFIGURATION.md#updating-flake-inputs); `modules/services/scx.nix`, `flake.nix` |

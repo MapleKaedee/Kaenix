@@ -46,7 +46,7 @@ The root `flake.nix` retains inputs, `nixConfig`, and the platform declaration, 
 
 | Owner | Responsibility |
 | --- | --- |
-| `modules/outputs.nix` | Existing default system package, `kae`, formatter, and check outputs for `x86_64-linux` |
+| `modules/outputs.nix` | Default system package, `kae`, isolated DSH Desktop, formatter, and check outputs for `x86_64-linux` |
 | `modules/hosts/syrup.nix` | Select `config.kaenix.users.kaede`, hostname and installation data; assemble globals; construct `nixosConfigurations.syrup`; explicitly select six bundles and `packages` |
 | `modules/bundles/<name>.nix` | Register an import-only `flake.modules.nixos.<name>` with an explicit ordered list of leaf feature imports |
 | `modules/users/kaede.nix` | Define the internal `kaenix.users.kaede` metadata record: username `kaede`, shell `nushell`, terminal `kitty` |
@@ -96,6 +96,41 @@ Loupe uses the pinned `loupe` package in the user application list. After activa
 OBS Studio uses the standard pinned `obs-studio` package in the user list, with no additional plugins or virtual-camera configuration. Its preferences, scenes, and profiles remain GUI-managed. After activation, launch `obs` and add [Screen Capture (PipeWire)](https://obsproject.com/kb/display-capture-sources) for Wayland capture using the existing PipeWire and desktop portals. Verify a short recording with microphone and system audio in the active session; evaluation alone does not establish capture or encoder behavior.
 
 The `programs` and `services` options also install packages through their modules. Keep their activation and configuration with the feature; comments in `modules/packages.nix` point to locations such as Brave, btop, Helix, Kitty, Yazi, shells, Niri, and DMS. These references are not a transitive dependency inventory. Kernel/driver choices, cursor packages, and executable references remain with their features. Do not duplicate module-installed packages in the explicit lists.
+
+### Isolated DSH Desktop
+
+Kaenix packages the **unofficial** [MochiNek0/dsh-desktop v0.1.29](https://github.com/MochiNek0/dsh-desktop/releases/tag/v0.1.29), pinned to commit `e9dc7283846f31ec9f3215525c4e9deeacaf0f9b`, through `lib/dsh-desktop.nix` and the existing user application list. It is independent of the npm DSH CLI described above: the existing Node package, npm installation/cache, DSH home, and running web server are not replaced or migrated. No flake input or state-version change is needed.
+
+**Do not launch an unmodified upstream binary against the existing DSH home.** Upstream starts its own `dsh web` and automatically installs/refreshes `dsh-desktop-signal` in the selected web profile; random ports do not isolate profile writes. Its Linux login-startup implementation also bypasses ordinary shell wrappers. Kaenix instead builds from source, applies `config/dsh-desktop/managed-runtime.patch`, and runs `config/dsh-desktop/kaenix.rs` as the first statement in `main`, before Tauri initialization. Direct ELF execution and restarts therefore enforce the same policy.
+
+All desktop-specific writable state starts fresh beneath `$HOME/.local/share/dsh-desktop-isolated/`:
+
+| Subdirectory | Owner and purpose |
+| --- | --- |
+| `dsh/` | Separate DSH profiles, credentials, sessions, plugin dependencies, and staged desktop plugin |
+| `agents/` | Separate shared-agent configuration via `DSH_AGENTS_HOME` |
+| `config/`, `data/`, `cache/`, `state/` | Private XDG roots, including writable desktop settings and WebKit state |
+| `runtime/` | Exact-version npm backend, initialized explicitly, not replaced automatically |
+| `npm/`, `pnpm/` | Private package-manager prefix/home; caches remain under `cache/` |
+
+The launch environment overrides inherited DSH/XDG/npm paths locally; it does not change login-shell variables or the real `HOME`. Isolation paths reject symlink redirection, and the isolation root must be owned by the user with mode 0700. Existing private settings remain writable. No existing credentials, sessions, plugins, or agent settings are copied or linked; sign in/configure providers again in the desktop. This is **state isolation, not a security sandbox**: agents still have the user's filesystem access and can work on the same selected projects.
+
+After a separately authorized Kaenix activation, initialize the private backend and check it without opening a window:
+
+```sh
+dsh-desktop-setup
+dsh-desktop --kaenix-check-runtime
+```
+
+Setup downloads `@deepseek-ai/dsh@0.2.1-rc.2` using the existing prebuilt Node 26.12.1 package and private npm paths. It is never an activation hook and does not start a server. Valid existing private runtimes are preserved; unexpected, incomplete, or mismatched installed runtimes are refused, not deleted or replaced. Setup and desktop/backend execution share a nonblocking runtime lock: quit the desktop **using its Quit action**, not just its close button, before setup. Initialization failures stop before the GUI rather than offering an alternative Node/runtime installer.
+
+Then launch `dsh-desktop` from a terminal or application launcher. It starts a separate loopback DSH server on an automatically chosen port; it does not attach to or stop an existing DSH server. Built-in desktop/Node/DSH updates, runtime switching/removal, release-channel changes, and autostart are disabled at their handlers, not only hidden in menus. Their actions explain the Nix-managed policy. The bundled desktop plugin can still be adopted and other plugins managed **inside the private profile**. The pinned `pnpm_10` uses the same prebuilt Node and is supplied on the app's PATH.
+
+Mobile access remains optional and unused by the integration. No pairing information is imported and no firewall ports or tunnels are configured. Leave **Phone connection** unused for local-only operation: enabling it is a separate security decision; its gateway can bind all interfaces, and paired LAN/Tailscale connections may resume on subsequent launches. Closing the pairing card alone does not necessarily stop sharing.
+
+The desktop, patches, Node, and pnpm are Nix-pinned. The private backend and profile plugins remain npm-managed runtime state: pinning the DSH version does not freeze npm's transitive dependency resolution. Desktop updates require reviewing the upstream profile-write/startup/runtime-management paths again and updating the source and Cargo hashes. Backend updates additionally require changing the version in `scripts/dsh-desktop-runtime.py` and an explicit private-runtime migration; a rebuild alone never overwrites an existing runtime. Never run the app's suggested global npm update commands against the original installation.
+
+Build only this package with `nix build --no-link --no-update-lock-file path:.#dsh-desktop`; run the `dsh-desktop` check described in the validation guide. Evaluation/headless checks do not establish live WebKit rendering, Wayland shortcuts, notifications, provider authentication, or actual plugin startup. Those require a separately authorized first launch. For rollback, quit the desktop and remove its package-list entry/rebuild when authorized; retain the private root for recovery. Removing the package never deletes either DSH installation's user data.
 
 ### Nix package and option search
 

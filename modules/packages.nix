@@ -32,7 +32,8 @@
         mpvpaper
         ffmpeg
 
-        # Applications.
+        # Applications; DSH Desktop enforces its own isolated runtime.
+        inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.dsh-desktop
         discord
         loupe
         obs-studio
