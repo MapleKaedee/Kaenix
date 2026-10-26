@@ -123,7 +123,7 @@
         # A forced config also has to stay quiet for noninteractive commands.
         nu --config "$XDG_CONFIG_HOME/nushell/config.nu" -c 'print "kaenix-quiet"' > quiet.out
         test "$(cat quiet.out)" = kaenix-quiet
-        nu --login -c 'use std/assert; assert equal $env.BROWSER brave; assert (($env.PATH | describe) == "list<string>"); print "kaenix-login"' > login.out
+        nu --login -c 'use std/assert; assert (($env.PATH | describe) == "list<string>"); print "kaenix-login"' > login.out
         test "$(cat login.out)" = kaenix-login
         nu --interactive --config "$XDG_CONFIG_HOME/nushell/config.nu" -c 'use std/assert; assert equal (ls | describe | str starts-with "table") true; assert (scope aliases | any {|a| $a.name == "ll" }); assert (scope commands | any {|c| $c.name == "y" }); assert equal $env.STARSHIP_SHELL nu; print "kaenix-interactive"' > interactive.out
         test "$(grep -c 'Maple-Tree' interactive.out)" = 1
@@ -182,9 +182,38 @@
   seed-integration =
     pkgs.runCommand "kaenix-seed-integration-test"
       {
-        nativeBuildInputs = [ pkgs.python3 ];
+        nativeBuildInputs = [
+          pkgs.python3
+          pkgs.bash
+          pkgs.coreutils
+          pkgs.findutils
+          pkgs.gettext
+        ];
         manifest = pkgs.writeText "kaenix-seeds.json" (builtins.toJSON homeConfig.kaenix.seedFiles);
         dmsThemePath = "${homeConfig.xdg.configHome}/dms/themes/catppuccin/theme.json";
+        seedScript = ../scripts/seed-files.py;
+        linkGenerationScript = pkgs.writeText "kaenix-test-link-generation.sh" homeConfig.home.activation.linkGeneration.data;
+        oldDefaultAppsFiles = pkgs.linkFarm "kaenix-old-home-manager-files" [
+          {
+            name = ".config/mimeapps.list";
+            path = homeConfig.xdg.configFile."mimeapps.list".source;
+          }
+          {
+            name = ".config/xdg-terminals.list";
+            path = homeConfig.xdg.configFile."xdg-terminals.list".source;
+          }
+          {
+            name = ".local/share/applications/mimeapps.list";
+            path = homeConfig.xdg.configFile."mimeapps.list".source;
+          }
+        ];
+        managedDefaultApps = builtins.toJSON (
+          map (target: homeConfig.home.file."${homeConfig.home.homeDirectory}/${target}".enable) [
+            ".config/mimeapps.list"
+            ".config/xdg-terminals.list"
+            ".local/share/applications/mimeapps.list"
+          ]
+        );
       }
       ''
         mkdir -p test-home migrated-home
@@ -225,7 +254,8 @@
         from pathlib import Path
         root = Path("test-home")
         entries = json.loads(Path(os.environ["manifest"]).read_text())
-        assert len(entries) == 24
+        assert len(entries) == 26
+        assert len({entry["target"] for entry in entries}) == len(entries)
         assert {entry["target"] for entry in entries if entry["target"].startswith((".config/dms/", ".local/state/dms/"))} == {
             ".config/dms/settings.json",
             ".config/dms/plugin_settings.json",
@@ -254,6 +284,7 @@
         assert Path("test-home/.config/alacritty/dank-theme.toml").read_text() == '[colors.primary]\nbackground = "#123456"\n'
         assert Path("test-home/.config/mango/dms/binds.conf").read_text() == "# edited in DMS\n"
         PY
+        python3 ${./test_default_apps.py}
         touch "$out"
       '';
 }

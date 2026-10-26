@@ -139,11 +139,11 @@ The brightness shortcuts require both the step and device arguments; an empty de
 
 ## Choosing Alacritty or Kitty
 
-`kaenix.users.kaede.defaultTerminal` in `modules/users/kaede.nix` accepts `"alacritty"` or `"kitty"` and currently selects Kitty. The typed user metadata schema and `lib/terminal-package.nix` reject other values; the host forwards the selection as `globals.defaultTerminal`. Both applications are always installed through their Home Manager modules; this selection only sets the desktop default and does not remove the other terminal.
+`kaenix.users.kaede.defaultTerminal` in `modules/users/kaede.nix` accepts `"alacritty"` or `"kitty"` and currently selects Kitty as the initial preference. The typed user metadata schema and `lib/terminal-package.nix` reject other values; the host forwards the selection as `globals.defaultTerminal`. Both applications are always installed through their Home Manager modules. Changing this value affects initialization of an absent terminal preference file, not an existing GUI selection.
 
-The Niri module aligns `$TERMINAL` in the NixOS session with `xdg.terminal-exec.settings.default`. The desktop ID is `Alacritty.desktop` or `kitty.desktop`. Home Manager installs `xdg-terminal-exec` and manages `~/.config/xdg-terminals.list` as read-only configuration. Change the default through Nix and rebuild rather than using the DMS GUI's terminal selector; the pinned DMS GUI tries to write the same file. Other DMS state/settings files remain writable.
+The Niri module sets `$TERMINAL` to `xdg-terminal-exec` and uses `xdg.terminal-exec.settings.default` to generate the initial desktop ID, `Alacritty.desktop` or `kitty.desktop`. Home Manager installs the launcher but disables managed installation of `~/.config/xdg-terminals.list`. The copy-once seed mechanism creates a writable file from that generated baseline only when the target is absent. Choose the terminal in DMS **Settings → Applications → Default apps**; later rebuilds preserve that choice.
 
-The baseline `Mod+T` runs `xdg-terminal-exec`. Applications using this launcher follow the default terminal list; applications reading `$TERMINAL` follow the session environment. Explicit `kitty` or `alacritty` commands still open the named application. After changing the default, rebuild and log out/in to refresh the Niri/DMS environment.
+The baseline `Mod+T` and applications invoking `$TERMINAL` use `xdg-terminal-exec`, which follows the writable terminal list. Explicit `kitty` or `alacritty` commands still open the named application. Log out/in once after migrating from the previous fixed `$TERMINAL` value; subsequent GUI terminal changes need no rebuild.
 
 Alacritty uses JetBrainsMono Nerd Font Mono at size 12, 12 px padding, 0.9 opacity, hidden decorations, 3000 lines of scrollback, and a block cursor blinking every 1000 ms. `Ctrl+Shift+N` opens a new window; `Ctrl++`, `Ctrl+-`, and `Ctrl+0` control font size. Kitty tabs and its `Ctrl+T` shortcut remain in Kitty; the terminals do not have identical features.
 
@@ -151,7 +151,17 @@ Alacritty and Kitty start `globals.defaultShell` directly with `--login`. [TUIOS
 
 ### One-time migration after first activation
 
-The user activates with `sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix#syrup`. Home Manager uses the `pre-kaenix` backup extension and does not overwrite existing backups. The old `~/.config/xdg-terminals.list` will be backed up as `xdg-terminals.list.pre-kaenix`. If that backup name already exists, save the earlier backup under another unique name before retrying activation.
+The user activates with `sudo nixos-rebuild switch --flake path:/home/kaede/Kaenix#syrup`. Home Manager uses the backup command in `modules/system/home-manager.nix` to move conflicting regular files to `<file>.pre-kaenix`. If that name already exists, GNU `mv --backup=numbered` preserves the earlier backup as `<file>.pre-kaenix.~1~`, then `.~2~`, and so on. The most recent displaced file occupies `<file>.pre-kaenix`. Existing backups, including those from the previous fixed-extension policy, no longer need manual renaming or removal before activation.
+
+This policy applies to remaining Home Manager file conflicts; backups are created when files are displaced, not on every rebuild. App defaults in `mimeapps.list` and `xdg-terminals.list` now use the separate copy-once seed mechanism, so GUI edits to these files are preserved rather than displaced during activation.
+
+### Default applications managed through DMS
+
+Brave and mpv contribute initial MIME defaults to the generated `mimeapps.list`. The shared Home Manager module disables managed installation of both `~/.config/mimeapps.list` and the legacy `~/.local/share/applications/mimeapps.list` copy. It seeds only the modern config path as a writable file. DMS selections then remain authoritative across rebuilds. Kaenix does not export a fixed `$BROWSER`, allowing applications using desktop MIME defaults to follow the selected browser.
+
+On the first `kae switch` after this migration, Home Manager removes its obsolete symlinks before the seeds run. Existing regular files, including GUI edits and legacy MIME files, remain untouched. Old `.pre-kaenix` backups are not restored or removed. After switching, log out/in to refresh session variables, select the desired apps again in DMS, then switch once more and confirm the choices remain. For a terminal choice, also check `xdg-terminal-exec --print-id` and `Mod+T`. This live check is separate from evaluation and disposable-home tests.
+
+### Existing terminal binding migration
 
 Seed changes do not modify bindings already present in the home. After activation, back up the binding file and change only the `Mod+T` command from `kitty` to `xdg-terminal-exec`, using the DMS binding editor or a text editor. The following targeted alternative handles an old binding that still exactly matches the baseline. Run `bash` first if the current terminal uses Nushell, then execute this block in Bash:
 
@@ -176,7 +186,7 @@ Seed changes do not modify bindings already present in the home. After activatio
 )
 ```
 
-This block preserves other bindings and does not run automatically during rebuilds. Once the binding uses the generic launcher, later changes to `globals.defaultTerminal` need no further migration. Verify `xdg-terminal-exec --print-id`, then test `Mod+T` and application launchers after logging in again. Do not replace the entire binding file or DMS directory with the baseline.
+This block preserves other bindings and does not run automatically during rebuilds. Once the binding uses the generic launcher, later terminal choices through DMS need no further binding migration. Verify `xdg-terminal-exec --print-id`, then test `Mod+T` and application launchers after logging in again. Do not replace the entire binding file or DMS directory with the baseline.
 
 ## Manual TUIOS sessions
 
@@ -222,10 +232,12 @@ This workaround applies to pinned nixpkgs `09063bd1f2b36fd9fd793c36dfade7bd40a93
 
 ## Writable files and one-time seeding
 
-`kaenix.seedFiles` runs `scripts/seed-files.py` after Home Manager linking and before systemd reload. Nix provides the Python interpreter; global Python is unnecessary. The manifest comes from the Nix store; all 24 seed targets are relative to the user's home.
+`kaenix.seedFiles` runs `scripts/seed-files.py` after Home Manager linking and before systemd reload. Nix provides the Python interpreter; global Python is unnecessary. The manifest comes from the Nix store; all 26 seed targets are relative to the user's home.
 
 | Target | Initial source | Owner after activation |
 | --- | --- | --- |
+| `~/.config/mimeapps.list` | Generated Brave/mpv MIME defaults | DMS/user |
+| `~/.config/xdg-terminals.list` | Generated initial terminal preference | DMS/user |
 | `~/.config/dms/settings.json` | `config/dms/settings.nix` | DMS GUI |
 | `~/.config/dms/plugin_settings.json` | `modules/desktop/dms.nix` | DMS plugin GUI |
 | `~/.local/state/dms/session.json` | Minimal state without launcher history | DMS |

@@ -40,8 +40,8 @@ Home Manager is integrated into the NixOS configuration. Do not run its activati
 
 - Check DankGreeter login/logout and lock/unlock with the system password.
 - Check `systemctl --user status dms udiskie opentabletdriver`. DMS and udiskie are declared through Home Manager; the NixOS module provides the OpenTabletDriver user unit. Avoid duplicate instances.
-- Alacritty and Kitty must follow `globals.defaultShell`: currently Nushell, with Fish still available. `Mod+T` and `xdg-terminal-exec --print-id` must follow `globals.defaultTerminal`, currently Kitty. Existing homes need the [one-time binding migration](CONFIGURATION.md#choosing-alacritty-or-kitty). Check Starship and a single Fastfetch greeting on interactive startup.
-- Change DMS settings, wallpaper, terminal themes, and tablet area; confirm that GUI changes survive a rebuild. The default terminal application is managed by Nix, while terminal colors remain writable.
+- Alacritty and Kitty must follow `globals.defaultShell`: currently Nushell, with Fish still available. `globals.defaultTerminal` seeds the initial terminal preference, currently Kitty; later DMS choices must persist across rebuilds and be reflected by `Mod+T` and `xdg-terminal-exec --print-id`. Existing homes may need the [one-time binding migration](CONFIGURATION.md#existing-terminal-binding-migration). Check Starship and a single Fastfetch greeting on interactive startup.
+- Change DMS settings, wallpaper, default apps, terminal selection/themes, and tablet area; confirm that GUI changes survive a rebuild. MIME and terminal defaults use writable copy-once seeds.
 - Check Brave and WhatsApp Web, Discord, notifications, clipboard, file chooser, and screen sharing as needed.
 - Check audio/microphone, Pavucontrol/EasyEffects, brightness, networking, Bluetooth, Niri shortcuts, and screenshots.
 - Check supported ASUS features, CTL-472/area rotation, osu!lazer, NVIDIA offload, suspend/resume, and external displays. Do not run osu!'s built-in tablet driver alongside OTD if they compete for the device.

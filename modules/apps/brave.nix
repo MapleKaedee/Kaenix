@@ -7,7 +7,6 @@
         { ... }:
         {
           programs.brave.enable = true;
-          home.sessionVariables.BROWSER = "brave";
           xdg.mimeApps = {
             enable = true;
             defaultApplications = {

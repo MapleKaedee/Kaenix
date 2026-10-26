@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-26 — Preserve DMS default applications across rebuilds
+
+- Keep generated Brave/mpv MIME defaults and the selected initial terminal as copy-once writable seeds. Disable Home Manager installation of both MIME list symlinks and the terminal list, so the first switch removes obsolete managed links before seeding while preserving existing regular files. DMS choices remain authoritative on later rebuilds; existing backups are neither restored nor removed.
+- Set `TERMINAL=xdg-terminal-exec` and remove the fixed Brave `BROWSER` export. `globals.defaultTerminal` now controls the initial terminal seed only. Update configuration, migration, validation, context-index, and agent guidance to match GUI ownership; the existing backup-rotation change is preserved.
+- Extend seed integration with the pinned Home Manager link-generation node in disposable homes, covering fresh files, old managed symlinks, existing GUI files, repeated MIME/terminal edits, and backup preservation. Evaluate all three disabled file entries, exactly one of each new seed, and 26 unique seeds overall.
+- Validation passes: lock-preserving flake evaluation without builds, ownership assertions, all four shell/terminal fixtures, selected `seed-files`, `seed-integration`, `terminals`, `shells`, and forwarded `mpv-config` checks, non-writing Nix formatting, Python syntax, changed documentation references, and whitespace. `seed-integration` and `shells` execute freshly; the other selected checks reuse existing store results. An independent read-only review finds no actionable defects. No full system build, activation, live-file migration, service restart, input update, commit, or push is performed. Live verification remains: switch, log in again, select apps in DMS, then switch again and confirm persistence.
+
+## 2026-10-26 — Rotate Home Manager conflict backups automatically
+
+- Replace the fixed `pre-kaenix` backup extension with a Home Manager backup command using pinned GNU `mv --backup=numbered`. Conflicting files still move to `<file>.pre-kaenix`; earlier backups rotate to numbered siblings without being overwritten, including backups left by the previous policy. Repeated conflicts no longer require manual renaming or removal of backups.
+- Document automatic rotation and the distinction between managed-file conflicts and writable GUI seeds, with a route from the context index.
+- Validation passes: lock-preserving flake evaluation without builds, evaluated backup options and Home Manager service environment, non-writing Nix formatting, changed documentation references, and whitespace. Build the small backup helper and test it in a disposable home: reproduce the old collision, verify the new pinned Home Manager preflight accepts it without changing files, and preserve all contents across repeated backups, literal filenames, and an existing backup symlink. No full system build, activation, live-file migration, service restart, commit, or push is performed.
+
 ## 2026-10-26 — Add standard OBS Studio
 
 - Add the pinned `obs-studio` package to the Home Manager application list for `kaede`, using the existing PipeWire and desktop portal configuration. Keep preferences, scenes, and profiles GUI-managed, with no additional plugins or virtual-camera configuration.

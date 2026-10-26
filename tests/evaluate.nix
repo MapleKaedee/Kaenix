@@ -118,7 +118,17 @@ assert builtins.all
     hm.programs.yazi.package
     fixture.pkgs.tuios
   ];
-assert cfg.environment.sessionVariables.TERMINAL == defaultTerminal;
+assert cfg.environment.sessionVariables.TERMINAL == "xdg-terminal-exec";
+assert !(hm.home.sessionVariables ? BROWSER);
+assert !hm.xdg.configFile."mimeapps.list".enable;
+assert !hm.xdg.dataFile."applications/mimeapps.list".enable;
+assert !hm.xdg.configFile."xdg-terminals.list".enable;
+assert builtins.all
+  (target: builtins.length (builtins.filter (seed: seed.target == target) hm.kaenix.seedFiles) == 1)
+  [
+    ".config/mimeapps.list"
+    ".config/xdg-terminals.list"
+  ];
 assert hm.xdg.terminal-exec.enable;
 assert
   hm.xdg.terminal-exec.settings.default == [

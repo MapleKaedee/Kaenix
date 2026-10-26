@@ -78,7 +78,17 @@ let
     assert
       hm.programs.alacritty.settings.terminal.shell.program == lib.getExe cfg.users.users.kaede.shell;
     assert hm.programs.kitty.settings.shell == "${lib.getExe cfg.users.users.kaede.shell} --login";
-    assert cfg.environment.sessionVariables.TERMINAL == selection.defaultTerminal;
+    assert cfg.environment.sessionVariables.TERMINAL == "xdg-terminal-exec";
+    assert !(hm.home.sessionVariables ? BROWSER);
+    assert !hm.xdg.configFile."mimeapps.list".enable;
+    assert !hm.xdg.dataFile."applications/mimeapps.list".enable;
+    assert !hm.xdg.configFile."xdg-terminals.list".enable;
+    assert builtins.all
+      (target: builtins.length (builtins.filter (seed: seed.target == target) hm.kaenix.seedFiles) == 1)
+      [
+        ".config/mimeapps.list"
+        ".config/xdg-terminals.list"
+      ];
     assert
       hm.xdg.terminal-exec.settings.default
       == [ (if selection.defaultTerminal == "kitty" then "kitty.desktop" else "Alacritty.desktop") ];

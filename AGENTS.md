@@ -64,9 +64,10 @@ comments are a guide, not a transitive dependency inventory.
 Change shared user defaults in `modules/users/kaede.nix`; use the assembled
 globals in NixOS and Home Manager modules. `globals.defaultShell` aligns the login shell,
 Alacritty, and Kitty while retaining Nushell/Fish. `globals.defaultTerminal`
-aligns `TERMINAL` and `xdg-terminal-exec` while retaining Alacritty/Kitty. Niri's
+seeds the initial terminal choice while retaining Alacritty/Kitty. `TERMINAL`
+uses `xdg-terminal-exec`; writable app/terminal defaults remain GUI-managed. Niri's
 default binding uses `xdg-terminal-exec`; existing writable bindings need a
-[one-time migration](docs/CONFIGURATION.md#one-time-migration-after-first-activation).
+[one-time migration](docs/CONFIGURATION.md#existing-terminal-binding-migration).
 
 ## Project-local skills
 
