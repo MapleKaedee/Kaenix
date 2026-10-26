@@ -15,9 +15,9 @@
         nautilus
         zed-editor
         chatgpt
-        deepseek-harness
 
-        # Git and command-line utilities.
+        # Development and command-line utilities.
+        nodejs_latest
         git
         gh
         curl

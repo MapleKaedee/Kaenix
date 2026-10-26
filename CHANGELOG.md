@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-26 — Add Node.js and remove DeepSeek Harness
+
+- Add `nodejs_latest` (26.12.1) from pinned nixpkgs to the existing system package list and remove `deepseek-harness`, without updating the lockfile.
+- Document the package selection and post-activation version checks.
+- Validation passes: lock-preserving flake evaluation without builds, evaluated system package membership (latest Node.js exactly once, DeepSeek Harness absent), non-writing Nix formatting, and whitespace. No system activation or runtime version checks are performed.
+
 ## 2026-10-26 — Add ns search wrapper
 
 - Install `ns` through the existing Home Manager package list using `writeShellApplication`, the pinned `nix-search-tv` source's `nixpkgs.sh`, and explicit `fzf`/`nix-search-tv` runtime inputs.
