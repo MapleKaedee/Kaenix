@@ -34,6 +34,7 @@
 
         # Applications.
         discord
+        obs-studio
         osu-lazer-bin
         spotify
 

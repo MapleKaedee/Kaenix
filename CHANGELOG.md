@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-26 — Add standard OBS Studio
+
+- Add the pinned `obs-studio` package to the Home Manager application list for `kaede`, using the existing PipeWire and desktop portal configuration. Keep preferences, scenes, and profiles GUI-managed, with no additional plugins or virtual-camera configuration.
+- Document startup and post-activation capture checks in the package guide and context index. Screen capture, audio capture, and recording still require verification in a live session after activation.
+- Validation passes: lock-preserving flake evaluation without builds, evaluated Home Manager package membership (OBS Studio 32.2.2 exactly once), non-writing Nix formatting, changed documentation links/anchors, and whitespace. PipeWire and desktop portals remain enabled. No full system build, activation, live recording test, commit, or push is performed.
+
 ## 2026-10-26 — Load AMD early for Plymouth
 
 - Add `amdgpu` to the existing initrd module list alongside NVIDIA, retaining AMD-primary PRIME offload and the MikuPlymouth theme. The observed boot started Plymouth at about 1.5 seconds but initialized the AMD display at about 8.3 seconds, shortly before the quit request at about 9.2 seconds; late display initialization is the likely cause of the briefly visible splash.
