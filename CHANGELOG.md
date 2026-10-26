@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-26 — Quiet boot output
+
+- Set console log level 3 and add quiet kernel, udev, and initrd systemd status parameters while preserving the existing GRUB and MikuPlymouth configuration. The evaluation fixture asserts the settings. Evaluation and formatting checks pass; activation and a reboot are still required to observe boot behavior.
+
 ## 2026-10-26 — MikuPlymouth boot splash
 
 - Enable MikuPlymouth as the Plymouth boot splash with the upstream default 10 clips, shuffled each boot. Add its flake input following root nixpkgs and retain the existing GRUB theme configuration. The fixture and `nix flake check --no-build` pass, and the package builds with 10 clip assets. Upstream declares 24 frames for each clip, while selected `clip000` contains 23 image files; visual impact remains unverified. No full system build or activation is performed.

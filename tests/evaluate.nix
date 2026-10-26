@@ -48,6 +48,12 @@ assert cfg.boot.loader.grub.enable;
 assert cfg.boot.loader.grub.efiSupport;
 assert cfg.boot.loader.grub.device == "nodev";
 assert !cfg.boot.loader.systemd-boot.enable;
+assert cfg.boot.consoleLogLevel == 3;
+assert builtins.all (parameter: builtins.elem parameter cfg.boot.kernelParams) [
+  "quiet"
+  "udev.log_priority=3"
+  "rd.systemd.show_status=auto"
+];
 assert builtins.baseNameOf (toString cfg.boot.loader.grub.theme) == "catppuccin-mocha-grub-theme";
 assert cfg.boot.plymouth.enable;
 assert cfg.boot.plymouth.theme == "MikuPlymouth";
