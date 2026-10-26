@@ -1,10 +1,10 @@
 # Reinstalling and adapting Kaenix
 
-Updated: 25 October 2026. Use this guide for reinstallation or adaptation to another machine. For routine changes on `syrup`, use the [README](../README.md#getting-started).
+Updated: 26 October 2026. Use this guide for reinstallation or adaptation to another machine. For routine changes on `syrup`, use the [README](../README.md#getting-started).
 
 ## Current configuration
 
-The repository is at `/home/kaede/Kaenix` and targets NixOS host `syrup` with user `kaede`. `installation/installation.nix` contains `hardwareReady = true`, UEFI GRUB, and both `systemStateVersion` and `homeStateVersion` set to `26.11`. The hardware configuration UUIDs matched the machine's mounts during the 18 October 2026 review.
+The repository is at `/home/kaede/Kaenix` and targets NixOS host `syrup` with user `kaede`. `installation/installation.nix` contains `hardwareReady = true`, UEFI Limine, and both `systemStateVersion` and `homeStateVersion` set to `26.11`. The hardware configuration UUIDs matched the machine's mounts during the 18 October 2026 review.
 
 This does not guarantee compatibility with another machine.
 
@@ -19,7 +19,7 @@ This does not guarantee compatibility with another machine.
 7. Review user metadata in `modules/users/kaede.nix`, the selected record and hostname in `modules/hosts/syrup.nix`, the hardware composition in `modules/bundles/hardware-syrup.nix`, AMD/NVIDIA configuration and PCI addresses, kernel in `modules/system/boot.nix`, ASUS/tablet devices, and monitor/wallpaper outputs in the Niri/DMS assets. Preserve installer-specific requirements such as secure boot where applicable.
 8. Once the target configuration is correct, set `hardwareReady = true`. Do not deploy the synthetic disk fixture in `tests/evaluate.nix`.
 
-The current `syrup` configuration uses UEFI GRUB with Catppuccin Mocha. For another target, use bootloader settings verified on that target rather than automatically copying `syrup`'s choice.
+The current `syrup` configuration uses UEFI Limine with Catppuccin Mocha/Mauve. For another target, use bootloader settings verified on that target rather than automatically copying `syrup`'s choice.
 
 ## Validate and prepare to boot
 

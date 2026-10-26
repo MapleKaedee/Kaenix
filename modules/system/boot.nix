@@ -18,9 +18,9 @@
         "rd.systemd.show_status=auto"
       ];
       boot.loader = globals.installation.bootLoader // {
-        grub = globals.installation.bootLoader.grub // {
-          configurationLimit = 5;
-          theme = "${inputs.grub-theme}/src/catppuccin-mocha-grub-theme";
+        limine = globals.installation.bootLoader.limine // {
+          maxGenerations = 5;
+          extraConfig = builtins.readFile "${inputs.limine-theme}/themes/mocha/catppuccin-mocha-mauve.conf";
         };
       };
 

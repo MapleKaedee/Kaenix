@@ -186,22 +186,6 @@
         "type": "github"
       }
     },
-    "grub-theme": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1752224239,
-        "narHash": "sha256-jgM22pvCQvb0bjQQXoiqGMgScR9AgCK3OfDF5Ud+/mk=",
-        "owner": "catppuccin",
-        "repo": "grub",
-        "rev": "0a37ab19f654e77129b409fed371891c01ffd0b9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "catppuccin",
-        "repo": "grub",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -255,6 +239,22 @@
       "original": {
         "owner": "denful",
         "repo": "import-tree",
+        "type": "github"
+      }
+    },
+    "limine-theme": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781176720,
+        "narHash": "sha256-4quZdgijooBlIevUpdwJXu/7eg32BQdHA21HqWIzFis=",
+        "owner": "catppuccin",
+        "repo": "limine",
+        "rev": "43d7027853c6f733bcea7e22968510915ba0da23",
+        "type": "github"
+      },
+      "original": {
+        "owner": "catppuccin",
+        "repo": "limine",
         "type": "github"
       }
     },
@@ -384,9 +384,9 @@
         "chaotic": "chaotic",
         "dms": "dms",
         "flake-parts": "flake-parts",
-        "grub-theme": "grub-theme",
         "home-manager": "home-manager_2",
         "import-tree": "import-tree",
+        "limine-theme": "limine-theme",
         "miku-plymouth": "miku-plymouth",
         "mpv-configs": "mpv-configs",
         "mpvpaper-plugin": "mpvpaper-plugin",

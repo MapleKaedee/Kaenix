@@ -7,10 +7,9 @@
 
   # Bootloader settings for syrup; these are not in hardware-configuration.nix.
   bootLoader = {
-    grub = {
+    limine = {
       enable = true;
       efiSupport = true;
-      device = "nodev";
     };
     efi.canTouchEfiVariables = true;
   };

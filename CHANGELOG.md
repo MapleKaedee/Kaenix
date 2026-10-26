@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-26 — Switch syrup from GRUB to Limine
+
+- Configure UEFI Limine with the official Catppuccin Mocha/Mauve theme, preserve EFI variable access, and retain at most five system configurations. Replace the GRUB theme source with a locked `limine-theme` input; keep Plymouth and existing boot message settings unchanged.
+- The boot fixture, lock-preserving flake evaluation, Nix formatting, and whitespace checks pass. No full system build or activation was performed; firmware boot and theme rendering still require runtime verification.
+
 ## 2026-10-26 — NVIDIA early KMS
 
 - Load the NVIDIA, modesetting, and DRM modules from the initrd while retaining AMD as the primary GPU and preserving PRIME offload. The fixture verifies the configured module list; activation and reboot are required to confirm early loading and the Plymouth display on the hardware.

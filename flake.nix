@@ -30,8 +30,8 @@
       url = "github:tokisak1kurum1/mpvpaper-plugin/c720365423a4988af4a5d03c967fcac3912d1cb6";
       flake = false;
     };
-    grub-theme = {
-      url = "github:catppuccin/grub";
+    limine-theme = {
+      url = "github:catppuccin/limine";
       flake = false;
     };
 

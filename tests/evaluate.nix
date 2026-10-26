@@ -15,10 +15,9 @@ let
       installation = (import ../installation/installation.nix) // {
         hardwareReady = true;
         bootLoader = {
-          grub = {
+          limine = {
             enable = true;
             efiSupport = true;
-            device = "nodev";
           };
           efi.canTouchEfiVariables = true;
         };
@@ -44,10 +43,11 @@ let
   hm = cfg.home-manager.users.kaede;
 in
 assert cfg.hardware.nvidia.open;
-assert cfg.boot.loader.grub.enable;
-assert cfg.boot.loader.grub.efiSupport;
-assert cfg.boot.loader.grub.device == "nodev";
-assert cfg.boot.loader.grub.configurationLimit == 5;
+assert cfg.boot.loader.limine.enable;
+assert cfg.boot.loader.limine.efiSupport;
+assert cfg.boot.loader.efi.canTouchEfiVariables;
+assert cfg.boot.loader.limine.maxGenerations == 5;
+assert !cfg.boot.loader.grub.enable;
 assert !cfg.boot.loader.systemd-boot.enable;
 assert builtins.all (module: builtins.elem module cfg.boot.initrd.kernelModules) [
   "nvidia"
@@ -60,7 +60,12 @@ assert builtins.all (parameter: builtins.elem parameter cfg.boot.kernelParams) [
   "udev.log_priority=3"
   "rd.systemd.show_status=auto"
 ];
-assert builtins.baseNameOf (toString cfg.boot.loader.grub.theme) == "catppuccin-mocha-grub-theme";
+assert builtins.any (line: builtins.match "interface_branding_color: cba6f7" line != null) (
+  fixture.pkgs.lib.splitString "\n" cfg.boot.loader.limine.extraConfig
+);
+assert builtins.any (line: builtins.match "term_background: 1e1e2e" line != null) (
+  fixture.pkgs.lib.splitString "\n" cfg.boot.loader.limine.extraConfig
+);
 assert cfg.boot.plymouth.enable;
 assert cfg.boot.plymouth.theme == "MikuPlymouth";
 assert builtins.elem fixture.pkgs.mikuPlymouth cfg.boot.plymouth.themePackages;
