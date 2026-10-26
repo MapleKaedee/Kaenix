@@ -17,6 +17,7 @@
         chatgpt
 
         # Development and command-line utilities.
+        (callPackage ../lib/nodejs-prebuilt.nix { })
         git
         gh
         curl

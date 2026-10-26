@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-26 — Package official prebuilt Node.js for direct npm DSH
+
+- Install the official Node.js 26.12.1 Linux x64 archive through `lib/nodejs-prebuilt.nix` and the existing system package list, with a pinned URL/checksum and runtime dependencies from locked nixpkgs. Keep DSH npm-managed and other applications' Node dependencies unchanged.
+- Use `autoPatchelfHook` with `--no-sort` to avoid a reproduced startup crash from ordinary ELF header sorting; retain upstream symbols and bind bundled npm/npx scripts to the packaged interpreter. No Node source compilation or hardening override is needed.
+- Fresh package build and install checks pass: Node 26.12.1, npm/npx 11.20.0, all runtime libraries resolved, and the release archive checksum matched. Direct DSH native-addon checks pass for all five internal modules and required loader interfaces without extra library-path variables.
+- An isolated temporary-home DSH 0.2.1-rc.2 web smoke test starts on a random localhost port and returns authenticated HTTP 200 HTML; the server is stopped and temporary state removed afterward. No browser, provider credentials, or model requests are involved.
+- Lock-preserving flake evaluation without full-system builds, non-writing Nix formatting, and diff whitespace checks pass. No system activation, commit, or push is performed. Document the separate binary version/checksum update procedure and retain the Steam fallback for use before activation.
+
 ## 2026-10-26 — Run npm DSH through steam-run
 
 - Keep stock `nodejs_latest` and document the latest npm DSH with prebuilt Node.js 26.12.1 inside the existing `steam-run` environment, retaining the removal of the explicit DeepSeek Harness package.

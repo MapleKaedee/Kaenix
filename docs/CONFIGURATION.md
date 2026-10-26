@@ -71,15 +71,25 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 `modules/packages.nix` registers `flake.modules.nixos.packages`, selected explicitly by the host, and centralizes three explicit lists: `environment.systemPackages`, `home-manager.users.${globals.username}.home.packages`, and `fonts.packages`. Comments group packages by purpose. Nautilus, Zed, ChatGPT, Discord, Loupe, OBS Studio, Spotify, osu!, ProtonPlus, MangoHud, GOverlay, Nix tools, and CLI utilities use these lists because they only need installation. TUIOS is installed in the user list for manual startup.
 
-Node.js uses `nodejs_latest` from the pinned nixpkgs input in the system development tools list, currently version 26.12.1. It follows the latest release packaged by that input when the input is updated. After activation, verify `node --version` and `npm --version`. DeepSeek Harness is no longer explicitly installed by Kaenix.
+Node.js uses the official prebuilt Linux x64 archive, currently version 26.12.1, packaged by `lib/nodejs-prebuilt.nix` and installed through the system development tools list. The archive URL and SHA-256 are pinned in that recipe. Runtime libraries and packaging tools come from the pinned nixpkgs input. Packaging unpacks and patches the binary without compiling Node or changing the Node dependencies of other applications.
 
-The npm-distributed DSH native addon fails with `Unsupported/no-getter` on the tested stock Nix-built Node.js 24.21.0 and 26.12.1. For the latest npm DSH without a custom Node build, use the already-installed Steam feature's `steam-run` environment with a prebuilt Node binary:
+The package uses `autoPatchelfHook` with `--no-sort`: ordinary ELF header sorting during RPATH rewriting crashes this upstream binary. It preserves upstream symbols and binds bundled npm/npx scripts to this package's Node interpreter. Package install checks run Node 26.12.1 and bundled npm/npx 11.20.0. The npm DSH native addon, which fails with `Unsupported/no-getter` on the tested stock Nix-built Node.js 24.21.0 and 26.12.1, passes all five internal-module imports with this package. A temporary-home smoke test also starts DSH 0.2.1-rc.2 and retrieves its authenticated web UI as HTTP 200 HTML, without `steam-run` or opening a browser. Provider credentials and model requests are not tested.
+
+After activation, verify `node --version`, `npm --version`, and `npx --version`, then run the npm release directly:
+
+```sh
+npx @deepseek-ai/dsh@latest web
+```
+
+To update Node, change `version` and the archive checksum together in `lib/nodejs-prebuilt.nix`, verifying the checksum against the official release's `SHASUMS256.txt`, then rebuild the package and repeat its install and DSH loader checks. Flake input updates alone do not advance this separately pinned binary version. Updates download and patch a new archive rather than compiling Node. DeepSeek Harness remains npm-managed and is not explicitly installed by Kaenix.
+
+Before activating the prebuilt package, the already-installed Steam feature also provides this fallback:
 
 ```sh
 steam-run npx --yes --package=node@26.12.1 --package=@deepseek-ai/dsh@latest dsh web
 ```
 
-The prebuilt Node.js 26.12.1 binary successfully loaded all five internal modules required by the installed DSH addon inside `steam-run`; full web startup remains a runtime check. This command leaves the system Node selection unchanged and lets npm manage DSH in its cache. The pinned nixpkgs `deepseek-harness` package separately patches DSH and wraps its own Node.js 24 dependency, but currently provides 0.2.1-alpha.3 rather than the newer npm copy tested here (0.2.1-rc.2).
+The pinned nixpkgs `deepseek-harness` package separately patches DSH and wraps its own Node.js 24 dependency, but currently provides 0.2.1-alpha.3 rather than the newer npm copy tested here (0.2.1-rc.2).
 
 Loupe uses the pinned `loupe` package in the user application list. After activation, launch `loupe` or **Image Viewer** from the application launcher. Preferences remain application-managed; select it as the image viewer through DMS **Settings → Applications → Default apps**. Kaenix does not enforce image MIME defaults. Verify opening an image from Nautilus after choosing the default; package evaluation alone does not prove GUI behavior.
 
