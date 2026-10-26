@@ -30,7 +30,8 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 
 Agent guidance is checked with [behavioral scenarios](../tests/agents/README.md); the review skill owns the [documentation checklist](../.agents/skills/kaenix-review/SKILL.md#documentation-and-comment-checklist).
 Scenarios include scoped validation context, partial staging, root lock-graph
-research, and exact-pin updates; see [agent validation](VALIDATION.md#agent-behavioral-scenarios).
+research, exact-pin updates, external mpv ownership, and Mango baseline imports;
+see [agent validation](VALIDATION.md#agent-behavioral-scenarios).
 
 ## Documentation storage
 

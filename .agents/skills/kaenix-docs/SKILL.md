@@ -36,11 +36,17 @@ wiring, rather than an unrelated registry or a fresh unoverlaid nixpkgs import.
 A matching package version alone does not establish identical behavior: the
 local [khal override](../../../modules/desktop/dms.nix) changes build attributes.
 
-Include sources outside `flake.lock`. For vendored assets, inspect provenance,
-recorded hashes, and the relevant local code and adaptations. For mpv/PlayKit,
-start with [its upstream record](../../../config/mpv/UPSTREAM.md) and inspect the
-affected repository files; the player's nixpkgs version does not identify its
-vendored scripts, and the recorded upstream snapshot does not include local edits.
+For mpv/PlayKit, resolve the `mpv-configs` input and inspect its `README.md`,
+`config/mpv/UPSTREAM.md`, recorded hashes, and affected module/assets at the locked
+revision. Its `flakeModules.mpv` supplies the feature selected by Kaenix's
+applications bundle; `modules/outputs.nix` forwards its check using Kaenix's
+package set and evaluated Home Manager configuration. A separate maintenance
+checkout is not evidence of the locked contents. The DMS `mpvpaper` integration
+remains owned by Kaenix's `modules/desktop/dms.nix`.
+
+For other vendored assets, inspect their provenance, recorded hashes, and local
+adaptations. The application's package version does not identify its vendored
+scripts, and a recorded upstream snapshot does not include later adaptations.
 Treat provenance and historical results as context to cross-check against code.
 
 For installed/running targets, use existing relevant evidence of executable paths,

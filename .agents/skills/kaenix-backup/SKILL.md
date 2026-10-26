@@ -65,7 +65,7 @@ Do not silently follow external links into data outside the selected scope.
 | --- | --- |
 | Kaenix repository | Include hidden files, `.git/`, lockfile, documentation, root agent instructions, uncommitted changes, untracked/ignored files, and assets. A clone or `git archive` alone is insufficient. If Git metadata is indirect, identify what is needed to preserve the selected checkout and report any omitted external metadata. |
 | osu!lazer data | Include the whole selected data directory and database, not just its `files/` subdirectory; close osu! for the final consistent copy. |
-| Desktop state | Include selected DMS settings/state plus DMS-written Niri fragments and selected terminal themes outside the DMS directory; stop the relevant writers for the final copy. |
+| Desktop state | Include selected DMS settings/state plus selected DMS-written Niri/Mango fragments and terminal themes outside the DMS directory; stop the relevant writers for the final copy. |
 | Private application databases | Only when selected, verify current locations and include database/WAL companions as applicable; close all writers for the final consistent copy and keep the backup private. |
 | Personal files | Copy only the selected folders/files; do not infer omitted personal paths from a broad home-directory scan. |
 

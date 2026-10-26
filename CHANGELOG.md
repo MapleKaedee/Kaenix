@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-10-26 — Align local agent skills with current Kaenix
+
+- Review all ten project skills against current ownership, input wiring, checks, and writable settings. Correct six: route mpv research and updates through the locked `mpv-configs` input while retaining Kaenix's separate DMS `mpvpaper` integration; select Mango parser/seed checks; derive full check and seed inventories from current implementation instead of the stale eight-check/17-seed lists. Add Mango fragment ownership to GUI imports, selected backups, runtime diagnosis, and the configuration guide. Preserve the historical backup selections. Leave feature, build-debug, Git, and review skills unchanged.
+- Add B13 (external mpv source/update/check ownership) and B14 (selected Mango fragment import and existing-home preservation) in catalog v8; preserve B01–B12 byte-equivalent as decoded fixtures. Run four isolated Luna High paper exercises with fresh actors, no parent history, at most two concurrently, and no worker delegation. Packets contain only the case request/files, root guidance, applicable skills, and inactive protocol; grading criteria and earlier answers are withheld. Standard harness context is still injected. Session records confirm the actors' model/effort, complete packet delivery, and exactly one packet-read call each, with no protocol violations.
+- Preserve every observation: initial B13 does not meet the empty-artifact/maintenance-checkout rubric, but its request left those expectations implicit. Clarify the request and rerun rather than attributing that ambiguity to a skill defect. Initial B14 omits validation of the merged live configuration before writer restart and the subsequent session test. Add that conditional migration guidance to GUI Baseline and rerun. Both fresh final samples meet every required outcome with no forbidden outcomes; a separate Sol High reassessment verifies the grading and finds no concrete defect in the final changes. B01–B12 are not rerun. These are individual paper observations, not an A/B comparison, pass-rate estimate, automatic-discovery test, or runtime enforcement proof.
+- Freeze actor inputs at base revision `01b9c66cc77a52c4a231e69a3cd68f53f46e6e70` plus local changes. Raw packets, responses, tool traces, manifests, and grading remain outside the checkout in `/tmp/kaenix-skill-review-hilwk3me/`, subject to temporary-directory cleanup. Applicable input SHA-256 values:
+
+  | Input | SHA-256 |
+  | --- | --- |
+  | Root `AGENTS.md` | `1569b58caf75c3cfe46a1fc08915bbe0389cb6517d16000d2e33bb87a1c96693` |
+  | Catalog v8, initial request | `02afc2e45dbf84bbbc8be7ae81eddce2cd95ad439ccb7ccbe9015dfbf66faf07` |
+  | Catalog v8, clarified B13 request | `0ca1bb8f7eb9c0e1111dc4ef23e7d1dcf97c4be89670abe47e19423654730610` |
+  | `kaenix-docs` | `578cec9b2903d32e44303346135c11f2682f0b329c5fd09dff383552a3f467bd` |
+  | `kaenix-update` | `e4518824f1f00b1ac693b320c573ce5d84179b896b5a09143e287c799e7097e1` |
+  | `kaenix-validate` | `a75249c817478e46b06099f6338d92c0468ed33c17ce00aa80b41d77f9af6652` |
+  | `kaenix-gui-baseline`, initial | `47623ed860c09bbcf09508bd5b9c45f863d14b86aca40bc82fa48847da1f027b` |
+  | `kaenix-gui-baseline`, final | `3bec1a7351cf58017cac1939809105e5f0a3df34dc9427b850b0ce97f6d0229d` |
+
+- Static checks pass: all ten skill-creator validators, ten UI YAML/invocation checks, 107 local links/anchors, catalog schema/references and earlier-fixture preservation, and whitespace. Verify external mpv file references at the actual locked revision using Git objects, without assuming the maintenance checkout matches. Preserve the root README, root agent instructions, Nix configuration, input declarations/lockfile, and staged content. No Nix evaluation/build, activation, live GUI/service change, staging, commit, or push is performed.
+
 ## 2026-10-26 — Switch syrup from GRUB to Limine
 
 - Configure UEFI Limine with the official Catppuccin Mocha/Mauve theme, preserve EFI variable access, and retain at most five system configurations. Replace the GRUB theme source with a locked `limine-theme` input; keep Plymouth and existing boot message settings unchanged.

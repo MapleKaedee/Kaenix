@@ -61,7 +61,7 @@ Use these as starting points, not proof of the current runtime topology:
 
 | Symptom | Evidence and ownership to inspect |
 | --- | --- |
-| DMS or Niri failure | Relevant user unit, graphical-session target, compositor/session logs, base Niri configuration versus DMS-written fragments; distinguish the greeter from the user's shell |
+| DMS, Niri, or Mango failure | Relevant user unit and compositor/session logs, base configuration versus DMS-written fragments; distinguish the greeter from the user's shell. Inspect session attachment/lifetime (`WantedBy`/`PartOf`), startup ordering (`After`), and the actual Wayland socket separately. Mango uses its packaged `mango-session.target`; verify DMS's ordering after it rather than assuming attachment ensures socket readiness |
 | Audio failure | PipeWire/Pulse compatibility and session-manager units actually present, device/node availability, selected routes/defaults, and physical versus EasyEffects virtual devices |
 | Portals or screen sharing | Actual selected portal backend, desktop/session identification, PipeWire availability, and relevant portal/application logs; a healthy unit alone does not prove capture works |
 | Wrong terminal or shell | Active binding command, `xdg-terminal-exec --print-id`, relevant session variables, generated terminal configuration, and the shared globals; inspect the documented one-time binding migration |

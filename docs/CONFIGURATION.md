@@ -211,6 +211,7 @@ This workaround applies to pinned nixpkgs `09063bd1f2b36fd9fd793c36dfade7bd40a93
 | `~/.local/state/dms/session.json` | Minimal state without launcher history | DMS |
 | `~/.config/dms/themes/catppuccin/theme.json` | `config/dms/catppuccin.json` | DMS |
 | `~/.config/niri/dms/*.kdl` | `config/niri/dms/` | DMS/user |
+| `~/.config/mango/dms/*.conf` | `config/mango/dms/` | DMS/user |
 | `~/.config/kitty/dank-*.conf` | `config/kitty/` | DMS theme generator |
 | `~/.config/alacritty/dank-theme.toml` | `config/alacritty/dank-theme.toml` | DMS theme generator/user |
 | `~/.config/OpenTabletDriver/settings.json` | `config/opentabletdriver/settings.json` | OpenTabletDriver GUI |
@@ -229,7 +230,7 @@ For selected preference imports, use [Kaenix GUI Baseline](../.agents/skills/kae
 
 Export DMS settings with `dms ipc call settings dump`, then translate the desired baseline values into `config/dms/settings.nix`. Do not copy other users' absolute paths, search history, or credentials.
 
-Niri fragments, Kitty themes, and tablet profiles can be copied back to their respective baseline locations after review. `fish_variables` is unnecessary: the module manages the Fish prompt and plugins.
+Selected Niri/Mango fragments, Kitty themes, and tablet profiles can be brought back to their respective baseline locations after review. Preserve unrelated preferences and the declarative compositor base configuration. `fish_variables` is unnecessary: the module manages the Fish prompt and plugins.
 
 Plugins are pinned in flake inputs. The GUI can change settings, but plugin code must be updated/removed through Nix; see [updating flake inputs](#updating-flake-inputs).
 

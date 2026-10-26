@@ -1,6 +1,6 @@
 ---
 name: kaenix-gui-baseline
-description: "Save selected GUI preferences as Kaenix repository baselines for DMS, Niri, terminal themes, or OpenTabletDriver. Use when bringing GUI changes or settings exports back into the configuration; not for installing applications, updating plugin code, or applying settings to the active session."
+description: "Save selected GUI preferences as Kaenix repository baselines for DMS, Niri, Mango, terminal themes, or OpenTabletDriver. Use when bringing GUI changes or settings exports back into the configuration; not for installing applications, updating plugin code, or applying settings to the active session."
 ---
 
 # Kaenix GUI Baseline
@@ -35,6 +35,7 @@ points; verify the mapping before editing.
 | DMS settings | `config/dms/settings.nix`, generated and seeded by `modules/desktop/dms.nix` |
 | DMS plugin preferences | `pluginSettings` in `modules/desktop/dms.nix`; plugin code remains pinned in flake inputs |
 | DMS-written Niri fragments | Corresponding files in `config/niri/dms/`, seeded by `modules/desktop/niri.nix` |
+| DMS-written Mango fragments | Corresponding files in `config/mango/dms/`, seeded by `modules/desktop/mango.nix`; the main `mango/config.conf` remains declarative |
 | Kitty theme or tab colors | Corresponding files in `config/kitty/`, included and seeded by `modules/apps/kitty.nix` |
 | Alacritty theme colors | `config/alacritty/dank-theme.toml`, imported and seeded by `modules/apps/alacritty.nix` |
 | OpenTabletDriver preferences | Selected fields in `config/opentabletdriver/settings.json`, seeded by `modules/hardware/tablet.nix` |
@@ -42,7 +43,7 @@ points; verify the mapping before editing.
 Distinguish a writable seed from declarative Home Manager configuration and
 transient application state. Non-theme terminal preferences belong in the owning
 terminal module; shell/default terminal choices follow the existing globals.
-Base Niri configuration is distinct from DMS-written fragments. Do not introduce
+Base Niri/Mango configuration is distinct from DMS-written fragments. Do not introduce
 another writer or a seed that competes with an existing declarative setting.
 
 ## Apply only the selected baseline differences
@@ -59,7 +60,7 @@ export contains more settings than requested.
   monitor mappings. Translate requested paths into the repository's existing
   parameterized form where applicable, rather than embedding an exported home
   path. Do not alter plugin sources, commits, or the lockfile.
-- For Niri, update the matching fragment and preserve unrelated bindings,
+- For Niri/Mango, update the matching fragment and preserve unrelated bindings,
   commands, and outputs. Do not copy the entire generated configuration over the
   declarative base.
 - For generated terminal themes, keep their writable seed/import arrangement.
@@ -99,6 +100,9 @@ changed.
 When existing homes need the new baseline, provide targeted migration steps:
 stop the relevant writer, back up only the affected writable file to a unique
 name, and apply or merge the selected changes while retaining other preferences.
+For compositor fragments, validate the merged configuration before restarting
+the writer, then verify the selected behavior in the session. Keep those steps
+as user-run guidance unless live migration is explicitly authorized.
 Re-seed a whole file only when intentionally resetting that file to its baseline;
 explain any loss of other preferences first. Do not replace entire application
 or DMS directories. A parent directory symlink requires separate handling before

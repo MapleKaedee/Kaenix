@@ -50,7 +50,8 @@ of flake outputs. Combine checks for mixed changes without running duplicates.
 | Terminal or XDG selection | `terminals`; add `niri-config` if launchers or bindings change |
 | Writable seed helper, manifest, declarations, or baselines | `seed-files` and `seed-integration`, plus checks for affected consumers |
 | Niri KDL, including DMS fragments | `niri-config`; add seed checks if a fragment is a seed baseline |
-| mpv configuration, scripts, or Home Manager/MIME mapping | `mpv-config` |
+| Mango configuration, including DMS fragments | `mango-config`; add seed checks if a fragment is a seed baseline |
+| `mpv-configs` input or mpv Home Manager/MIME integration | Forwarded `mpv-config`; inspect its builder in the resolved input and the `pkgs`/`homeConfig` supplied by `modules/outputs.nix` |
 
 For instruction changes, use the [agent scenario guide](../../../tests/agents/README.md)
 to select cases that exercise changed decisions within the authorized scope.
@@ -82,16 +83,16 @@ a disposable fixture. Compare all four named user-preference combinations and
 all four lower-level
 shell/terminal fixture results, system/user/font package selections, generated
 file contents and priorities/precedence, and seed manifests by target and content.
-Require unique seed targets and test preservation of all 17 edited seeds in
+Require unique seed targets and test preservation of every current manifest entry in
 disposable homes. Trace changed derivations to incidental order differences or actual declaration changes; do not assume
 every path difference is harmless.
 Use a disposable baseline checkout without changing the current index or working
 tree; verify baseline/current lockfile identity, preserve the baseline lockfile,
 and document any unavailable baseline.
-Run all eight checks for a full infrastructure migration: `kae`, `terminal-apps`,
-`terminals`, `mpv-config`, `shells`, `seed-files`, `niri-config`, and
-`seed-integration`; confirm this inventory against `modules/outputs.nix` and
-`tests/checks.nix` before running. Matching derivations are equivalence evidence
+Run every currently exposed check for a full infrastructure migration. Resolve
+the complete inventory from `modules/outputs.nix` and `tests/checks.nix`, including
+checks forwarded from inputs; do not stop at the local check definitions.
+Matching derivations are equivalence evidence
 for those outputs, not a full system build or runtime test. Record fresh execution,
 cached realization, and substituted results separately.
 

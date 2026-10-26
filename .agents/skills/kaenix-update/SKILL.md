@@ -15,7 +15,10 @@ request is review-only or authorizes updates. Infer scope from the request and
 repository first; ask when it remains ambiguous. Update all inputs only when the
 user explicitly requests a full update. A named-input update does not authorize
 unrelated top-level updates. This skill covers flake inputs, including non-flake
-plugin inputs; vendored mpv/PlayKit scripts, shaders, and fonts are outside scope.
+plugin inputs and Kaenix's `mpv-configs` input. Updating that input's locked
+revision is in scope; editing its vendored mpv/PlayKit scripts, shaders, or fonts
+belongs to the separate repository. Keep Kaenix's DMS `mpvpaper` integration
+separate from an mpv player update.
 
 Inspect staged, unstaged, and relevant untracked changes, including existing
 `flake.nix` and `flake.lock` edits. Record their starting state privately so the

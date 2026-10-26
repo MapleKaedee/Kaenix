@@ -3,7 +3,7 @@
 These synthetic paper exercises test decisions made with Kaenix guidance. They
 complement skill structure, YAML, links, and whitespace checks; they do not run
 Nix, activate configuration, or prove automatic skill discovery or real tool
-enforcement. The [catalog](scenarios.json) contains twelve fixed cases and their
+enforcement. The [catalog](scenarios.json) contains fourteen fixed cases and their
 grading criteria. Fixture paths and values are synthetic, not deployment targets.
 
 ## Select cases
@@ -22,7 +22,9 @@ and historical observations remain unchanged; this fixture refresh has no new
 model-trial result. Catalog version 7 adds B09 for documentation-only validation
 context, B10 for staged-only commits with partial staging, B11 for root lock-graph
 and `follows` resolution, and B12 for selected updates of exact commit pins.
-The earlier eight fixtures and rubrics remain unchanged. Trial results and input
+Catalog version 8 adds B13 for external mpv input/provenance ownership and forwarded
+validation, and B14 for Mango fragment imports, focused checks, and existing-home
+preservation. The earlier twelve fixtures and rubrics remain unchanged. Trial results and input
 versions are recorded separately in the changelog.
 Do not add a model trial to routine configuration
 validation merely because this directory exists.
