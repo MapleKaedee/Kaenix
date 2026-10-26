@@ -19,6 +19,7 @@
       ];
       boot.loader = globals.installation.bootLoader // {
         grub = globals.installation.bootLoader.grub // {
+          configurationLimit = 5;
           theme = "${inputs.grub-theme}/src/catppuccin-mocha-grub-theme";
         };
       };

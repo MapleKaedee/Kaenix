@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-26 — NVIDIA early KMS
+
+- Load the NVIDIA, modesetting, and DRM modules from the initrd while retaining AMD as the primary GPU and preserving PRIME offload. The fixture verifies the configured module list; activation and reboot are required to confirm early loading and the Plymouth display on the hardware.
+
+## 2026-10-26 — Limit GRUB generations
+
+- Limit GRUB to retaining five system configurations. The evaluation fixture asserts the configured limit; activation and a subsequent boot are needed to observe the menu entries.
+
 ## 2026-10-26 — Quiet boot output
 
 - Set console log level 3 and add quiet kernel, udev, and initrd systemd status parameters while preserving the existing GRUB and MikuPlymouth configuration. The evaluation fixture asserts the settings. Evaluation and formatting checks pass; activation and a reboot are still required to observe boot behavior.

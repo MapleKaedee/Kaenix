@@ -47,7 +47,13 @@ assert cfg.hardware.nvidia.open;
 assert cfg.boot.loader.grub.enable;
 assert cfg.boot.loader.grub.efiSupport;
 assert cfg.boot.loader.grub.device == "nodev";
+assert cfg.boot.loader.grub.configurationLimit == 5;
 assert !cfg.boot.loader.systemd-boot.enable;
+assert builtins.all (module: builtins.elem module cfg.boot.initrd.kernelModules) [
+  "nvidia"
+  "nvidia_modeset"
+  "nvidia_drm"
+];
 assert cfg.boot.consoleLogLevel == 3;
 assert builtins.all (parameter: builtins.elem parameter cfg.boot.kernelParams) [
   "quiet"
