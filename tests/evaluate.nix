@@ -49,6 +49,10 @@ assert cfg.boot.loader.efi.canTouchEfiVariables;
 assert cfg.boot.loader.limine.maxGenerations == 5;
 assert !cfg.boot.loader.grub.enable;
 assert !cfg.boot.loader.systemd-boot.enable;
+assert cfg.boot.kernel.sysctl."vm.swappiness" == 150;
+assert builtins.elem "zswap.enabled=0" cfg.boot.kernelParams;
+assert !(fixture.pkgs.lib.hasInfix "vm.swappiness" cfg.services.udev.extraRules);
+assert !(fixture.pkgs.lib.hasInfix "zswap" cfg.services.udev.extraRules);
 assert builtins.all (module: builtins.elem module cfg.boot.initrd.kernelModules) [
   "nvidia"
   "nvidia_modeset"

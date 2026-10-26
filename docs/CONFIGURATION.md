@@ -79,11 +79,11 @@ This workaround is verified for udiskie 2.7.0 from nixpkgs `02c087f3fe673c9e317f
 
 ## ZRAM, VM memory, and I/O scheduling
 
-`modules/system/base.nix` configures ZRAM with zstd, a maximum size of 100% of RAM, and swap priority 100. The related VM policy starts with `vm.swappiness=100`; a udev rule raises it to 150 and disables zswap when `zram0` finishes initializing. It also sets VFS cache pressure to 50, caps dirty-page thresholds at 256 MiB/64 MiB, sets writeback wakeups to 15 seconds, and disables swap read-ahead clustering.
+`modules/system/base.nix` configures ZRAM with zstd, a maximum size of 100% of RAM, and swap priority 100. It declares `vm.swappiness=150` directly so sysctl reloads retain the intended value, and disables zswap from boot with `zswap.enabled=0`. No ZRAM-event rule changes either setting. The module also sets VFS cache pressure to 50, caps dirty-page thresholds at 256 MiB/64 MiB, sets writeback wakeups to 15 seconds, and disables swap read-ahead clustering.
 
 The same module assigns `bfq` to rotational disks, `mq-deadline` to non-rotational SATA/eMMC devices, and `kyber` to NVMe devices when udev sees them. These are the selected CachyOS settings adapted into Kaenix's existing base module; other CachyOS sysctls and unrelated device/service tweaks are not enabled.
 
-After activation, inspect `zramctl`, `swapon --show`, `sysctl vm.swappiness vm.vfs_cache_pressure vm.dirty_bytes vm.dirty_background_bytes vm.dirty_writeback_centisecs vm.page-cluster`, and `/sys/block/<device>/queue/scheduler`. Confirm ZRAM reports the selected compression and priority, swappiness reaches 150 after zram initialization, and each device exposes the selected scheduler. A successful evaluation alone does not verify runtime udev behavior or performance.
+After activation, inspect `zramctl`, `swapon --show`, `sysctl vm.swappiness vm.vfs_cache_pressure vm.dirty_bytes vm.dirty_background_bytes vm.dirty_writeback_centisecs vm.page-cluster`, and `/sys/block/<device>/queue/scheduler`. Confirm ZRAM reports the selected compression and priority, swappiness is 150, and each device exposes the selected scheduler. After rebooting into the updated generation, verify `zswap.enabled=0` in `/proc/cmdline` and that `/sys/module/zswap/parameters/enabled`, when present, reports `N`. Switching configurations alone does not apply a new kernel command line. Successful evaluation does not verify runtime udev behavior or performance.
 
 ## LAVD CPU scheduling
 
@@ -116,6 +116,22 @@ Alacritty, btop, Helix, Kitty, Nushell, Fish, Fastfetch, and Yazi use `programs.
 Niri remains the display manager's default session and the compositor used by DankGreeter. Mango is an additional selectable session, enabled through pinned nixpkgs' `programs.mango` module. At login, choose Mango in the session selector; Niri remains the default. The declarative Mango configuration is in `config/mango/config.conf` and is installed at `~/.config/mango/config.conf`; it uses `xdg-terminal-exec`, defaults to the scrolling layout, and translates the common DMS launcher, lock, media, audio, brightness, tag/workspace, focus, and window movement controls. `Print` opens the DMS region screenshot selector in Mango. Its seven DMS fragments live in `config/mango/dms/` and are installed as copy-once writable files, so DMS setup and settings can update them without replacing the repository-managed main config. The main config includes each fragment with `source_optional`. Niri-specific column controls stay in the Niri bindings. See Mango's [configuration guide](https://mangowm.github.io/docs/configuration/basics/) for the file format and [DMS's compositor-specific systemd guidance](https://duxlabs.dev/docs/dankmaterialshell/installation/) for session behavior.
 
 DMS runs as a user service in either compositor session. Niri starts it through `niri.service`; the pinned Mango 0.18.2 package provides `mango-session.target` and exports the compositor environment. Home Manager attaches DMS to both targets, orders it after Mango's target so its Wayland socket is ready, and stops it with the active session. Do not define a second Mango target or add manual environment-export/start hooks: those override or duplicate Mango's packaged session integration. A previous Niri-to-Mango transition exposed a restart race: DMS retried against the exiting Niri Wayland socket, hit systemd's start limit, and could not start when Mango's target became active. The ownership checks verify both session links, Mango target ordering, and the absence of a Home Manager target override; the Mango config check parses the generated file and packaged target but does not verify a live graphical session.
+
+### Existing-home Mango brightness migration
+
+The brightness shortcuts require both the step and device arguments; an empty device selects DMS's preferred device. New homes receive the corrected baseline, but rebuilding preserves an existing writable `~/.config/mango/dms/binds.conf`. To migrate that file, perform these steps yourself in the Mango session; repository validation does not execute them:
+
+1. Stop its DMS writer with `systemctl --user stop dms.service`.
+2. Back up only `~/.config/mango/dms/binds.conf` to a unique filename, preserving any previous backup.
+3. Merge these two commands into the existing brightness bindings, retaining every unrelated binding and preference:
+
+   ```conf
+   bindl=NONE,XF86MonBrightnessUp,spawn,dms ipc call brightness increment 5 ""
+   bindl=NONE,XF86MonBrightnessDown,spawn,dms ipc call brightness decrement 5 ""
+   ```
+
+4. Validate the merged configuration with `mango -c ~/.config/mango/config.conf -p`. If validation fails, correct it or restore the backup before continuing.
+5. Start DMS with `systemctl --user start dms.service`, then test both brightness keys. If the change fails, stop the writer, restore and validate the backup, and start DMS again. Keep the backup until the session behavior is verified.
 
 ## Choosing Alacritty or Kitty
 
@@ -386,28 +402,28 @@ Keep physical speakers/headsets/microphones as the default devices; do not selec
 
 ### Global low-latency tuning
 
-The audio feature imports only `inputs.nix-gaming.nixosModules.pipewireLowLatency`. The locked nix-gaming revision is `2b027ac8c57e1ea2db14f9f6bb1b350aea562bd8`, with its nixpkgs following Kaenix's existing input. No nix-gaming overlay or game package replaces the pinned nixpkgs packages. Adjust these settings in `modules/services/audio.nix`:
+The audio feature imports only `inputs.nix-gaming.nixosModules.pipewireLowLatency`. The locked nix-gaming revision is `2b027ac8c57e1ea2db14f9f6bb1b350aea562bd8`, with its nixpkgs following Kaenix's existing input. No nix-gaming overlay or game package replaces the pinned nixpkgs packages. Global low-latency tuning is currently disabled in `modules/services/audio.nix`; its retained settings are:
 
 ```nix
 services.pipewire.lowLatency = {
-  enable = true;
+  enable = false;
   quantum = 64;
   rate = 48000;
   alsa.enable = false;
 };
 ```
 
-The [locked upstream module](https://github.com/fufexan/nix-gaming/blob/2b027ac8c57e1ea2db14f9f6bb1b350aea562bd8/modules/pipewireLowLatency.nix) sets the graph's minimum quantum to 64, Pulse minimum request/quantum/fragment values to `64/48000`, and client latency defaults to `64/48000`. It also applies its realtime defaults (`nice.level = -15`, `rt.prio = 88`, soft/hard realtime limits of 200000) and client resampling quality of 1. Accept these upstream defaults together; this is a global buffering policy, not a guarantee that every stream runs at exactly 64 samples or that every device uses 48 kHz. Client requests, backend behavior, and device negotiation still matter.
+With `enable = false`, the module adds none of its low-latency PipeWire, Pulse, or client drop-ins. If explicitly enabled later, the [locked upstream module](https://github.com/fufexan/nix-gaming/blob/2b027ac8c57e1ea2db14f9f6bb1b350aea562bd8/modules/pipewireLowLatency.nix) uses the retained values to set the graph's minimum quantum to 64, Pulse minimum request/quantum/fragment values to `64/48000`, and client latency defaults to `64/48000`. It also applies its realtime defaults (`nice.level = -15`, `rt.prio = 88`, soft/hard realtime limits of 200000) and client resampling quality of 1. Accept these upstream defaults together when enabling the policy; they do not guarantee that every stream runs at exactly 64 samples or that every device uses 48 kHz. Client requests, backend behavior, and device negotiation still matter.
 
-The optional WirePlumber ALSA device overrides remain disabled; the existing `services.pipewire.alsa.enable = true` and 32-bit compatibility remain enabled. Device selection and writable preferences stay user-managed. Browser audio, Discord, games, and other streams can share the affected graph. No server metadata or global `PIPEWIRE_QUANTUM` environment override is added.
+The optional WirePlumber ALSA device overrides remain disabled; the existing `services.pipewire.alsa.enable = true` and 32-bit compatibility remain enabled. Device selection and writable preferences stay user-managed. If the policy is enabled, browser audio, Discord, games, and other streams can share the affected graph. No server metadata or global `PIPEWIRE_QUANTUM` environment override is added.
 
 The custom `osu-lowlatency` command and **osu! — Low Latency** entry are removed. The unchanged `osu-lazer-bin` package is back in `modules/packages.nix`; launch ordinary **osu!** or `'osu!'` as before, retaining its file/URL associations and game data. Fully quit any previously tuned osu! instance before testing this policy, because removing a launcher does not change an already running process's inherited environment. Avoid keeping external PipeWire environment overrides when comparing results.
 
 On 24 October 2026, separate five-minute tests with the MOONDROP RAYS measured average ALSA driver-reported delays of 21.05 ms at server-forced 128 samples and 24.63 ms at automatically negotiated 256 samples. Similar gameplay had no user-reported audible problems, but the 128 run added three osu! stream errors while 256 added none; both had zero RAYS output errors. These earlier tests do not measure the global 64 policy, establish its stability, or measure end-to-end keypress-to-sound latency.
 
-After an explicitly requested rebuild/activation and audio-session restart, inspect actual quanta/rates and increases in error counters with `pw-top`. Test osu! gameplay, browser playback, Discord output/capture, and usual device switching; listen for crackling, dropouts, or increasing delay. `pw-metadata -n settings 0` should show no test-imposed force values. An exact 64-sample graph is not an acceptance requirement for this adaptive policy. Evaluation and generated-config builds do not prove active audio behavior.
+If enabling this policy later, after an explicitly requested rebuild/activation and audio-session restart, inspect actual quanta/rates and increases in error counters with `pw-top`. Test osu! gameplay, browser playback, Discord output/capture, and usual device switching; listen for crackling, dropouts, or increasing delay. `pw-metadata -n settings 0` should show no test-imposed force values. An exact 64-sample graph is not an acceptance requirement for this adaptive policy. Evaluation and generated-config builds do not prove active audio behavior.
 
-For recovery, increase `lowLatency.quantum` to 128 or 256, or set `lowLatency.enable = false`, then rebuild/activate and restart the audio session or log out/in. Disabling the option removes its PipeWire, Pulse, and client tuning while the audio feature keeps base PipeWire, ALSA, Pulse compatibility, and RTKit enabled. No full system rollback is necessary. A session restart interrupts active audio; perform it only when explicitly requested.
+If an enabled policy causes problems, increase `lowLatency.quantum` to 128 or 256, or return `lowLatency.enable` to `false`, then rebuild/activate and restart the audio session or log out/in. Disabling the option removes its PipeWire, Pulse, and client tuning while the audio feature keeps base PipeWire, ALSA, Pulse compatibility, and RTKit enabled. No full system rollback is necessary. A session restart interrupts active audio; perform it only when explicitly requested.
 
 ## Steam gaming
 

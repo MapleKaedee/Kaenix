@@ -1,6 +1,6 @@
 # Kaenix validation
 
-Updated: 24 October 2026. Run commands from the repository root. The commands and coverage below follow the repository configuration; previously executed results are recorded in the [changelog](../CHANGELOG.md).
+Updated: 26 October 2026. Run commands from the repository root. The commands and coverage below follow the repository configuration; previously executed results are recorded in the [changelog](../CHANGELOG.md).
 
 ## Evidence scope
 
@@ -11,7 +11,7 @@ Updated: 24 October 2026. Run commands from the repository root. The commands an
 | Activation | A generation has been applied to the system/user; this requires separate evidence |
 | Runtime | A specific function was tested on the target session/device; state what was tested and when |
 
-`nix flake check --no-build` evaluates checks without building them. `tests/evaluate.nix` replaces disk/boot settings with a synthetic fixture; do not deploy its output to a machine.
+`nix flake check --no-build` evaluates checks without building them. `tests/evaluate.nix` replaces disk/boot settings with a synthetic fixture and asserts the shared shell/terminal, boot, and memory policy, including direct swappiness 150, boot-time zswap disabling, and absence of competing udev assignments. Do not deploy its output to a machine.
 
 ## Repeatable checks
 
@@ -42,7 +42,7 @@ git diff --check
 | `seed-files` | Copy-once helper, preservation of user changes, and path/symlink protections |
 | `seed-integration` | Contents of all 24 Home Manager seeds, JSON, canonical DMS paths/theme baseline, preservation of DMS settings/plugins/session/theme in a migrated home with compatibility symlinks, and preservation of edited DMS settings, Mango fragments, and Alacritty themes when the helper runs again |
 | `niri-config` | Base KDL validation without DMS fragments and with baseline DMS fragments |
-| `mango-config` | Pinned package session-target presence and generated Mango configuration parsing |
+| `mango-config` | Pinned package session-target presence, generated Mango configuration parsing, and both brightness spawn commands delivering the step and empty device arguments to an isolated DMS stub; no live IPC or brightness change |
 
 Seed checks provide Python through Nix; a global Python installation is unnecessary. Home Manager's seed activation also uses the Nix-provided interpreter. Running unit tests directly with `python3` is only an alternative when an interpreter is available.
 

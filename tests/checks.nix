@@ -162,7 +162,10 @@
   mango-config =
     pkgs.runCommand "kaenix-mango-config-test"
       {
-        nativeBuildInputs = [ pkgs.mango ];
+        nativeBuildInputs = [
+          pkgs.mango
+          pkgs.python3
+        ];
         mangoConfig = homeConfig.xdg.configFile."mango/config.conf".source;
       }
       ''
@@ -172,6 +175,7 @@
         cp ${../config/mango/dms}/*.conf "$HOME/.config/mango/dms/"
         test -f ${pkgs.mango}/share/systemd/user/mango-session.target
         mango -c "$HOME/.config/mango/config.conf" -p
+        python3 ${./test_mango_bindings.py} "$HOME/.config/mango/dms/binds.conf" ${pkgs.bash}/bin/bash
         touch "$out"
       '';
 

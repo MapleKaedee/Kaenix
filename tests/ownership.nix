@@ -51,7 +51,7 @@ let
     assert cfg.programs.mango.enable;
     assert cfg.services.displayManager.defaultSession == "niri";
     assert builtins.elem cfg.programs.mango.package cfg.services.displayManager.sessionPackages;
-    assert cfg.services.displayManager.dms-greeter.compositor.name == "niri";
+    assert cfg.services.displayManager.dux-greeter.compositor.name == "niri";
     assert hm.programs.dank-material-shell.systemd.target == "niri.service";
     assert builtins.elem "niri.service" (hm.systemd.user.services.dms.Install.WantedBy or [ ]);
     assert builtins.elem "mango-session.target" (hm.systemd.user.services.dms.Install.WantedBy or [ ]);
