@@ -1,6 +1,6 @@
 # Configuration ownership
 
-Updated: 24 October 2026; configuration descriptions follow repository ownership. Use [Kaenix context and the documentation index](kaenix.md) for other guides and [validation](VALIDATION.md) to distinguish repository configuration, check results, and runtime status.
+Updated: 26 October 2026; configuration descriptions follow repository ownership. Use [Kaenix context and the documentation index](kaenix.md) for other guides and [validation](VALIDATION.md) to distinguish repository configuration, check results, and runtime status.
 
 ## Modules by category
 
@@ -17,7 +17,7 @@ Configuration is grouped by function, inspired by the organization of [hlissner/
 | `modules/system/` | Base, boot, networking, account/groups, Nix, Home Manager, home identity/XDG, and seed infrastructure |
 | `modules/users/` | Typed user metadata definitions selected by the host |
 
-`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 36 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the kernel and installation bootloader; `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, ZRAM, VM memory tuning, and device I/O scheduler rules stay in `modules/system/base.nix`.
+`modules/hosts/syrup.nix` selects the user metadata and installation data, then explicitly selects six bundles and `packages`. The bundles import all 36 remaining leaf features, each through one bundle owner. Category directories have no `default.nix` import lists. The host owns the generated hardware import, hostname, readiness assertion, and system state version. `modules/system/boot.nix` applies the CachyOS kernel and installation bootloader settings; `syrup` uses UEFI GRUB with Catppuccin Mocha from the `grub-theme` non-flake input and Plymouth with the upstream default 10-clip Miku theme. The clips are shuffled at boot. `modules/system/networking.nix` owns NetworkManager. Locale, time zone, keyboard, ZRAM, VM memory tuning, and device I/O scheduler rules stay in `modules/system/base.nix`.
 
 | Bundle | Ordered leaf imports |
 | --- | --- |
@@ -275,7 +275,7 @@ For command-line lockfile updates, use `kae update` for all inputs or `kae updat
 
 Use [Kaenix Update](../.agents/skills/kaenix-update/SKILL.md), for example `$kaenix-update update dms and review compatibility`, for selected inputs or an explicitly requested full update. The skill owns the review/update procedure and compatibility-fix boundaries; activation remains separate.
 
-Preserve input release lines and shared nixpkgs relationships. The `cat-widget` and `mpvpaper-plugin` declarations pin exact commits: verify and change the intended commit before refreshing the selected lock entries. A lockfile refresh alone does not advance those declared pins. The `mpv-configs` input comes from [MapleKaedee/mpv-configs](https://github.com/MapleKaedee/mpv-configs), maintained locally at `/home/kaede/Projects/mpv-configs`. After publishing changes to that repository, run `kae update mpv-configs` to refresh its lock entry. Reassess affected workarounds, including the [khal override](#dms-calendar-and-the-khal-build-workaround), and distinguish passing configuration checks from real-session plugin compatibility. The mpv flake's README records vendored asset provenance and update guidance.
+Preserve input release lines and shared nixpkgs relationships. The `cat-widget` and `mpvpaper-plugin` declarations pin exact commits: verify and change the intended commit before refreshing the selected lock entries. The `grub-theme` non-flake input follows Catppuccin's default branch (currently `main`); `flake.lock` records the resolved revision, and `kae update grub-theme` advances it to the current default-branch head. `miku-plymouth` follows its upstream default branch and the root `nixpkgs`; its resolved source revision is recorded in `flake.lock`. The `mpv-configs` input comes from [MapleKaedee/mpv-configs](https://github.com/MapleKaedee/mpv-configs), maintained locally at `/home/kaede/Projects/mpv-configs`. After publishing changes to that repository, run `kae update mpv-configs` to refresh its lock entry. Reassess affected workarounds, including the [khal override](#dms-calendar-and-the-khal-build-workaround), and distinguish passing configuration checks from real-session plugin compatibility. The mpv flake's README records vendored asset provenance and update guidance.
 
 The Chaotic Nyx input intentionally tracks `nyxpkgs-unstable` without following the root nixpkgs input. Chaotic publishes cache-aligned packages on that branch; making it follow Kaenix's nixpkgs can produce different kernel derivations and force local builds. Keep its separate nixpkgs pin when updating the `chaotic` input.
 

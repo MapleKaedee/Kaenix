@@ -15,8 +15,12 @@ let
       installation = (import ../installation/installation.nix) // {
         hardwareReady = true;
         bootLoader = {
-          systemd-boot.enable = true;
-          efi.canTouchEfiVariables = false;
+          grub = {
+            enable = true;
+            efiSupport = true;
+            device = "nodev";
+          };
+          efi.canTouchEfiVariables = true;
         };
       };
     };
@@ -40,6 +44,14 @@ let
   hm = cfg.home-manager.users.kaede;
 in
 assert cfg.hardware.nvidia.open;
+assert cfg.boot.loader.grub.enable;
+assert cfg.boot.loader.grub.efiSupport;
+assert cfg.boot.loader.grub.device == "nodev";
+assert !cfg.boot.loader.systemd-boot.enable;
+assert builtins.baseNameOf (toString cfg.boot.loader.grub.theme) == "catppuccin-mocha-grub-theme";
+assert cfg.boot.plymouth.enable;
+assert cfg.boot.plymouth.theme == "MikuPlymouth";
+assert builtins.elem fixture.pkgs.mikuPlymouth cfg.boot.plymouth.themePackages;
 assert cfg.hardware.nvidia.prime.offload.enable;
 assert !cfg.hardware.nvidia.prime.sync.enable;
 assert !hm.programs.dank-material-shell.managePluginSettings;

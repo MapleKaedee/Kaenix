@@ -16,6 +16,9 @@
     nix-gaming.url = "github:fufexan/nix-gaming";
     nix-gaming.inputs.nixpkgs.follows = "nixpkgs";
 
+    miku-plymouth.url = "github:Thang1191/MikuPlymouth";
+    miku-plymouth.inputs.nixpkgs.follows = "nixpkgs";
+
     dms.url = "github:AvengeMedia/DankMaterialShell/stable";
     dms.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -25,6 +28,10 @@
     };
     mpvpaper-plugin = {
       url = "github:tokisak1kurum1/mpvpaper-plugin/c720365423a4988af4a5d03c967fcac3912d1cb6";
+      flake = false;
+    };
+    grub-theme = {
+      url = "github:catppuccin/grub";
       flake = false;
     };
 

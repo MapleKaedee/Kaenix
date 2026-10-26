@@ -10,7 +10,7 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 
 | Task | Guide and implementation |
 | --- | --- |
-| Modules, bundles, packages, and system memory/I/O policy | [Configuration ownership](CONFIGURATION.md#modules-by-category), [ZRAM, VM memory, and I/O scheduling](CONFIGURATION.md#zram-vm-memory-and-io-scheduling); `modules/bundles/`, leaf categories, `modules/packages.nix`, `modules/system/base.nix`, and `modules/hosts/syrup.nix` |
+| Modules, bundles, packages, boot splash, and system memory/I/O policy | [Configuration ownership](CONFIGURATION.md#modules-by-category), [ZRAM, VM memory, and I/O scheduling](CONFIGURATION.md#zram-vm-memory-and-io-scheduling); `modules/bundles/`, leaf categories, `modules/packages.nix`, `modules/system/boot.nix`, `modules/system/base.nix`, and `modules/hosts/syrup.nix` |
 | Kaenix management, monitored builds, updates, and help | [kae](CONFIGURATION.md#kaenix-management-with-kae); `scripts/kae.nu`, `lib/kae.nix` |
 | User defaults and host identity | [Ownership and metadata](CONFIGURATION.md#dendritic-features-and-flake-outputs); `modules/users/kaede.nix`, `modules/hosts/syrup.nix`, `installation/` |
 | Flake structure and dendritic features | [Feature registration and host selection](CONFIGURATION.md#dendritic-features-and-flake-outputs); `flake.nix`, host → bundle → feature wiring under `modules/` |

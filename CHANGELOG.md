@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-26 — MikuPlymouth boot splash
+
+- Enable MikuPlymouth as the Plymouth boot splash with the upstream default 10 clips, shuffled each boot. Add its flake input following root nixpkgs and retain the existing GRUB theme configuration. The fixture and `nix flake check --no-build` pass, and the package builds with 10 clip assets. Upstream declares 24 frames for each clip, while selected `clip000` contains 23 image files; visual impact remains unverified. No full system build or activation is performed.
+
+## 2026-10-25 — UEFI GRUB with Catppuccin Mocha
+
+- Switch `syrup` from systemd-boot to UEFI GRUB and apply the Catppuccin Mocha theme through a `flake = false` input tracking the upstream default branch (currently `main`); `flake.lock` records the resolved revision for reproducible evaluations.
+- Update the synthetic evaluation fixture and migration/configuration guidance to reflect the selected bootloader. Lock-preserving flake evaluation, the bootloader fixture evaluation, Nix parsing/formatting, and whitespace checks pass. No full system build or activation is performed; firmware boot and theme rendering still require runtime verification.
+
 ## 2026-10-25 — Move mpv configuration into its own flake
 
 - Move the mpv Home Manager feature, vendored configuration/assets, provenance guide, and headless test implementation into `/home/kaede/Projects/mpv-configs`. Export the feature through `flakeModules.mpv` and expose a check builder that uses Kaenix's evaluated Home Manager configuration and package set.

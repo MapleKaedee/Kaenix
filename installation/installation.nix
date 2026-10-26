@@ -5,10 +5,13 @@
   systemStateVersion = "26.11";
   homeStateVersion = "26.11";
 
-  # Keep bootloader settings from the target installation here.
-  # They are not contained in hardware-configuration.nix.
+  # Bootloader settings for syrup; these are not in hardware-configuration.nix.
   bootLoader = {
-    systemd-boot.enable = true;
+    grub = {
+      enable = true;
+      efiSupport = true;
+      device = "nodev";
+    };
     efi.canTouchEfiVariables = true;
   };
 }
