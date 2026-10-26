@@ -73,6 +73,14 @@ Use [Kaenix Docs](../.agents/skills/kaenix-docs/SKILL.md), for example `$kaenix-
 
 Node.js uses `nodejs_latest` from the pinned nixpkgs input in the system development tools list, currently version 26.12.1. It follows the latest release packaged by that input when the input is updated. After activation, verify `node --version` and `npm --version`. DeepSeek Harness is no longer explicitly installed by Kaenix.
 
+The npm-distributed DSH native addon fails with `Unsupported/no-getter` on the tested stock Nix-built Node.js 24.21.0 and 26.12.1. For the latest npm DSH without a custom Node build, use the already-installed Steam feature's `steam-run` environment with a prebuilt Node binary:
+
+```sh
+steam-run npx --yes --package=node@26.12.1 --package=@deepseek-ai/dsh@latest dsh web
+```
+
+The prebuilt Node.js 26.12.1 binary successfully loaded all five internal modules required by the installed DSH addon inside `steam-run`; full web startup remains a runtime check. This command leaves the system Node selection unchanged and lets npm manage DSH in its cache. The pinned nixpkgs `deepseek-harness` package separately patches DSH and wraps its own Node.js 24 dependency, but currently provides 0.2.1-alpha.3 rather than the newer npm copy tested here (0.2.1-rc.2).
+
 Loupe uses the pinned `loupe` package in the user application list. After activation, launch `loupe` or **Image Viewer** from the application launcher. Preferences remain application-managed; select it as the image viewer through DMS **Settings → Applications → Default apps**. Kaenix does not enforce image MIME defaults. Verify opening an image from Nautilus after choosing the default; package evaluation alone does not prove GUI behavior.
 
 OBS Studio uses the standard pinned `obs-studio` package in the user list, with no additional plugins or virtual-camera configuration. Its preferences, scenes, and profiles remain GUI-managed. After activation, launch `obs` and add [Screen Capture (PipeWire)](https://obsproject.com/kb/display-capture-sources) for Wayland capture using the existing PipeWire and desktop portals. Verify a short recording with microphone and system audio in the active session; evaluation alone does not establish capture or encoder behavior.

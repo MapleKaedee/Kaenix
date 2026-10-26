@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-26 — Run npm DSH through steam-run
+
+- Keep stock `nodejs_latest` and document the latest npm DSH with prebuilt Node.js 26.12.1 inside the existing `steam-run` environment, retaining the removal of the explicit DeepSeek Harness package.
+- Confirm the npm addon's `Unsupported/no-getter` failure with stock Nix-built Node.js 24.21.0 and 26.12.1. The prebuilt 26.12.1 binary passes all five required internal-module imports in `steam-run`; full web startup remains untested.
+- Remove the package-local Node hardening override and stop its unfinished source build at the user's request. No custom Node package is activated.
+- Final checks confirm the build processes have exited, active Node remains 26.12.1, the package module and lockfile are unchanged, the documentation route resolves, and diff whitespace checks pass.
+
 ## 2026-10-26 — Add Node.js and remove DeepSeek Harness
 
 - Add `nodejs_latest` (26.12.1) from pinned nixpkgs to the existing system package list and remove `deepseek-harness`, without updating the lockfile.

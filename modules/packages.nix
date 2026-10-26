@@ -17,7 +17,6 @@
         chatgpt
 
         # Development and command-line utilities.
-        nodejs_latest
         git
         gh
         curl
