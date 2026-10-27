@@ -4,6 +4,10 @@ Updated: 22 October 2026. The data selection follows the user's choices on 16 Oc
 
 ## Local backup skill
 
+For a reusable dotfile checklist and NixOS-to-Arch portability notes, see
+[BACKUP_LIST.md](../BACKUP_LIST.md). It records candidate configuration paths,
+not completed backups, and does not change the historical data selections below.
+
 Use [Kaenix Backup](../.agents/skills/kaenix-backup/SKILL.md), for example `$kaenix-backup prepare a backup plan for my selected Kaenix data`, for its copy/verification procedure and action boundaries. Planning or verification does not authorize copying; restoration is guidance-only. Closing applications or stopping services needs authorization. Keep private backups outside the repository and preserve the selections below.
 
 ## Selected data

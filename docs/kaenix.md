@@ -1,6 +1,6 @@
 # Kaenix — project context and local documentation
 
-Updated: 26 October 2026. Kaenix is a personal NixOS configuration for host `syrup`, user `kaede`, platform `x86_64-linux`, and time zone `Asia/Jakarta`, located at `/home/kaede/Kaenix`.
+Updated: 27 October 2026. Kaenix is a personal NixOS configuration for host `syrup`, user `kaede`, platform `x86_64-linux`, and time zone `Asia/Jakarta`, located at `/home/kaede/Kaenix`.
 
 ## Purpose and documentation ownership
 
@@ -31,7 +31,7 @@ Follow [AGENTS.md](../AGENTS.md#understand-the-context-first) for context loadin
 | Image viewing, audio, video, and gaming | [Loupe, OBS Studio, and package lists](CONFIGURATION.md#centralized-package-lists), [Global low-latency audio](CONFIGURATION.md#global-low-latency-tuning), [Steam](steam.md), and the `mpv-configs` flake input; `modules/packages.nix`, `modules/services/audio.nix`, and owning modules in `modules/apps/` |
 | Validation, reviews, and debugging | [Validation](VALIDATION.md); `tests/` and the linked project skills |
 | Reinstallation or another device | [Migration](MIGRATION.md); `installation/`, `modules/hosts/syrup.nix`, and `modules/users/kaede.nix` |
-| Backups and recovery guidance | [Backup](BACKUP.md); selected repository and writable user data |
+| Backups and recovery guidance | [Configuration backup checklist](../BACKUP_LIST.md), including Arch migration exports; [backup procedures](BACKUP.md) and selected writable user data |
 
 Agent guidance is checked with [behavioral scenarios](../tests/agents/README.md); the review skill owns the [documentation checklist](../.agents/skills/kaenix-review/SKILL.md#documentation-and-comment-checklist).
 Scenarios include scoped validation context, partial staging, root lock-graph

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-27 — Add a configuration backup checklist
+
+- Add root `BACKUP_LIST.md` with reusable checkboxes for configuration sources,
+  live desktop settings, shell/CLI configs, and optional application settings.
+  Explain separate portable exports for Nix-store links before migrating to
+  Arch, plus consistency and verification steps.
+- Link the checklist from the context index and backup guide. This records
+  guidance only; no data is copied, no services are stopped, and no configuration
+  is activated.
+
 ## 2026-10-26 — Isolate unofficial DSH Desktop declaratively
 
 - Package MochiNek0/dsh-desktop 0.1.29 from exact source commit `e9dc7283846f31ec9f3215525c4e9deeacaf0f9b`, with pinned source/Cargo hashes, the existing prebuilt Node 26.12.1 package, and pinned pnpm 10.34.7 using the same Node. Export the package separately and install it once through the existing Home Manager application list; preserve flake inputs, the original npm DSH, and host/bundle/hardware wiring.
